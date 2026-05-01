@@ -58,7 +58,7 @@ import hashlib, json, os, re, sys
 
 def normalize(msg):
     msg = msg.lower()
-    msg = re.sub(r'[a-zA-Z0-9_/\-]+\.(ts|tsx|js|jsx|py|md|json|sh|yaml|yml|env|toml)', 'FILE', msg)
+    msg = re.sub(r'[a-zA-Z0-9_/\-]+\.(tsx|ts|jsx|js|py|md|json|sh|yaml|yml|env|toml)', 'FILE', msg)
     msg = re.sub(r'[0-9]+', 'NUM', msg)
     msg = re.sub(r'https?://\S+', 'URL', msg)
     msg = re.sub(r'[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}', 'UUID', msg)

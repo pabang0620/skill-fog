@@ -222,21 +222,14 @@ update_pattern_jq() {
     existing=$(jq -r --arg id "$pattern_id" '.patterns[$id] // empty' "$PATTERNS_FILE" 2>/dev/null || echo "")
 
     if [ -n "$existing" ]; then
-      # 이미 이 세션에서 기록됐으면 스킵
-      local already
-      already=$(jq -r --arg id "$pattern_id" --arg sid "$SESSION_ID" \
-        '.patterns[$id].sessions | index($sid) // -1' "$PATTERNS_FILE" 2>/dev/null || echo "-1")
-
-      if [ "$already" != "-1" ]; then
-        return
-      fi
-
-      # 세션 추가 및 카운트 업데이트
+      # count는 매 메시지마다 증가, sessions는 세션당 1회만 추가 (dedup)
       jq --arg id "$pattern_id" --arg sid "$SESSION_ID" \
         --arg now "$now" --arg ex "$masked_msg" \
-        '.patterns[$id].sessions += [$sid] |
-         .patterns[$id].count += 1 |
+        '.patterns[$id].count += 1 |
          .patterns[$id].last_seen = $now |
+         if (.patterns[$id].sessions | index($sid)) == null then
+           .patterns[$id].sessions += [$sid]
+         else . end |
          if ((.patterns[$id].examples | length) < 3) then
            .patterns[$id].examples += [$ex]
          else . end' \
@@ -304,12 +297,11 @@ with open(lock_file, 'w') as lock_f:
 
         if pattern_id in patterns:
             p = patterns[pattern_id]
-            # 이미 이 세션 기록됐으면 스킵
-            if session_id in p.get('sessions', []):
-                sys.exit(0)
-            p['sessions'].append(session_id)
+            # count는 매 메시지마다 증가, sessions는 dedup (세션당 1회만)
             p['count'] = p.get('count', 0) + 1
             p['last_seen'] = now
+            if session_id not in p.get('sessions', []):
+                p.setdefault('sessions', []).append(session_id)
             if len(p.get('examples', [])) < 3:
                 p.setdefault('examples', []).append(masked_msg)
         else:
@@ -429,7 +421,7 @@ normalize_message() {
   local msg="$1"
   echo "$msg" \
     | tr '[:upper:]' '[:lower:]' \
-    | sed -E 's/[a-zA-Z0-9_\/-]+\.(ts|tsx|js|jsx|py|md|json|sh|yaml|yml|env|toml)/FILE/g' \
+    | sed -E 's/[a-zA-Z0-9_\/-]+\.(tsx|ts|jsx|js|py|md|json|sh|yaml|yml|env|toml)/FILE/g' \
     | sed -E 's/[0-9]+/NUM/g' \
     | sed -E 's/https?:\/\/[^ ]+/URL/g' \
     | sed -E 's/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/UUID/g' \
@@ -516,11 +508,11 @@ process_messages() {
     # 패턴 ID 생성 (정규화된 텍스트의 해시)
     local pattern_id
     if command -v md5sum &>/dev/null; then
-      pattern_id=$(echo "$canonical" | md5sum | head -c 12)
+      pattern_id=$(printf '%s' "$canonical" | md5sum | head -c 12)
     elif command -v md5 &>/dev/null; then
-      pattern_id=$(echo "$canonical" | md5 | head -c 12)
+      pattern_id=$(printf '%s' "$canonical" | md5 | head -c 12)
     else
-      pattern_id=$(echo "$canonical" | shasum | head -c 12)
+      pattern_id=$(printf '%s' "$canonical" | shasum | head -c 12)
     fi
 
     log "DEBUG: Processing pattern $pattern_id (len=${#masked})"
