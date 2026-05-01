@@ -421,10 +421,10 @@ normalize_message() {
   local msg="$1"
   echo "$msg" \
     | tr '[:upper:]' '[:lower:]' \
-    | sed -E 's/[a-zA-Z0-9_\/-]+\.(tsx|ts|jsx|js|py|md|json|sh|yaml|yml|env|toml)/FILE/g' \
-    | sed -E 's/[0-9]+/NUM/g' \
-    | sed -E 's/https?:\/\/[^ ]+/URL/g' \
+    | sed -E 's/[a-zA-Z0-9_\/-]+\.(tsx|ts|jsx|json|yaml|js|yml|py|md|sh|env|toml)/FILE/g' \
     | sed -E 's/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/UUID/g' \
+    | sed -E 's/https?:\/\/[^ ]+/URL/g' \
+    | sed -E 's/[0-9]+/NUM/g' \
     | tr -s ' \t\n' ' ' \
     | sed -E 's/^ +| +$//g' \
     | cut -c1-120
