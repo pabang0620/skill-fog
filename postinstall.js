@@ -28,18 +28,13 @@ function main() {
   });
 
   if (result.error) {
-    console.error('\n[skill-fog] Failed to run install.sh automatically.');
-    console.error('  Error:', result.error.message);
-    console.error('\nPlease run manually:');
-    console.error('  bash ' + INSTALL_SCRIPT);
-    process.exit(0); // npm install 자체는 실패로 처리하지 않음
+    console.error('[skill-fog] Failed to run install.sh:', result.error.message);
+    process.exit(1);
   }
 
   if (result.status !== 0) {
-    console.error('\n[skill-fog] Installation failed with exit code ' + result.status);
-    console.error('\nTo retry manually:');
-    console.error('  bash ' + INSTALL_SCRIPT);
-    process.exit(result.status);
+    console.error('[skill-fog] install.sh exited with code ' + result.status);
+    process.exit(result.status > 0 ? result.status : 1);
   }
 }
 

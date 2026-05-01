@@ -25,7 +25,11 @@ error()   { echo -e "${RED}✗${NC}  $*" >&2; }
 dim()     { echo -e "${DIM}$*${NC}"; }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VERSION=$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/../package.json'))['version'])" 2>/dev/null || echo "2.0.0")
+if [ -f "$SCRIPT_DIR/../package.json" ]; then
+  VERSION=$(python3 -c "import json,sys; print(json.load(sys.stdin).get('version','2.0.1'))" < "$SCRIPT_DIR/../package.json" 2>/dev/null || echo "2.0.1")
+else
+  VERSION="2.0.1"
+fi
 
 # ─────────────────────────────────────────────
 # 의존성 확인
@@ -45,19 +49,27 @@ JSON_TOOL=$(check_jq_or_python)
 jq_query() {
   local filter="$1"
   local file="${2:-$PATTERNS_FILE}"
+  case "$file" in
+    "$PATTERNS_FILE"|"$PENDING_DIR"/*.json) ;;
+    *)
+      echo ""
+      return 1
+      ;;
+  esac
   if [ "$JSON_TOOL" = "jq" ]; then
     jq -r "$filter" "$file" 2>/dev/null || echo ""
   elif [ "$JSON_TOOL" = "python3" ]; then
-    python3 -c "
-import json, sys
+    SF_FILE="$file" python3 - <<'PYEOF'
+import os, json, sys
+file_path = os.environ.get('SF_FILE', '')
 try:
-    with open('$file') as f:
+    with open(file_path) as f:
         data = json.load(f)
     # 단순 패턴만 지원
     print(str(data))
-except:
+except Exception:
     print('')
-" 2>/dev/null || echo ""
+PYEOF
   else
     echo ""
   fi
@@ -284,16 +296,16 @@ cmd_list() {
   # Skills
   echo -e "  ${BOLD}${GREEN}Skills${NC} (${CLAUDE_DIR}/skills/):"
   if [ -d "$CLAUDE_DIR/skills" ]; then
-    local found=0
-    find "$CLAUDE_DIR/skills" -name "*.md" -type f 2>/dev/null | sort | while read -r f; do
-      local rel="${f#$CLAUDE_DIR/skills/}"
-      echo -e "    ${DIM}•${NC} $rel"
-      found=1
-    done
-    # find 결과가 없으면
-    local skill_count
-    skill_count=$(find "$CLAUDE_DIR/skills" -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
-    [ "${skill_count:-0}" -eq 0 ] && dim "    (none)"
+    local files
+    files=$(find "$CLAUDE_DIR/skills" -name "*.md" -type f 2>/dev/null | sort)
+    if [ -z "$files" ]; then
+      dim "    (none)"
+    else
+      echo "$files" | while read -r f; do
+        local rel="${f#"$CLAUDE_DIR/skills/"}"
+        echo -e "    ${DIM}•${NC} $rel"
+      done
+    fi
   else
     dim "    (directory not found)"
   fi
@@ -302,15 +314,15 @@ cmd_list() {
   # Commands
   echo -e "  ${BOLD}${BLUE}Commands${NC} (${CLAUDE_DIR}/commands/):"
   if [ -d "$CLAUDE_DIR/commands" ]; then
-    local cmd_count
-    cmd_count=$(find "$CLAUDE_DIR/commands" -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
-    if [ "${cmd_count:-0}" -gt 0 ]; then
-      find "$CLAUDE_DIR/commands" -name "*.md" -type f 2>/dev/null | sort | while read -r f; do
-        local rel="${f#$CLAUDE_DIR/commands/}"
+    local cmd_files
+    cmd_files=$(find "$CLAUDE_DIR/commands" -name "*.md" -type f 2>/dev/null | sort)
+    if [ -z "$cmd_files" ]; then
+      dim "    (none)"
+    else
+      echo "$cmd_files" | while read -r f; do
+        local rel="${f#"$CLAUDE_DIR/commands/"}"
         echo -e "    ${DIM}•${NC} $rel"
       done
-    else
-      dim "    (none)"
     fi
   else
     dim "    (directory not found)"
@@ -320,15 +332,15 @@ cmd_list() {
   # Agents
   echo -e "  ${BOLD}${YELLOW}Agents${NC} (${CLAUDE_DIR}/agents/):"
   if [ -d "$CLAUDE_DIR/agents" ]; then
-    local agent_count
-    agent_count=$(find "$CLAUDE_DIR/agents" -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
-    if [ "${agent_count:-0}" -gt 0 ]; then
-      find "$CLAUDE_DIR/agents" -name "*.md" -type f 2>/dev/null | sort | while read -r f; do
-        local rel="${f#$CLAUDE_DIR/agents/}"
+    local agent_files
+    agent_files=$(find "$CLAUDE_DIR/agents" -name "*.md" -type f 2>/dev/null | sort)
+    if [ -z "$agent_files" ]; then
+      dim "    (none)"
+    else
+      echo "$agent_files" | while read -r f; do
+        local rel="${f#"$CLAUDE_DIR/agents/"}"
         echo -e "    ${DIM}•${NC} $rel"
       done
-    else
-      dim "    (none)"
     fi
   else
     dim "    (directory not found)"

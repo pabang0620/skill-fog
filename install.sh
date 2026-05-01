@@ -11,7 +11,7 @@ CLAUDE_DIR="$HOME/.claude"
 SKILLS_DIR="$CLAUDE_DIR/skills/skill-fog"
 SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 LOCAL_BIN="$HOME/.local/bin"
-HOOK_CMD="bash ~/.skill-fog/hooks/stop.sh"
+HOOK_CMD="bash $HOME/.skill-fog/hooks/stop.sh"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'

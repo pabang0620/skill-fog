@@ -11,7 +11,7 @@ SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 SKILL_FOG_DIR="$HOME/.skill-fog"
 LOCAL_BIN_LINK="$HOME/.local/bin/skill-fog"
 HOME_BIN_LINK="$HOME/bin/skill-fog"
-HOOK_CMD="bash ~/.skill-fog/hooks/stop.sh"
+HOOK_CMD="bash $HOME/.skill-fog/hooks/stop.sh"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -63,7 +63,7 @@ remove_hook() {
     local tmp_file="${SETTINGS_FILE}.tmp"
 
     # skill-fog 훅 명령어를 포함하는 항목만 제거
-    jq \
+    if ! jq \
       --arg cmd "$HOOK_CMD" \
       '
       if .hooks.Stop then
@@ -77,7 +77,11 @@ remove_hook() {
         | if (.hooks | length) == 0 then del(.hooks) else . end
       else . end
       ' \
-      "$SETTINGS_FILE" > "$tmp_file" && mv "$tmp_file" "$SETTINGS_FILE"
+      "$SETTINGS_FILE" > "$tmp_file" 2>/dev/null; then
+      error "Failed to parse settings.json. Backup available at: $backup_file"
+      return 1
+    fi
+    mv "$tmp_file" "$SETTINGS_FILE"
 
     success "Stop hook removed from settings.json"
 

@@ -1,7 +1,7 @@
 ---
 name: skill-fog
 description: 대화 중 반복 요청 패턴을 5개 메시지마다 감지하여 스킬/커맨드/에이전트 생성 제안. 임계값(3회+2세션) 도달 시 즉시 질문.
-version: 2.0.0
+version: 2.0.1
 triggers:
   - /skill-fog
 ---
@@ -125,7 +125,9 @@ with open(patterns_file, 'w') as f:
     json.dump(data, f, ensure_ascii=False, indent=2)
 
 # 임계값 판단 출력
-if entry['count'] >= 3 and len(entry['sessions']) >= 2:
+if (entry['count'] >= 3 and
+    len(entry['sessions']) >= 2 and
+    len(entry.get('examples', [])) > 0):
     print('THRESHOLD_MET')
 else:
     print('TRACKING')

@@ -231,6 +231,11 @@ with open(lock_file, 'w') as lock_f:
         try:
             with open(patterns_file, 'r') as f:
                 data = json.load(f)
+        except json.JSONDecodeError as e:
+            import sys as _sys
+            _sys.stderr.write(f'[skill-fog] JSON parse error: {e}\n')
+            print('')
+            sys.exit(0)
         except Exception:
             data = {'patterns': {}}
 
@@ -338,8 +343,9 @@ with open(lock_file, 'w') as lock_f:
 
         if count >= 3 and session_count >= 2 and status == 'active':
             pending_file = os.path.join(pending_dir, pattern_id + '.json')
-            if not os.path.exists(pending_file):
-                with open(pending_file, 'w') as f:
+            try:
+                fd = os.open(pending_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+                with os.fdopen(fd, 'w') as f:
                     json.dump(p, f, indent=2, ensure_ascii=False)
                     f.write('\n')
                 p['status'] = 'proposed'
@@ -348,6 +354,8 @@ with open(lock_file, 'w') as lock_f:
                     json.dump(data, f, indent=2, ensure_ascii=False)
                     f.write('\n')
                 os.replace(tmp_file, patterns_file)
+            except FileExistsError:
+                pass
     finally:
         fcntl.flock(lock_f, fcntl.LOCK_UN)
 PYEOF
