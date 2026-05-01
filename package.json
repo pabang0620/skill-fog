@@ -5,18 +5,29 @@
   "scripts": {
     "postinstall": "node postinstall.js"
   },
-  "bin": {},
-  "keywords": ["claude-code", "skill", "agent", "automation"],
+  "bin": {
+    "skill-fog": "./bin/skill-fog"
+  },
+  "keywords": ["claude-code", "skill", "agent", "automation", "pattern-detection"],
   "license": "MIT",
   "engines": {
     "node": ">=16.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_USERNAME/skill-fog.git"
+    "url": "https://github.com/pabang0620/skill-fog.git"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/skill-fog#readme",
+  "homepage": "https://github.com/pabang0620/skill-fog#readme",
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/skill-fog/issues"
-  }
+    "url": "https://github.com/pabang0620/skill-fog/issues"
+  },
+  "files": [
+    "bin/",
+    "hooks/",
+    "SKILL.md",
+    "install.sh",
+    "uninstall.sh",
+    "postinstall.js",
+    "README.md"
+  ]
 }
