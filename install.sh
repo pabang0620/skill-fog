@@ -24,10 +24,14 @@ success() { echo -e "${GREEN}[skill-fog]${NC} $*"; }
 warn()    { echo -e "${YELLOW}[skill-fog]${NC} $*"; }
 error()   { echo -e "${RED}[skill-fog]${NC} $*"; }
 
+CURRENT_STEP="init"
+trap 'error "Installation failed at step: $CURRENT_STEP. Run ./uninstall.sh to clean up partial installation."; exit 1' ERR
+
 # ─────────────────────────────────────────────
 # 1. 의존성 확인
 # ─────────────────────────────────────────────
 check_dependencies() {
+  CURRENT_STEP="check_dependencies"
   info "Checking dependencies..."
 
   if command -v jq &>/dev/null; then
@@ -51,6 +55,7 @@ check_dependencies() {
 # 2. 디렉토리 구조 생성
 # ─────────────────────────────────────────────
 create_directories() {
+  CURRENT_STEP="create_directories"
   info "Creating ~/.skill-fog directory structure..."
 
   mkdir -p \
@@ -65,6 +70,7 @@ create_directories() {
 # 3. patterns.json 초기화 (없는 경우만)
 # ─────────────────────────────────────────────
 init_patterns() {
+  CURRENT_STEP="init_patterns"
   local patterns_file="$SKILL_FOG_DIR/patterns.json"
   if [ ! -f "$patterns_file" ]; then
     echo '{"patterns":{}}' > "$patterns_file"
@@ -78,6 +84,7 @@ init_patterns() {
 # 4. SKILL.md 복사
 # ─────────────────────────────────────────────
 install_skill() {
+  CURRENT_STEP="install_skill"
   info "Installing SKILL.md to $SKILLS_DIR..."
 
   mkdir -p "$SKILLS_DIR"
@@ -95,6 +102,7 @@ install_skill() {
 # 5. hooks/stop.sh 복사
 # ─────────────────────────────────────────────
 install_hook() {
+  CURRENT_STEP="install_hook"
   info "Installing stop hook..."
 
   if [ -f "$SCRIPT_DIR/hooks/stop.sh" ]; then
@@ -111,6 +119,7 @@ install_hook() {
 # 6. CLI 심볼릭 링크 생성
 # ─────────────────────────────────────────────
 install_cli() {
+  CURRENT_STEP="install_cli"
   info "Installing skill-fog CLI..."
 
   local cli_src="$SCRIPT_DIR/bin/skill-fog"
@@ -158,6 +167,7 @@ install_cli() {
 # 7. settings.json 백업
 # ─────────────────────────────────────────────
 backup_settings() {
+  CURRENT_STEP="backup_settings"
   if [ -f "$SETTINGS_FILE" ]; then
     local backup_file="${SETTINGS_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
     cp "$SETTINGS_FILE" "$backup_file"
@@ -174,6 +184,7 @@ backup_settings() {
 # 8. settings.json에 Stop 훅 등록
 # ─────────────────────────────────────────────
 register_hook() {
+  CURRENT_STEP="register_hook"
   info "Registering Stop hook in settings.json..."
 
   # 중복 확인
@@ -251,6 +262,7 @@ PYEOF
 # 9. CLAUDE.md에 skill-fog 활성화 등록
 # ─────────────────────────────────────────────
 register_claude_md() {
+  CURRENT_STEP="register_claude_md"
   local claude_md="$HOME/.claude/CLAUDE.md"
   local marker="# skill-fog: 대화 중 반복 패턴 감지"
 

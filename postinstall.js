@@ -36,10 +36,10 @@ function main() {
   }
 
   if (result.status !== 0) {
-    console.error('\n[skill-fog] install.sh exited with code ' + result.status);
+    console.error('\n[skill-fog] Installation failed with exit code ' + result.status);
     console.error('\nTo retry manually:');
     console.error('  bash ' + INSTALL_SCRIPT);
-    process.exit(0);
+    process.exit(result.status);
   }
 }
 

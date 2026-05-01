@@ -27,6 +27,14 @@ if [ -z "$PAYLOAD" ]; then
   exit 0
 fi
 
+# JSON 유효성 검사
+if command -v jq &>/dev/null; then
+  if ! echo "$PAYLOAD" | jq empty 2>/dev/null; then
+    log "ERROR: Invalid JSON payload (length=${#PAYLOAD})"
+    exit 0
+  fi
+fi
+
 # ─────────────────────────────────────────────
 # jq 사용 가능 여부 확인 (python3 fallback)
 # ─────────────────────────────────────────────
@@ -117,7 +125,12 @@ mask_secrets() {
     -e 's/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/[EMAIL]/g' \
     -e 's/password[=: ]+[^ ]*/password=[REDACTED]/gi' \
     -e 's/token[=: ]+[a-zA-Z0-9_-]{10,}/token=[REDACTED]/gi' \
-    -e 's/secret[=: ]+[a-zA-Z0-9_-]{8,}/secret=[REDACTED]/gi'
+    -e 's/secret[=: ]+[a-zA-Z0-9_-]{8,}/secret=[REDACTED]/gi' \
+    -e 's|postgresql://[^:]*:[^@]*@|postgresql://***:***@|g' \
+    -e 's|mysql://[^:]*:[^@]*@|mysql://***:***@|g' \
+    -e 's|mongodb://[^:]*:[^@]*@|mongodb://***:***@|g' \
+    -e 's|redis://[^:]*:[^@]*@|redis://***:***@|g' \
+    -e 's|-----BEGIN [A-Z ]* PRIVATE KEY-----|[PRIVATE_KEY_REDACTED]|g'
 }
 
 # ─────────────────────────────────────────────
@@ -140,46 +153,51 @@ update_pattern_jq() {
   now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   local tmp_file="${PATTERNS_FILE}.tmp"
 
-  # 기존 패턴 존재 여부 확인
-  local existing
-  existing=$(jq -r --arg id "$pattern_id" '.patterns[$id] // empty' "$PATTERNS_FILE" 2>/dev/null || echo "")
+  (
+    flock -x 200
 
-  if [ -n "$existing" ]; then
-    # 이미 이 세션에서 기록됐으면 스킵
-    local already
-    already=$(jq -r --arg id "$pattern_id" --arg sid "$SESSION_ID" \
-      '.patterns[$id].sessions | index($sid) // -1' "$PATTERNS_FILE" 2>/dev/null || echo "-1")
+    # 기존 패턴 존재 여부 확인
+    local existing
+    existing=$(jq -r --arg id "$pattern_id" '.patterns[$id] // empty' "$PATTERNS_FILE" 2>/dev/null || echo "")
 
-    if [ "$already" != "-1" ]; then
-      return
+    if [ -n "$existing" ]; then
+      # 이미 이 세션에서 기록됐으면 스킵
+      local already
+      already=$(jq -r --arg id "$pattern_id" --arg sid "$SESSION_ID" \
+        '.patterns[$id].sessions | index($sid) // -1' "$PATTERNS_FILE" 2>/dev/null || echo "-1")
+
+      if [ "$already" != "-1" ]; then
+        return
+      fi
+
+      # 세션 추가 및 카운트 업데이트
+      jq --arg id "$pattern_id" --arg sid "$SESSION_ID" \
+        --arg now "$now" --arg ex "$masked_msg" \
+        '.patterns[$id].sessions += [$sid] |
+         .patterns[$id].count += 1 |
+         .patterns[$id].last_seen = $now |
+         if ((.patterns[$id].examples | length) < 3) then
+           .patterns[$id].examples += [$ex]
+         else . end' \
+        "$PATTERNS_FILE" > "$tmp_file" && mv "$tmp_file" "$PATTERNS_FILE"
+    else
+      # 신규 패턴 생성
+      jq --arg id "$pattern_id" --arg sid "$SESSION_ID" \
+        --arg canonical "$canonical" --arg ex "$masked_msg" \
+        --arg now "$now" \
+        '.patterns[$id] = {
+          canonical: $canonical,
+          count: 1,
+          sessions: [$sid],
+          examples: [$ex],
+          first_seen: $now,
+          last_seen: $now,
+          status: "active"
+        }' \
+        "$PATTERNS_FILE" > "$tmp_file" && mv "$tmp_file" "$PATTERNS_FILE"
     fi
 
-    # 세션 추가 및 카운트 업데이트
-    jq --arg id "$pattern_id" --arg sid "$SESSION_ID" \
-      --arg now "$now" --arg ex "$masked_msg" \
-      '.patterns[$id].sessions += [$sid] |
-       .patterns[$id].count += 1 |
-       .patterns[$id].last_seen = $now |
-       if ((.patterns[$id].examples | length) < 3) then
-         .patterns[$id].examples += [$ex]
-       else . end' \
-      "$PATTERNS_FILE" > "$tmp_file" && mv "$tmp_file" "$PATTERNS_FILE"
-  else
-    # 신규 패턴 생성
-    jq --arg id "$pattern_id" --arg sid "$SESSION_ID" \
-      --arg canonical "$canonical" --arg ex "$masked_msg" \
-      --arg now "$now" \
-      '.patterns[$id] = {
-        canonical: $canonical,
-        count: 1,
-        sessions: [$sid],
-        examples: [$ex],
-        first_seen: $now,
-        last_seen: $now,
-        status: "active"
-      }' \
-      "$PATTERNS_FILE" > "$tmp_file" && mv "$tmp_file" "$PATTERNS_FILE"
-  fi
+  ) 200>"${PATTERNS_FILE}.lock"
 }
 
 # ─────────────────────────────────────────────
@@ -189,54 +207,63 @@ update_pattern_python() {
   local pattern_id="$1"
   local canonical="$2"
   local masked_msg="$3"
-  local session_id="$SESSION_ID"
-  local patterns_file="$PATTERNS_FILE"
 
-  python3 - <<PYEOF
-import json, sys, os
+  SF_PATTERN_ID="$pattern_id" \
+  SF_CANONICAL="$canonical" \
+  SF_MASKED_MSG="$masked_msg" \
+  SF_SESSION_ID="$SESSION_ID" \
+  SF_PATTERNS_FILE="$PATTERNS_FILE" \
+  python3 - <<'PYEOF'
+import os, json, sys, fcntl
 import datetime as _dt
 
-pattern_id = '$pattern_id'
-canonical = '$canonical'
-masked_msg = '''$masked_msg'''
-session_id = '$session_id'
-patterns_file = '$patterns_file'
+pattern_id = os.environ['SF_PATTERN_ID']
+canonical = os.environ['SF_CANONICAL']
+masked_msg = os.environ['SF_MASKED_MSG']
+session_id = os.environ['SF_SESSION_ID']
+patterns_file = os.environ['SF_PATTERNS_FILE']
 now = _dt.datetime.now(_dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
-try:
-    with open(patterns_file, 'r') as f:
-        data = json.load(f)
-except:
-    data = {'patterns': {}}
+lock_file = patterns_file + '.lock'
+with open(lock_file, 'w') as lock_f:
+    fcntl.flock(lock_f, fcntl.LOCK_EX)
+    try:
+        try:
+            with open(patterns_file, 'r') as f:
+                data = json.load(f)
+        except Exception:
+            data = {'patterns': {}}
 
-patterns = data.setdefault('patterns', {})
+        patterns = data.setdefault('patterns', {})
 
-if pattern_id in patterns:
-    p = patterns[pattern_id]
-    # 이미 이 세션 기록됐으면 스킵
-    if session_id in p.get('sessions', []):
-        sys.exit(0)
-    p['sessions'].append(session_id)
-    p['count'] = p.get('count', 0) + 1
-    p['last_seen'] = now
-    if len(p.get('examples', [])) < 3:
-        p.setdefault('examples', []).append(masked_msg)
-else:
-    patterns[pattern_id] = {
-        'canonical': canonical,
-        'count': 1,
-        'sessions': [session_id],
-        'examples': [masked_msg],
-        'first_seen': now,
-        'last_seen': now,
-        'status': 'active'
-    }
+        if pattern_id in patterns:
+            p = patterns[pattern_id]
+            # 이미 이 세션 기록됐으면 스킵
+            if session_id in p.get('sessions', []):
+                sys.exit(0)
+            p['sessions'].append(session_id)
+            p['count'] = p.get('count', 0) + 1
+            p['last_seen'] = now
+            if len(p.get('examples', [])) < 3:
+                p.setdefault('examples', []).append(masked_msg)
+        else:
+            patterns[pattern_id] = {
+                'canonical': canonical,
+                'count': 1,
+                'sessions': [session_id],
+                'examples': [masked_msg],
+                'first_seen': now,
+                'last_seen': now,
+                'status': 'active'
+            }
 
-tmp_file = patterns_file + '.tmp'
-with open(tmp_file, 'w') as f:
-    json.dump(data, f, indent=2, ensure_ascii=False)
-    f.write('\n')
-os.replace(tmp_file, patterns_file)
+        tmp_file = patterns_file + '.tmp'
+        with open(tmp_file, 'w') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+            f.write('\n')
+        os.replace(tmp_file, patterns_file)
+    finally:
+        fcntl.flock(lock_f, fcntl.LOCK_UN)
 PYEOF
 }
 
@@ -253,14 +280,23 @@ check_threshold_jq() {
 
   if [ "${count:-0}" -ge 3 ] && [ "${session_count:-0}" -ge 2 ] && [ "$status" = "active" ]; then
     local pending_file="$PENDING_DIR/${pattern_id}.json"
-    if [ ! -f "$pending_file" ]; then
-      jq --arg id "$pattern_id" '.patterns[$id]' "$PATTERNS_FILE" > "$pending_file" 2>/dev/null
-      # status → proposed
-      jq --arg id "$pattern_id" '.patterns[$id].status = "proposed"' \
-        "$PATTERNS_FILE" > "${PATTERNS_FILE}.tmp" 2>/dev/null \
-        && mv "${PATTERNS_FILE}.tmp" "$PATTERNS_FILE"
-      log "INFO: Pattern $pattern_id promoted to pending (count=$count, sessions=$session_count)"
-    fi
+    (
+      flock -x 200
+
+      # noclobber로 원자적 생성
+      set -C
+      if jq --arg id "$pattern_id" '.patterns[$id]' "$PATTERNS_FILE" > "$pending_file" 2>/dev/null; then
+        set +C
+        # status → proposed
+        jq --arg id "$pattern_id" '.patterns[$id].status = "proposed"' \
+          "$PATTERNS_FILE" > "${PATTERNS_FILE}.tmp" 2>/dev/null \
+          && mv "${PATTERNS_FILE}.tmp" "$PATTERNS_FILE"
+        log "INFO: Pattern $pattern_id promoted to pending (count=$count, sessions=$session_count)"
+      else
+        set +C
+      fi
+
+    ) 200>"${PATTERNS_FILE}.lock"
   fi
 }
 
@@ -269,44 +305,51 @@ check_threshold_jq() {
 # ─────────────────────────────────────────────
 check_threshold_python() {
   local pattern_id="$1"
-  local patterns_file="$PATTERNS_FILE"
-  local pending_dir="$PENDING_DIR"
 
-  python3 - <<PYEOF
-import json, sys, os
+  SF_PATTERN_ID="$pattern_id" \
+  SF_PATTERNS_FILE="$PATTERNS_FILE" \
+  SF_PENDING_DIR="$PENDING_DIR" \
+  python3 - <<'PYEOF'
+import os, json, sys, fcntl
 import datetime as _dt
 
-pattern_id = '$pattern_id'
-patterns_file = '$patterns_file'
-pending_dir = '$pending_dir'
+pattern_id = os.environ['SF_PATTERN_ID']
+patterns_file = os.environ['SF_PATTERNS_FILE']
+pending_dir = os.environ['SF_PENDING_DIR']
 now = _dt.datetime.now(_dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
-try:
-    with open(patterns_file, 'r') as f:
-        data = json.load(f)
-except:
-    sys.exit(0)
+lock_file = patterns_file + '.lock'
+with open(lock_file, 'w') as lock_f:
+    fcntl.flock(lock_f, fcntl.LOCK_EX)
+    try:
+        try:
+            with open(patterns_file, 'r') as f:
+                data = json.load(f)
+        except Exception:
+            sys.exit(0)
 
-p = data.get('patterns', {}).get(pattern_id)
-if not p:
-    sys.exit(0)
+        p = data.get('patterns', {}).get(pattern_id)
+        if not p:
+            sys.exit(0)
 
-count = p.get('count', 0)
-session_count = len(p.get('sessions', []))
-status = p.get('status', '')
+        count = p.get('count', 0)
+        session_count = len(p.get('sessions', []))
+        status = p.get('status', '')
 
-if count >= 3 and session_count >= 2 and status == 'active':
-    pending_file = os.path.join(pending_dir, pattern_id + '.json')
-    if not os.path.exists(pending_file):
-        with open(pending_file, 'w') as f:
-            json.dump(p, f, indent=2, ensure_ascii=False)
-            f.write('\n')
-        p['status'] = 'proposed'
-        tmp_file = patterns_file + '.tmp'
-        with open(tmp_file, 'w') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-            f.write('\n')
-        os.replace(tmp_file, patterns_file)
+        if count >= 3 and session_count >= 2 and status == 'active':
+            pending_file = os.path.join(pending_dir, pattern_id + '.json')
+            if not os.path.exists(pending_file):
+                with open(pending_file, 'w') as f:
+                    json.dump(p, f, indent=2, ensure_ascii=False)
+                    f.write('\n')
+                p['status'] = 'proposed'
+                tmp_file = patterns_file + '.tmp'
+                with open(tmp_file, 'w') as f:
+                    json.dump(data, f, indent=2, ensure_ascii=False)
+                    f.write('\n')
+                os.replace(tmp_file, patterns_file)
+    finally:
+        fcntl.flock(lock_f, fcntl.LOCK_UN)
 PYEOF
 }
 
@@ -324,6 +367,55 @@ normalize_message() {
     | tr -s ' \t\n' ' ' \
     | sed -E 's/^ +| +$//g' \
     | cut -c1-120
+}
+
+# ─────────────────────────────────────────────
+# 오래된 패턴 정리 함수 (30일)
+# ─────────────────────────────────────────────
+cleanup_old_patterns() {
+  local cutoff
+  cutoff=$(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || \
+           python3 -c "import datetime; print((datetime.datetime.utcnow() - datetime.timedelta(days=30)).isoformat() + 'Z')" 2>/dev/null || echo "")
+
+  if [ -z "$cutoff" ]; then
+    return
+  fi
+
+  SF_CUTOFF="$cutoff" \
+  SF_PATTERNS_FILE="$PATTERNS_FILE" \
+  python3 - <<'PYEOF'
+import os, json, fcntl
+
+cutoff = os.environ.get('SF_CUTOFF', '')
+pf = os.environ.get('SF_PATTERNS_FILE', '')
+
+if not cutoff or not pf:
+    exit(0)
+
+lock_file = pf + '.lock'
+try:
+    with open(lock_file, 'w') as lock_f:
+        fcntl.flock(lock_f, fcntl.LOCK_EX)
+        try:
+            with open(pf) as f:
+                data = json.load(f)
+            before = len(data['patterns'])
+            data['patterns'] = {
+                k: v for k, v in data['patterns'].items()
+                if v.get('status') not in ('rejected',) and
+                   v.get('last_seen', '9999') >= cutoff
+            }
+            after = len(data['patterns'])
+            if before != after:
+                with open(pf + '.tmp', 'w') as f:
+                    json.dump(data, f, indent=2, ensure_ascii=False)
+                    f.write('\n')
+                os.replace(pf + '.tmp', pf)
+        finally:
+            fcntl.flock(lock_f, fcntl.LOCK_UN)
+except Exception:
+    pass
+PYEOF
 }
 
 # ─────────────────────────────────────────────
@@ -387,5 +479,19 @@ process_messages() {
 # MAIN
 # ─────────────────────────────────────────────
 process_messages
+
+# 세션 카운트 기반 오래된 패턴 정리 (매 10번째 실행마다)
+SESSION_COUNT_FILE="$HOME/.skill-fog/.session_count"
+session_count=0
+if [ -f "$SESSION_COUNT_FILE" ]; then
+  session_count=$(cat "$SESSION_COUNT_FILE" 2>/dev/null || echo "0")
+fi
+session_count=$((session_count + 1))
+echo "$session_count" > "$SESSION_COUNT_FILE"
+
+if [ $((session_count % 10)) -eq 0 ]; then
+  cleanup_old_patterns
+  log "INFO: Ran cleanup_old_patterns at session count $session_count"
+fi
 
 exit 0

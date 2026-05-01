@@ -180,17 +180,14 @@ pending 파일이 여러 개면 하나씩 순서대로 제안한다.
 - "알겠습니다. 나중에 다시 확인할게요." 안내 후 종료.
 
 ### '거부' / '아니오' / '필요없어' 입력 시
-- patterns.json의 해당 패턴 status를 'rejected'로 업데이트.
+- patterns.json의 해당 패턴 status를 'rejected'로 업데이트하고, pending 파일을 즉시 삭제한다.
 
 ```bash
 jq --arg id "{PATTERN_ID}" \
   '.patterns[$id].status = "rejected"' \
   ~/.skill-fog/patterns.json > ~/.skill-fog/patterns.json.tmp \
   && mv ~/.skill-fog/patterns.json.tmp ~/.skill-fog/patterns.json
-```
 
-- pending 파일이 있으면 삭제:
-```bash
 rm -f ~/.skill-fog/pending/{PATTERN_ID}.json
 ```
 
@@ -293,6 +290,12 @@ model: claude-sonnet-4-5
 ## STEP E: 실제 파일 생성
 
 사용자 확인 후 파일을 생성한다.
+
+### 이름 검증 규칙
+
+생성할 이름은 반드시 영문 소문자, 숫자, 하이픈(-), 언더스코어(_)만 허용.
+특수문자/공백/슬래시 포함 시 자동으로 치환: 공백→하이픈, 나머지→제거.
+예: "코드 리뷰" → "code-review", "PR/MR check" → "pr-mr-check"
 
 ### 경로 규칙
 | 타입 | 경로 |
