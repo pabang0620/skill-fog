@@ -1,0 +1,650 @@
+#!/usr/bin/env bash
+# ─────────────────────────────────────────────────────────────────────────────
+# skill-fog CLI
+# ─────────────────────────────────────────────────────────────────────────────
+set -euo pipefail
+
+SKILL_FOG_DIR="$HOME/.skill-fog"
+PATTERNS_FILE="$SKILL_FOG_DIR/patterns.json"
+PENDING_DIR="$SKILL_FOG_DIR/pending"
+CLAUDE_DIR="$HOME/.claude"
+
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+DIM='\033[2m'
+NC='\033[0m'
+
+info()    { echo -e "${BLUE}[skill-fog]${NC} $*"; }
+success() { echo -e "${GREEN}✓${NC} $*"; }
+warn()    { echo -e "${YELLOW}⚠${NC}  $*"; }
+error()   { echo -e "${RED}✗${NC}  $*" >&2; }
+dim()     { echo -e "${DIM}$*${NC}"; }
+
+VERSION="1.0.0"
+
+# ─────────────────────────────────────────────
+# 의존성 확인
+# ─────────────────────────────────────────────
+check_jq_or_python() {
+  if command -v jq &>/dev/null; then
+    echo "jq"
+  elif command -v python3 &>/dev/null; then
+    echo "python3"
+  else
+    echo ""
+  fi
+}
+
+JSON_TOOL=$(check_jq_or_python)
+
+jq_query() {
+  local filter="$1"
+  local file="${2:-$PATTERNS_FILE}"
+  if [ "$JSON_TOOL" = "jq" ]; then
+    jq -r "$filter" "$file" 2>/dev/null || echo ""
+  elif [ "$JSON_TOOL" = "python3" ]; then
+    python3 -c "
+import json, sys
+try:
+    with open('$file') as f:
+        data = json.load(f)
+    # 단순 패턴만 지원
+    print(str(data))
+except:
+    print('')
+" 2>/dev/null || echo ""
+  else
+    echo ""
+  fi
+}
+
+# ─────────────────────────────────────────────
+# 서브커맨드: status
+# ─────────────────────────────────────────────
+cmd_status() {
+  echo ""
+  echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${BOLD}  skill-fog — Pattern Status${NC}"
+  echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo ""
+
+  if [ ! -f "$PATTERNS_FILE" ]; then
+    warn "No patterns.json found. Run some Claude Code sessions first."
+    return
+  fi
+
+  if [ "$JSON_TOOL" = "jq" ]; then
+    local total active proposed accepted rejected
+
+    total=$(jq '.patterns | length' "$PATTERNS_FILE" 2>/dev/null || echo "0")
+    active=$(jq '[.patterns[] | select(.status == "active")] | length' "$PATTERNS_FILE" 2>/dev/null || echo "0")
+    proposed=$(jq '[.patterns[] | select(.status == "proposed")] | length' "$PATTERNS_FILE" 2>/dev/null || echo "0")
+    accepted=$(jq '[.patterns[] | select(.status == "accepted")] | length' "$PATTERNS_FILE" 2>/dev/null || echo "0")
+    rejected=$(jq '[.patterns[] | select(.status == "rejected")] | length' "$PATTERNS_FILE" 2>/dev/null || echo "0")
+
+    echo -e "  Total patterns : ${BOLD}$total${NC}"
+    echo -e "  Active         : ${CYAN}$active${NC}"
+    echo -e "  Pending review : ${YELLOW}$proposed${NC}"
+    echo -e "  Accepted       : ${GREEN}$accepted${NC}"
+    echo -e "  Rejected       : ${RED}$rejected${NC}"
+    echo ""
+
+    # 상위 패턴 테이블
+    echo -e "${BOLD}  Top patterns (by count):${NC}"
+    echo -e "  ${DIM}$(printf '%-14s %-6s %-8s %-10s %s' 'ID' 'Count' 'Sessions' 'Status' 'Pattern')${NC}"
+    echo -e "  ${DIM}$(printf '%-14s %-6s %-8s %-10s %s' '──────────────' '──────' '────────' '──────────' '───────────────────────────────────────────────────')${NC}"
+
+    jq -r '
+      .patterns | to_entries
+      | sort_by(-.value.count)
+      | .[:15][]
+      | [.key[0:12], (.value.count | tostring), (.value.sessions | length | tostring), .value.status, (.value.canonical[0:50])]
+      | @tsv
+    ' "$PATTERNS_FILE" 2>/dev/null | while IFS=$'\t' read -r id count sessions status canonical; do
+      local status_color="$NC"
+      case "$status" in
+        "active")   status_color="$CYAN" ;;
+        "proposed") status_color="$YELLOW" ;;
+        "accepted") status_color="$GREEN" ;;
+        "rejected") status_color="$RED" ;;
+      esac
+      printf "  %-14s %-6s %-8s ${status_color}%-10s${NC} %s\n" \
+        "$id" "$count" "$sessions" "$status" "$canonical"
+    done
+
+  elif [ "$JSON_TOOL" = "python3" ]; then
+    python3 - <<PYEOF
+import json, os
+
+patterns_file = '$PATTERNS_FILE'
+try:
+    with open(patterns_file) as f:
+        data = json.load(f)
+except:
+    print("  Error reading patterns.json")
+    exit(0)
+
+patterns = data.get('patterns', {})
+total = len(patterns)
+counts = {'active': 0, 'proposed': 0, 'accepted': 0, 'rejected': 0}
+for p in patterns.values():
+    counts[p.get('status', 'active')] = counts.get(p.get('status', 'active'), 0) + 1
+
+print(f"  Total patterns : {total}")
+print(f"  Active         : {counts.get('active', 0)}")
+print(f"  Pending review : {counts.get('proposed', 0)}")
+print(f"  Accepted       : {counts.get('accepted', 0)}")
+print(f"  Rejected       : {counts.get('rejected', 0)}")
+print()
+print("  Top patterns (by count):")
+print(f"  {'ID':<14} {'Count':<6} {'Sessions':<9} {'Status':<11} {'Pattern'}")
+print(f"  {'-'*14} {'-'*6} {'-'*8} {'-'*10} {'-'*50}")
+
+sorted_p = sorted(patterns.items(), key=lambda x: -x[1].get('count', 0))
+for pid, p in sorted_p[:15]:
+    print(f"  {pid[:12]:<14} {p.get('count',0):<6} {len(p.get('sessions',[])):<9} {p.get('status',''):<11} {p.get('canonical','')[:50]}")
+PYEOF
+  else
+    error "No JSON tool available (jq or python3 required)"
+  fi
+
+  echo ""
+
+  # pending 파일 수
+  local pending_count
+  pending_count=$(ls "$PENDING_DIR"/*.json 2>/dev/null | wc -l || echo "0")
+  pending_count=$(echo "$pending_count" | tr -d ' ')
+
+  if [ "${pending_count:-0}" -gt 0 ]; then
+    echo -e "  ${YELLOW}${BOLD}$pending_count pattern(s) pending review!${NC} Run: ${CYAN}skill-fog review${NC}"
+    echo ""
+  fi
+}
+
+# ─────────────────────────────────────────────
+# 서브커맨드: review
+# ─────────────────────────────────────────────
+cmd_review() {
+  echo ""
+  echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${BOLD}  skill-fog — Review Pending Patterns${NC}"
+  echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo ""
+
+  local pending_files
+  pending_files=$(ls "$PENDING_DIR"/*.json 2>/dev/null || true)
+
+  if [ -z "$pending_files" ]; then
+    success "No pending patterns to review."
+    echo ""
+    dim "  Patterns are promoted to pending when count >= 3 across >= 2 sessions."
+    echo ""
+    return
+  fi
+
+  local count=0
+  for f in $pending_files; do
+    count=$((count + 1))
+    local pattern_id
+    pattern_id=$(basename "$f" .json)
+
+    echo -e "  ${BOLD}[$count] Pattern: ${CYAN}$pattern_id${NC}"
+
+    if [ "$JSON_TOOL" = "jq" ]; then
+      local canonical freq session_count examples
+
+      canonical=$(jq -r '.canonical' "$f" 2>/dev/null || echo "(unknown)")
+      freq=$(jq -r '.count' "$f" 2>/dev/null || echo "?")
+      session_count=$(jq -r '.sessions | length' "$f" 2>/dev/null || echo "?")
+
+      echo -e "  ${DIM}Pattern: $canonical${NC}"
+      echo -e "  Seen ${BOLD}$freq${NC} times across ${BOLD}$session_count${NC} sessions"
+      echo ""
+      echo -e "  ${DIM}Examples:${NC}"
+      jq -r '.examples[]?' "$f" 2>/dev/null | head -3 | while IFS= read -r ex; do
+        echo -e "    ${DIM}• $ex${NC}"
+      done
+
+    elif [ "$JSON_TOOL" = "python3" ]; then
+      python3 - <<PYEOF
+import json
+try:
+    with open('$f') as fp:
+        p = json.load(fp)
+    print(f"  Pattern: {p.get('canonical','?')[:80]}")
+    print(f"  Seen {p.get('count','?')} times across {len(p.get('sessions',[]))} sessions")
+    print()
+    print("  Examples:")
+    for ex in p.get('examples', [])[:3]:
+        print(f"    • {ex[:100]}")
+except Exception as e:
+    print(f"  (Error reading pattern: {e})")
+PYEOF
+    fi
+
+    echo ""
+    echo -e "  Actions: ${GREEN}[s]${NC}kill  ${BLUE}[c]${NC}ommand  ${YELLOW}[a]${NC}gent  ${DIM}[k]${NC}eep (later)  ${RED}[r]${NC}eject"
+    echo -n "  Choice: "
+
+    local choice
+    read -r choice
+
+    case "$choice" in
+      s|skill)
+        success "Marked for skill creation. Open Claude Code and run /skill-fog to generate."
+        ;;
+      c|command)
+        success "Marked for command creation. Open Claude Code and run /skill-fog to generate."
+        ;;
+      a|agent)
+        success "Marked for agent creation. Open Claude Code and run /skill-fog to generate."
+        ;;
+      k|keep|later|"")
+        info "Keeping for later review."
+        ;;
+      r|reject)
+        rm "$f"
+        # status를 rejected로 업데이트
+        if [ "$JSON_TOOL" = "jq" ] && [ -f "$PATTERNS_FILE" ]; then
+          jq --arg id "$pattern_id" '.patterns[$id].status = "rejected"' \
+            "$PATTERNS_FILE" > "${PATTERNS_FILE}.tmp" 2>/dev/null \
+            && mv "${PATTERNS_FILE}.tmp" "$PATTERNS_FILE"
+        fi
+        warn "Pattern rejected and removed."
+        ;;
+      *)
+        info "Unknown choice, keeping for later."
+        ;;
+    esac
+
+    echo ""
+    echo -e "  ${DIM}─────────────────────────────────────────────────────────────${NC}"
+    echo ""
+  done
+
+  echo -e "  Review complete. Run ${CYAN}/skill-fog${NC} in Claude Code to generate artifacts."
+  echo ""
+}
+
+# ─────────────────────────────────────────────
+# 서브커맨드: list
+# ─────────────────────────────────────────────
+cmd_list() {
+  echo ""
+  echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${BOLD}  skill-fog — Generated Skills / Commands / Agents${NC}"
+  echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo ""
+
+  # Skills
+  echo -e "  ${BOLD}${GREEN}Skills${NC} (${CLAUDE_DIR}/skills/):"
+  if [ -d "$CLAUDE_DIR/skills" ]; then
+    local found=0
+    find "$CLAUDE_DIR/skills" -name "*.md" -type f 2>/dev/null | sort | while read -r f; do
+      local rel="${f#$CLAUDE_DIR/skills/}"
+      echo -e "    ${DIM}•${NC} $rel"
+      found=1
+    done
+    # find 결과가 없으면
+    local skill_count
+    skill_count=$(find "$CLAUDE_DIR/skills" -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+    [ "${skill_count:-0}" -eq 0 ] && dim "    (none)"
+  else
+    dim "    (directory not found)"
+  fi
+  echo ""
+
+  # Commands
+  echo -e "  ${BOLD}${BLUE}Commands${NC} (${CLAUDE_DIR}/commands/):"
+  if [ -d "$CLAUDE_DIR/commands" ]; then
+    local cmd_count
+    cmd_count=$(find "$CLAUDE_DIR/commands" -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+    if [ "${cmd_count:-0}" -gt 0 ]; then
+      find "$CLAUDE_DIR/commands" -name "*.md" -type f 2>/dev/null | sort | while read -r f; do
+        local rel="${f#$CLAUDE_DIR/commands/}"
+        echo -e "    ${DIM}•${NC} $rel"
+      done
+    else
+      dim "    (none)"
+    fi
+  else
+    dim "    (directory not found)"
+  fi
+  echo ""
+
+  # Agents
+  echo -e "  ${BOLD}${YELLOW}Agents${NC} (${CLAUDE_DIR}/agents/):"
+  if [ -d "$CLAUDE_DIR/agents" ]; then
+    local agent_count
+    agent_count=$(find "$CLAUDE_DIR/agents" -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+    if [ "${agent_count:-0}" -gt 0 ]; then
+      find "$CLAUDE_DIR/agents" -name "*.md" -type f 2>/dev/null | sort | while read -r f; do
+        local rel="${f#$CLAUDE_DIR/agents/}"
+        echo -e "    ${DIM}•${NC} $rel"
+      done
+    else
+      dim "    (none)"
+    fi
+  else
+    dim "    (directory not found)"
+  fi
+
+  echo ""
+}
+
+# ─────────────────────────────────────────────
+# 서브커맨드: clean
+# ─────────────────────────────────────────────
+cmd_clean() {
+  echo ""
+  echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${BOLD}  skill-fog — Clean Old Patterns${NC}"
+  echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo ""
+
+  if [ ! -f "$PATTERNS_FILE" ]; then
+    info "No patterns.json found."
+    return
+  fi
+
+  local cleaned=0
+
+  if [ "$JSON_TOOL" = "jq" ]; then
+    # 30일 이상 된 패턴 제거 (last_seen 기준)
+    local cutoff_date
+    cutoff_date=$(date -u -d "30 days ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || \
+                  date -u -v-30d +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || \
+                  echo "")
+
+    if [ -n "$cutoff_date" ]; then
+      local old_count
+      old_count=$(jq --arg cutoff "$cutoff_date" \
+        '[.patterns[] | select(.last_seen < $cutoff or .status == "rejected")] | length' \
+        "$PATTERNS_FILE" 2>/dev/null || echo "0")
+
+      if [ "${old_count:-0}" -gt 0 ]; then
+        echo -e "  Found ${YELLOW}$old_count${NC} stale/rejected pattern(s) to remove."
+        echo -n "  Proceed? [y/N] "
+        local confirm
+        read -r confirm
+        case "$confirm" in
+          [Yy]*)
+            jq --arg cutoff "$cutoff_date" \
+              'del(.patterns[] | select(.last_seen < $cutoff or .status == "rejected"))' \
+              "$PATTERNS_FILE" > "${PATTERNS_FILE}.tmp" 2>/dev/null \
+              && mv "${PATTERNS_FILE}.tmp" "$PATTERNS_FILE"
+            success "Removed $old_count stale/rejected patterns."
+            cleaned=$old_count
+            ;;
+          *)
+            info "Cancelled."
+            ;;
+        esac
+      else
+        success "No stale patterns found. patterns.json is clean."
+      fi
+    else
+      # 날짜 계산 안 되면 rejected만 제거
+      local rejected_count
+      rejected_count=$(jq '[.patterns[] | select(.status == "rejected")] | length' \
+        "$PATTERNS_FILE" 2>/dev/null || echo "0")
+
+      if [ "${rejected_count:-0}" -gt 0 ]; then
+        jq 'del(.patterns[] | select(.status == "rejected"))' \
+          "$PATTERNS_FILE" > "${PATTERNS_FILE}.tmp" 2>/dev/null \
+          && mv "${PATTERNS_FILE}.tmp" "$PATTERNS_FILE"
+        success "Removed $rejected_count rejected patterns."
+        cleaned=$rejected_count
+      else
+        success "No rejected patterns to clean."
+      fi
+    fi
+
+  elif [ "$JSON_TOOL" = "python3" ]; then
+    python3 - <<PYEOF
+import json, datetime, os, sys
+
+patterns_file = '$PATTERNS_FILE'
+cutoff = datetime.datetime.utcnow() - datetime.timedelta(days=30)
+
+try:
+    with open(patterns_file) as f:
+        data = json.load(f)
+except:
+    print("  Error reading patterns.json")
+    sys.exit(0)
+
+patterns = data.get('patterns', {})
+to_remove = []
+
+for pid, p in patterns.items():
+    last_seen_str = p.get('last_seen', '')
+    status = p.get('status', '')
+    if status == 'rejected':
+        to_remove.append(pid)
+        continue
+    try:
+        last_seen = datetime.datetime.strptime(last_seen_str, '%Y-%m-%dT%H:%M:%SZ')
+        if last_seen < cutoff:
+            to_remove.append(pid)
+    except:
+        pass
+
+if to_remove:
+    print(f"  Found {len(to_remove)} stale/rejected patterns to remove.")
+    answer = input("  Proceed? [y/N] ").strip().lower()
+    if answer == 'y':
+        for pid in to_remove:
+            del patterns[pid]
+        tmp_file = patterns_file + '.tmp'
+        with open(tmp_file, 'w') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+            f.write('\n')
+        os.replace(tmp_file, patterns_file)
+        print(f"  Removed {len(to_remove)} patterns.")
+    else:
+        print("  Cancelled.")
+else:
+    print("  No stale patterns found.")
+PYEOF
+  else
+    error "No JSON tool available."
+  fi
+
+  # 오래된 로그 파일 정리 (30일 이상)
+  find "$SKILL_FOG_DIR/logs" -name "*.log" -mtime +30 -delete 2>/dev/null || true
+  info "Cleaned log files older than 30 days."
+
+  echo ""
+}
+
+# ─────────────────────────────────────────────
+# 서브커맨드: doctor
+# ─────────────────────────────────────────────
+cmd_doctor() {
+  echo ""
+  echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${BOLD}  skill-fog — Installation Diagnostics${NC}"
+  echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo ""
+
+  local ok=0
+  local warn_count=0
+  local fail=0
+
+  check_item() {
+    local label="$1"
+    local status="$2"  # ok, warn, fail
+    local detail="${3:-}"
+    case "$status" in
+      ok)   echo -e "  ${GREEN}✓${NC}  $label${detail:+  ${DIM}($detail)${NC}}"; ok=$((ok+1)) ;;
+      warn) echo -e "  ${YELLOW}⚠${NC}  $label${detail:+  ${DIM}($detail)${NC}}"; warn_count=$((warn_count+1)) ;;
+      fail) echo -e "  ${RED}✗${NC}  $label${detail:+  ${DIM}($detail)${NC}}"; fail=$((fail+1)) ;;
+    esac
+  }
+
+  # jq
+  if command -v jq &>/dev/null; then
+    check_item "jq installed" "ok" "$(jq --version)"
+  else
+    check_item "jq installed" "warn" "python3 fallback active"
+  fi
+
+  # python3
+  if command -v python3 &>/dev/null; then
+    check_item "python3 available" "ok" "$(python3 --version 2>&1)"
+  else
+    check_item "python3 available" "warn" "not found"
+  fi
+
+  # ~/.skill-fog/
+  if [ -d "$SKILL_FOG_DIR" ]; then
+    check_item "~/.skill-fog/ directory" "ok"
+  else
+    check_item "~/.skill-fog/ directory" "fail" "missing — run install.sh"
+  fi
+
+  # ~/.skill-fog/pending/
+  if [ -d "$PENDING_DIR" ]; then
+    check_item "~/.skill-fog/pending/ directory" "ok"
+  else
+    check_item "~/.skill-fog/pending/ directory" "fail" "missing"
+  fi
+
+  # patterns.json
+  if [ -f "$PATTERNS_FILE" ]; then
+    check_item "~/.skill-fog/patterns.json" "ok"
+  else
+    check_item "~/.skill-fog/patterns.json" "warn" "will be created on first session"
+  fi
+
+  # stop.sh hook
+  if [ -f "$SKILL_FOG_DIR/hooks/stop.sh" ]; then
+    if [ -x "$SKILL_FOG_DIR/hooks/stop.sh" ]; then
+      check_item "stop.sh hook (executable)" "ok"
+    else
+      check_item "stop.sh hook (executable)" "fail" "not executable — run: chmod +x ~/.skill-fog/hooks/stop.sh"
+    fi
+  else
+    check_item "stop.sh hook" "fail" "missing — run install.sh"
+  fi
+
+  # SKILL.md
+  if [ -f "$CLAUDE_DIR/skills/skill-fog/SKILL.md" ]; then
+    check_item "SKILL.md installed" "ok"
+  else
+    check_item "SKILL.md installed" "fail" "missing — run install.sh"
+  fi
+
+  # settings.json hook registration
+  local settings_file="$CLAUDE_DIR/settings.json"
+  if [ -f "$settings_file" ]; then
+    local hook_registered=""
+    if command -v jq &>/dev/null; then
+      hook_registered=$(jq -r \
+        '.hooks.Stop[]?.hooks[]? | select(.command | contains("skill-fog")) | .command' \
+        "$settings_file" 2>/dev/null || echo "")
+    elif command -v python3 &>/dev/null; then
+      hook_registered=$(python3 -c "
+import json
+with open('$settings_file') as f:
+    s = json.load(f)
+for entry in s.get('hooks', {}).get('Stop', []):
+    for h in entry.get('hooks', []):
+        if 'skill-fog' in h.get('command', ''):
+            print(h['command'])
+" 2>/dev/null || echo "")
+    fi
+
+    if [ -n "$hook_registered" ]; then
+      check_item "Stop hook registered in settings.json" "ok"
+    else
+      check_item "Stop hook registered in settings.json" "fail" "not found — run install.sh"
+    fi
+  else
+    check_item "settings.json exists" "warn" "will be created by install.sh"
+  fi
+
+  # CLI in PATH
+  if command -v skill-fog &>/dev/null; then
+    check_item "skill-fog in PATH" "ok" "$(command -v skill-fog)"
+  else
+    check_item "skill-fog in PATH" "warn" "not in PATH — add ~/.local/bin to PATH"
+  fi
+
+  echo ""
+  echo -e "  ${BOLD}Summary:${NC} ${GREEN}$ok ok${NC}  ${YELLOW}$warn_count warnings${NC}  ${RED}$fail failures${NC}"
+  echo ""
+
+  if [ "$fail" -gt 0 ]; then
+    echo -e "  ${RED}Installation issues detected.${NC} Re-run install.sh to fix:"
+    echo -e "    bash $(command -v skill-fog 2>/dev/null | xargs -I{} dirname {} | xargs -I{} dirname {})/install.sh"
+    echo ""
+  fi
+}
+
+# ─────────────────────────────────────────────
+# 서브커맨드: help
+# ─────────────────────────────────────────────
+cmd_help() {
+  echo ""
+  echo -e "${BOLD}skill-fog${NC} v$VERSION — Claude Code pattern detector"
+  echo ""
+  echo -e "${BOLD}USAGE${NC}"
+  echo -e "  skill-fog <command>"
+  echo ""
+  echo -e "${BOLD}COMMANDS${NC}"
+  echo -e "  ${CYAN}status${NC}    Show pattern statistics and pending review count"
+  echo -e "  ${CYAN}review${NC}    Review pending patterns and choose action"
+  echo -e "  ${CYAN}list${NC}      List generated skills, commands, and agents"
+  echo -e "  ${CYAN}clean${NC}     Remove rejected/stale patterns and old logs"
+  echo -e "  ${CYAN}doctor${NC}    Diagnose installation health"
+  echo -e "  ${CYAN}help${NC}      Show this help message"
+  echo ""
+  echo -e "${BOLD}HOW IT WORKS${NC}"
+  echo -e "  1. Claude Code session ends → stop.sh analyzes message patterns"
+  echo -e "  2. Pattern seen ≥3 times across ≥2 sessions → moved to pending"
+  echo -e "  3. Session start → skill-fog proposes skill/command/agent creation"
+  echo -e "  4. You confirm → file generated in ~/.claude/skills|commands|agents"
+  echo ""
+  echo -e "${BOLD}FILES${NC}"
+  echo -e "  ${DIM}~/.skill-fog/patterns.json${NC}   Pattern database"
+  echo -e "  ${DIM}~/.skill-fog/pending/*.json${NC}  Patterns awaiting review"
+  echo -e "  ${DIM}~/.skill-fog/logs/*.log${NC}      Session processing logs"
+  echo -e "  ${DIM}~/.skill-fog/hooks/stop.sh${NC}   Claude Code Stop hook"
+  echo -e "  ${DIM}~/.claude/skills/skill-fog/${NC}  SKILL.md for Claude"
+  echo ""
+  echo -e "${BOLD}UNINSTALL${NC}"
+  echo -e "  bash \$(dirname \$(readlink -f \$(which skill-fog)))/../uninstall.sh"
+  echo ""
+}
+
+# ─────────────────────────────────────────────
+# MAIN
+# ─────────────────────────────────────────────
+main() {
+  local cmd="${1:-help}"
+  shift || true
+
+  case "$cmd" in
+    status)  cmd_status "$@" ;;
+    review)  cmd_review "$@" ;;
+    list)    cmd_list "$@" ;;
+    clean)   cmd_clean "$@" ;;
+    doctor)  cmd_doctor "$@" ;;
+    help|-h|--help) cmd_help ;;
+    version|--version|-v) echo "skill-fog v$VERSION" ;;
+    *)
+      error "Unknown command: $cmd"
+      echo ""
+      cmd_help
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"
