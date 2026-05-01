@@ -1,7 +1,7 @@
 ---
 name: skill-fog
 description: 대화 중 반복 요청 패턴을 5개 메시지마다 감지하여 스킬/커맨드/에이전트 생성 제안. 임계값(3회+2세션) 도달 시 즉시 질문.
-version: 2.0.2
+version: 2.0.3
 triggers:
   - /skill-fog
 ---
