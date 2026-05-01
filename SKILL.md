@@ -15,17 +15,7 @@ Claude Code 대화 중 사용자의 반복 요청 패턴을 실시간으로 감�
 
 ## 세션 시작 시 초기화
 
-세션이 시작되면 즉시 아래 두 가지를 실행한다.
-
-### 1. 세션 ID 생성 (고정)
-
-```bash
-date +%s%N | md5sum | head -c 8
-```
-
-이 값을 세션 전체에서 고정으로 사용한다. (이하 `SESSION_ID`)
-
-### 2. pending 파일 확인
+세션이 시작되면 즉시 pending 파일을 확인한다.
 
 ```bash
 ls ~/.skill-fog/pending/*.json 2>/dev/null
@@ -168,10 +158,15 @@ pending 파일이 여러 개면 하나씩 순서대로 제안한다.
 - patterns.json의 해당 패턴 status를 'rejected'로 업데이트하고, pending 파일을 즉시 삭제한다.
 
 ```bash
-jq --arg id "{PATTERN_ID}" \
-  '.patterns[$id].status = "rejected"' \
-  ~/.skill-fog/patterns.json > ~/.skill-fog/patterns.json.tmp \
-  && mv ~/.skill-fog/patterns.json.tmp ~/.skill-fog/patterns.json
+python3 -c "
+import json, os
+pf = os.path.expanduser('~/.skill-fog/patterns.json')
+pid = 'PATTERN_ID'
+with open(pf) as f: d = json.load(f)
+if pid in d['patterns']: d['patterns'][pid]['status'] = 'rejected'
+with open(pf+'.tmp','w') as f: json.dump(d,f,ensure_ascii=False,indent=2)
+os.replace(pf+'.tmp', pf)
+"
 
 rm -f ~/.skill-fog/pending/{PATTERN_ID}.json
 ```
@@ -253,7 +248,7 @@ description: {설명}
 ---
 name: {에이전트명}
 description: {설명}
-model: claude-sonnet-4-5
+model: claude-sonnet-4-6
 ---
 
 # {에이전트명} 에이전트
@@ -304,15 +299,20 @@ mkdir -p ~/.claude/skills/{이름}
 1. patterns.json status 업데이트:
 
 ```bash
-jq --arg id "{PATTERN_ID}" --arg type "{skill|command|agent}" \
-  --arg name "{생성된_이름}" \
-  --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-  '.patterns[$id].status = "accepted" |
-   .patterns[$id].generated_type = $type |
-   .patterns[$id].generated_name = $name |
-   .patterns[$id].accepted_at = $now' \
-  ~/.skill-fog/patterns.json > ~/.skill-fog/patterns.json.tmp \
-  && mv ~/.skill-fog/patterns.json.tmp ~/.skill-fog/patterns.json
+python3 -c "
+import json, os
+from datetime import datetime, timezone
+pf = os.path.expanduser('~/.skill-fog/patterns.json')
+pid = 'PATTERN_ID'
+gtype = 'skill'  # 실제 선택된 타입으로 교체
+gname = '생성된_이름'  # 실제 생성된 이름으로 교체
+now = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+with open(pf) as f: d = json.load(f)
+if pid in d['patterns']:
+    d['patterns'][pid].update({'status':'accepted','generated_type':gtype,'generated_name':gname,'accepted_at':now})
+with open(pf+'.tmp','w') as f: json.dump(d,f,ensure_ascii=False,indent=2)
+os.replace(pf+'.tmp', pf)
+"
 ```
 
 2. pending 파일이 있으면 삭제:

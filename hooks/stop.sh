@@ -76,23 +76,13 @@ except Exception:
     print('')
     sys.exit(0)
 
-# .messages[]? | select(.role=="user") | .content
-if 'messages' in filter_str and 'user' in filter_str:
-    results = []
-    for m in data.get('messages', []):
-        if isinstance(m, dict) and m.get('role') == 'user':
-            content = m.get('content', '')
-            if isinstance(content, list):
-                for item in content:
-                    if isinstance(item, dict) and item.get('type') == 'text':
-                        results.append(item.get('text', ''))
-            elif isinstance(content, str):
-                results.append(content)
-    print('\n'.join(results))
-
 # .session_id // empty
-elif 'session_id' in filter_str:
+if 'session_id' in filter_str:
     print(data.get('session_id', ''))
+
+# .transcript_path // empty
+elif 'transcript_path' in filter_str:
+    print(data.get('transcript_path', ''))
 
 else:
     print('')
@@ -111,12 +101,76 @@ fi
 log "INFO: Processing session $SESSION_ID"
 
 # ─────────────────────────────────────────────
-# 사용자 메시지 추출
+# transcript_path 추출 (Stop hook payload 형식)
+# Claude Code Stop hook은 messages 배열이 아닌 transcript_path를 제공
 # ─────────────────────────────────────────────
-MESSAGES=$(jq_query '.messages[]? | select(.role=="user") | .content')
+TRANSCRIPT_PATH=""
+if [ -n "$JQ_CMD" ]; then
+  TRANSCRIPT_PATH=$(echo "$PAYLOAD" | jq -r '.transcript_path // empty' 2>/dev/null || echo "")
+else
+  TRANSCRIPT_PATH=$(SF_PAYLOAD="$PAYLOAD" python3 - <<'PYEOF'
+import os, json, sys
+try:
+    d = json.loads(os.environ.get('SF_PAYLOAD', '{}'))
+    print(d.get('transcript_path', ''))
+except Exception:
+    print('')
+PYEOF
+)
+fi
+
+if [ -z "$TRANSCRIPT_PATH" ]; then
+  log "INFO: No transcript_path in payload (session may have no transcript)"
+  exit 0
+fi
+
+if [ ! -f "$TRANSCRIPT_PATH" ]; then
+  log "WARN: transcript_path does not exist: $TRANSCRIPT_PATH"
+  exit 0
+fi
+
+log "INFO: Reading transcript: $TRANSCRIPT_PATH"
+
+# ─────────────────────────────────────────────
+# JSONL transcript에서 사용자 메시지 추출
+# 형식: {"role":"user","content":"..."} 또는 content가 배열인 경우
+# ─────────────────────────────────────────────
+MESSAGES=$(SF_TRANSCRIPT_PATH="$TRANSCRIPT_PATH" python3 - <<'PYEOF'
+import os, json, sys
+
+transcript_path = os.environ.get('SF_TRANSCRIPT_PATH', '')
+results = []
+
+try:
+    with open(transcript_path, 'r', encoding='utf-8', errors='replace') as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if obj.get('role') == 'user':
+                content = obj.get('content', '')
+                if isinstance(content, str):
+                    results.append(content)
+                elif isinstance(content, list):
+                    for item in content:
+                        if isinstance(item, dict) and item.get('type') == 'text':
+                            text = item.get('text', '')
+                            if text:
+                                results.append(text)
+except Exception as e:
+    import sys as _sys
+    _sys.stderr.write(f'[skill-fog] transcript read error: {e}\n')
+
+print('\n'.join(results))
+PYEOF
+)
 
 if [ -z "$MESSAGES" ]; then
-  log "INFO: No user messages found in payload"
+  log "INFO: No user messages found in transcript"
   exit 0
 fi
 
