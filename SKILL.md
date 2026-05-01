@@ -1,36 +1,161 @@
 ---
 name: skill-fog
-description: 반복 요청 패턴 감지 및 스킬/커맨드/에이전트 자동 생성. 세션 시작 시 ~/.skill-fog/pending/ 확인 후 감지된 패턴을 사용자에게 알리고 생성 여부 결정.
-version: 1.0.0
+description: 대화 중 반복 요청 패턴을 5개 메시지마다 감지하여 스킬/커맨드/에이전트 생성 제안. 임계값(3회+2세션) 도달 시 즉시 질문.
+version: 2.0.0
 triggers:
-  - session_start
   - /skill-fog
 ---
 
 # skill-fog 스킬
 
 ## 역할
-Claude Code 사용자의 반복 요청 패턴을 감지하여 자동으로 스킬/커맨드/에이전트로 변환하는 도우미.
+Claude Code 대화 중 사용자의 반복 요청 패턴을 실시간으로 감지하여, 임계값 도달 시 즉시 스킬/커맨드/에이전트 생성을 제안하는 도우미.
 
 ---
 
-## STEP 1: 세션 시작 시 pending 확인
+## 세션 시작 시 초기화
 
-세션 시작 시 즉시 아래 절차를 실행한다.
+세션이 시작되면 즉시 아래 두 가지를 실행한다.
+
+### 1. 세션 ID 생성 (고정)
+
+```bash
+date +%s%N | md5sum | head -c 8
+```
+
+이 값을 세션 전체에서 고정으로 사용한다. (이하 `SESSION_ID`)
+
+### 2. pending 파일 확인
 
 ```bash
 ls ~/.skill-fog/pending/*.json 2>/dev/null
 ```
 
-**pending 파일이 없으면**: 아무것도 하지 않는다. (조용히 패스)
-
-**pending 파일이 있으면**: 각 파일을 읽어 사용자에게 알린다.
+pending 파일이 있으면 STEP A(pending 제안)를 먼저 실행한다.
+없으면 아무것도 하지 않고 조용히 대기한다.
 
 ---
 
-## STEP 2: 패턴 알림 메시지 형식
+## 핵심 동작: 5개 메시지마다 패턴 분석
 
-pending 파일 하나당 아래 형식으로 알린다:
+Claude는 대화 중 사용자 메시지 수를 내부적으로 추적한다.
+
+- 세션 시작 시 카운터 = 0
+- 사용자 메시지가 올 때마다 카운터 +1
+- **카운터가 5의 배수(5, 10, 15...)일 때** 아래 패턴 분석을 실행한다
+- 분석 중임을 사용자에게 알리지 않는다 (조용히 실행)
+
+### 패턴 분석 절차
+
+**1단계: 직전 5개 사용자 메시지를 정규화**
+
+정규화 규칙:
+- 소문자 변환
+- 파일명(확장자 포함) → `FILE`
+- 숫자 → `NUM`
+- 경로(`/`로 시작) → `PATH`
+- URL → `URL`
+- 따옴표 안 내용 → `STR`
+
+예: `"UserList.tsx 리팩토링해줘"` → `"FILE 리팩토링해줘"`
+
+**2단계: 정규화된 텍스트 5개를 합쳐 패턴 ID 생성**
+
+```bash
+python3 -c "
+import hashlib
+texts = ['정규화된메시지1', '정규화된메시지2', '정규화된메시지3', '정규화된메시지4', '정규화된메시지5']
+combined = '|'.join(texts)
+print(hashlib.md5(combined.encode()).hexdigest()[:8])
+"
+```
+
+**3단계: patterns.json 업데이트**
+
+```bash
+mkdir -p ~/.skill-fog
+python3 -c "
+import json, datetime, hashlib, os, sys
+
+patterns_file = os.path.expanduser('~/.skill-fog/patterns.json')
+session_id = 'SESSION_ID'  # 세션 시작 시 생성한 고정 ID
+
+# 기존 데이터 로드
+try:
+    with open(patterns_file) as f:
+        data = json.load(f)
+except:
+    data = {'patterns': {}}
+
+pattern_id = 'PATTERN_ID'  # 2단계에서 생성한 해시
+normalized = 'NORMALIZED_TEXT'  # 정규화된 패턴
+examples = ['원본메시지1', '원본메시지2', '원본메시지3']  # 실제 사용자 메시지
+
+if pattern_id not in data['patterns']:
+    data['patterns'][pattern_id] = {
+        'canonical': normalized,
+        'count': 0,
+        'sessions': [],
+        'examples': [],
+        'status': 'tracking',
+        'first_seen': datetime.datetime.utcnow().isoformat() + 'Z',
+        'last_seen': None
+    }
+
+entry = data['patterns'][pattern_id]
+
+# 이미 제안/수락된 패턴은 업데이트하지 않음
+if entry['status'] in ('proposed', 'accepted', 'rejected'):
+    print('SKIP')
+    sys.exit(0)
+
+entry['count'] += 1
+entry['last_seen'] = datetime.datetime.utcnow().isoformat() + 'Z'
+
+if session_id not in entry['sessions']:
+    entry['sessions'].append(session_id)
+
+for ex in examples:
+    if ex not in entry['examples']:
+        entry['examples'].append(ex)
+
+entry['examples'] = entry['examples'][:5]  # 최대 5개 보관
+
+with open(patterns_file, 'w') as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
+
+# 임계값 판단 출력
+if entry['count'] >= 3 and len(entry['sessions']) >= 2:
+    print('THRESHOLD_MET')
+else:
+    print('TRACKING')
+"
+```
+
+**4단계: 임계값 도달 시 즉시 질문**
+
+3단계 결과가 `THRESHOLD_MET`이면 즉시 아래 메시지를 출력한다:
+
+```
+**[skill-fog]** `{canonical}` 패턴이 {count}회 감지됐습니다.
+
+예시:
+- {examples[0]}
+- {examples[1]}
+
+**skill / command / agent** 중 어떤 형태로 만들까요?
+(건너뛰려면 '나중에')
+```
+
+그리고 patterns.json의 해당 패턴 status를 `proposed`로 업데이트한다.
+
+---
+
+## STEP A: 세션 시작 시 pending 제안
+
+pending 파일이 있을 때 실행한다.
+
+각 파일을 읽어 아래 형식으로 알린다:
 
 ```
 **[skill-fog]** `{canonical}` 패턴이 {count}회({sessions}개 세션)에서 감지되었습니다.
@@ -41,51 +166,46 @@ pending 파일 하나당 아래 형식으로 알린다:
 - {examples[2]}
 
 **skill / command / agent** 중 어떤 형태로 만들까요?
-(건너뛰려면 '나중에' 또는 '스킵'이라고 입력하세요)
+(건너뛰려면 '나중에')
 ```
 
 pending 파일이 여러 개면 하나씩 순서대로 제안한다.
 
 ---
 
-## STEP 3: 사용자 응답 처리
+## STEP B: 사용자 응답 처리
 
 ### '나중에' / '스킵' / 'skip' / 'later' 입력 시
-- pending 파일을 그대로 둔다.
-- "다음 세션에 다시 제안할게요." 안내 후 종료.
+- 현재 상태를 그대로 유지한다.
+- "알겠습니다. 나중에 다시 확인할게요." 안내 후 종료.
 
 ### '거부' / '아니오' / '필요없어' 입력 시
-- pending 파일 삭제.
 - patterns.json의 해당 패턴 status를 'rejected'로 업데이트.
 
 ```bash
-# pending 파일 삭제
-rm ~/.skill-fog/pending/{PATTERN_ID}.json
-
-# status 업데이트
 jq --arg id "{PATTERN_ID}" \
   '.patterns[$id].status = "rejected"' \
   ~/.skill-fog/patterns.json > ~/.skill-fog/patterns.json.tmp \
   && mv ~/.skill-fog/patterns.json.tmp ~/.skill-fog/patterns.json
 ```
 
+- pending 파일이 있으면 삭제:
+```bash
+rm -f ~/.skill-fog/pending/{PATTERN_ID}.json
+```
+
 ### 'skill' / 'command' / 'agent' 선택 시
-→ STEP 4로 진행.
+→ STEP C로 진행.
 
 ---
 
-## STEP 4: 유사 항목 스캔
+## STEP C: 유사 항목 스캔
 
 선택 전 기존 파일과 겹치는지 확인한다.
 
 ```bash
-# 스킬 목록
 find ~/.claude/skills/ -name "*.md" 2>/dev/null
-
-# 커맨드 목록
 find ~/.claude/commands/ -name "*.md" 2>/dev/null
-
-# 에이전트 목록
 find ~/.claude/agents/ -name "*.md" 2>/dev/null
 ```
 
@@ -97,11 +217,11 @@ find ~/.claude/agents/ -name "*.md" 2>/dev/null
 어떻게 하시겠어요?
 ```
 
-**유사 없음**: 바로 STEP 5로.
+**유사 없음**: 바로 STEP D로.
 
 ---
 
-## STEP 5: 미리보기 생성 및 확인
+## STEP D: 미리보기 생성 및 확인
 
 실제 파일 생성 전, 내용을 미리 보여준다.
 
@@ -170,7 +290,7 @@ model: claude-sonnet-4-5
 
 ---
 
-## STEP 6: 실제 파일 생성
+## STEP E: 실제 파일 생성
 
 사용자 확인 후 파일을 생성한다.
 
@@ -189,16 +309,12 @@ mkdir -p ~/.claude/skills/{이름}
 
 ---
 
-## STEP 7: 완료 처리
+## STEP F: 완료 처리
 
 생성 완료 후:
 
-1. pending 파일 삭제:
-```bash
-rm ~/.skill-fog/pending/{PATTERN_ID}.json
-```
+1. patterns.json status 업데이트:
 
-2. patterns.json status 업데이트:
 ```bash
 jq --arg id "{PATTERN_ID}" --arg type "{skill|command|agent}" \
   --arg name "{생성된_이름}" \
@@ -211,10 +327,17 @@ jq --arg id "{PATTERN_ID}" --arg type "{skill|command|agent}" \
   && mv ~/.skill-fog/patterns.json.tmp ~/.skill-fog/patterns.json
 ```
 
-3. 완료 메시지:
+2. pending 파일이 있으면 삭제:
+
+```bash
+rm -f ~/.skill-fog/pending/{PATTERN_ID}.json
 ```
-✓ `{이름}` {타입}이 생성되었습니다: ~/.claude/{경로}
-다음 세션부터 바로 사용할 수 있습니다.
+
+3. 완료 메시지:
+
+```
+`{이름}` {타입}이 생성되었습니다: ~/.claude/{경로}
+다음 메시지부터 바로 사용할 수 있습니다.
 ```
 
 ---
@@ -229,9 +352,29 @@ jq --arg id "{PATTERN_ID}" --arg type "{skill|command|agent}" \
 
 ---
 
+## 중복 방지 규칙
+
+- 패턴 status가 `proposed` / `accepted` / `rejected`이면 다시 카운트하지 않는다.
+- 같은 세션 내에서 이미 질문한 패턴은 다시 묻지 않는다.
+- `rejected` 상태 패턴은 영구적으로 무시한다.
+
+---
+
 ## 수동 호출 (/skill-fog)
 
 사용자가 `/skill-fog` 를 명시적으로 입력한 경우:
-1. pending 파일 목록 출력
-2. patterns.json에서 top 5 패턴 요약 출력
-3. "검토하려는 패턴 번호를 선택하세요." 프롬프트
+
+```bash
+cat ~/.skill-fog/patterns.json 2>/dev/null || echo '{"patterns":{}}'
+```
+
+출력 형식:
+```
+[skill-fog] 현재까지 감지된 패턴:
+
+1. `{canonical}` — {count}회 / {sessions}개 세션 / 상태: {status}
+2. `{canonical}` — {count}회 / {sessions}개 세션 / 상태: {status}
+...
+
+검토할 패턴 번호를 선택하세요. (없으면 '종료')
+```
