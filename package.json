@@ -1,6 +1,6 @@
 {
   "name": "skill-fog",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Auto-detect usage patterns and generate Claude Code skills, commands, and agents",
   "scripts": {
     "postinstall": "node postinstall.js"
@@ -8,7 +8,13 @@
   "bin": {
     "skill-fog": "./bin/skill-fog"
   },
-  "keywords": ["claude-code", "skill", "agent", "automation", "pattern-detection"],
+  "keywords": [
+    "claude-code",
+    "skill",
+    "agent",
+    "automation",
+    "pattern-detection"
+  ],
   "license": "MIT",
   "engines": {
     "node": ">=16.0.0"
