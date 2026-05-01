@@ -177,6 +177,50 @@ remove_data() {
 }
 
 # ─────────────────────────────────────────────
+# 5. CLAUDE.md에서 skill-fog 블록 제거
+# ─────────────────────────────────────────────
+remove_claude_md() {
+  local claude_md="$HOME/.claude/CLAUDE.md"
+  local marker="# skill-fog: 대화 중 반복 패턴 감지"
+
+  if [ ! -f "$claude_md" ]; then
+    info "CLAUDE.md not found, skipping."
+    return
+  fi
+
+  if ! grep -q "$marker" "$claude_md"; then
+    info "skill-fog entry not found in CLAUDE.md, skipping."
+    return
+  fi
+
+  # 백업 먼저
+  local backup_file="${claude_md}.backup.$(date +%Y%m%d_%H%M%S)"
+  cp "$claude_md" "$backup_file"
+  info "Backed up CLAUDE.md to: $backup_file"
+
+  # skill-fog 블록 제거 (마커 줄부터 다음 빈 줄 이후까지 포함하는 2줄 블록)
+  python3 - <<PYEOF
+import re, os
+
+claude_md = os.path.expanduser('$claude_md')
+
+with open(claude_md, 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# 빈 줄 + 마커 줄 + 다음 줄(내용) 패턴 제거
+pattern = r'\n# skill-fog: 대화 중 반복 패턴 감지[^\n]*\n[^\n]*\n?'
+new_content = re.sub(pattern, '', content)
+
+with open(claude_md, 'w', encoding='utf-8') as f:
+    f.write(new_content)
+
+print('[skill-fog] skill-fog entry removed from CLAUDE.md')
+PYEOF
+
+  success "skill-fog entry removed from CLAUDE.md"
+}
+
+# ─────────────────────────────────────────────
 # 완료 메시지
 # ─────────────────────────────────────────────
 print_summary() {
@@ -200,6 +244,7 @@ main() {
   remove_hook
   remove_skill
   remove_cli
+  remove_claude_md
   remove_data
   print_summary
 }

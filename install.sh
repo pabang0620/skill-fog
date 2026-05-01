@@ -248,6 +248,27 @@ PYEOF
 }
 
 # ─────────────────────────────────────────────
+# 9. CLAUDE.md에 skill-fog 활성화 등록
+# ─────────────────────────────────────────────
+register_claude_md() {
+  local claude_md="$HOME/.claude/CLAUDE.md"
+  local marker="# skill-fog: 대화 중 반복 패턴 감지"
+
+  if [ -f "$claude_md" ] && grep -q "$marker" "$claude_md"; then
+    info "CLAUDE.md already configured"
+    return
+  fi
+
+  cat >> "$claude_md" << 'CLAUDEMD'
+
+# skill-fog: 대화 중 반복 패턴 감지 및 스킬 자동 생성 (자동 로드)
+skill-fog 스킬을 항상 활성 상태로 유지한다. 매 5번째 사용자 메시지마다 ~/.skill-fog/patterns.json을 확인하고 반복 패턴을 감지한다. 임계값(동일 패턴 3회 + 2개 이상 세션) 도달 시 즉시 사용자에게 skill / command / agent 생성을 제안한다.
+CLAUDEMD
+
+  success "skill-fog registered in CLAUDE.md"
+}
+
+# ─────────────────────────────────────────────
 # 완료 메시지
 # ─────────────────────────────────────────────
 print_summary() {
@@ -261,6 +282,7 @@ print_summary() {
   echo -e "    ~/.claude/skills/skill-fog/SKILL.md"
   echo -e "    ~/.skill-fog/hooks/stop.sh   (Stop hook)"
   echo -e "    ~/.local/bin/skill-fog       (CLI)"
+  echo -e "    ~/.claude/CLAUDE.md          (skill-fog always-on entry)"
   echo ""
   echo -e "  ${BLUE}How it works:${NC}"
   echo -e "    1. Each Claude Code session end → stop.sh analyzes patterns"
@@ -294,6 +316,7 @@ main() {
   install_cli
   backup_settings
   register_hook
+  register_claude_md
   print_summary
 }
 
