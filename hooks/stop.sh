@@ -42,81 +42,46 @@ else
   exit 0
 fi
 
-# JSON 쿼리 래퍼 함수 (jq 없으면 python3)
+# JSON 쿼리 래퍼 함수 (jq 없으면 python3 — 환경변수로 전달해 따옴표 문제 회피)
 jq_query() {
   local filter="$1"
   local input="${2:-$PAYLOAD}"
   if [ -n "$JQ_CMD" ]; then
     echo "$input" | jq -r "$filter" 2>/dev/null || echo ""
   else
-    echo "$input" | python3 -c "
-import json, sys, re
+    SF_FILTER="$filter" SF_INPUT="$input" python3 - <<'PYEOF'
+import os, json, sys
 
-def jq_simple(data, query):
-    # 간단한 jq 패턴 지원: .key, .key.sub, .key[]?, index
-    query = query.strip()
-    if query == '.':
-        return data
-    # .messages[]? | select(.role==\"user\") | .content
-    if 'messages' in query and 'select' in query and 'user' in query:
-        msgs = data.get('messages', [])
-        results = []
-        for m in msgs:
-            if isinstance(m, dict) and m.get('role') == 'user':
-                content = m.get('content', '')
-                if isinstance(content, list):
-                    for item in content:
-                        if isinstance(item, dict) and item.get('type') == 'text':
-                            results.append(item.get('text', ''))
-                elif isinstance(content, str):
-                    results.append(content)
-        return '\n'.join(results)
-    # .session_id // empty
-    if 'session_id' in query:
-        return data.get('session_id', '')
-    parts = query.lstrip('.').split('.')
-    result = data
-    for part in parts:
-        part = part.rstrip('?')
-        if isinstance(result, dict):
-            result = result.get(part, '')
-        else:
-            return ''
-    return result
+filter_str = os.environ.get('SF_FILTER', '')
+input_str = os.environ.get('SF_INPUT', '')
 
 try:
-    data = json.load(sys.stdin)
-    result = jq_simple(data, '$filter')
-    if result is None:
-        print('')
-    elif isinstance(result, (dict, list)):
-        print(json.dumps(result))
-    else:
-        print(str(result))
-except Exception as e:
+    data = json.loads(input_str)
+except Exception:
     print('')
-" 2>/dev/null || echo ""
-  fi
-}
+    sys.exit(0)
 
-# patterns.json용 jq 래퍼
-jq_file() {
-  local filter="$1"
-  local file="$2"
-  if [ -n "$JQ_CMD" ]; then
-    jq -r "$filter" "$file" 2>/dev/null || echo ""
-  else
-    python3 -c "
-import json, sys
-try:
-    with open('$file') as f:
-        data = json.load(f)
-    # 간단한 키 접근
-    filter = '''$filter'''
-    print(str(data))
-except:
+# .messages[]? | select(.role=="user") | .content
+if 'messages' in filter_str and 'user' in filter_str:
+    results = []
+    for m in data.get('messages', []):
+        if isinstance(m, dict) and m.get('role') == 'user':
+            content = m.get('content', '')
+            if isinstance(content, list):
+                for item in content:
+                    if isinstance(item, dict) and item.get('type') == 'text':
+                        results.append(item.get('text', ''))
+            elif isinstance(content, str):
+                results.append(content)
+    print('\n'.join(results))
+
+# .session_id // empty
+elif 'session_id' in filter_str:
+    print(data.get('session_id', ''))
+
+else:
     print('')
-" 2>/dev/null || echo ""
+PYEOF
   fi
 }
 
@@ -228,14 +193,15 @@ update_pattern_python() {
   local patterns_file="$PATTERNS_FILE"
 
   python3 - <<PYEOF
-import json, sys, datetime, os
+import json, sys, os
+import datetime as _dt
 
 pattern_id = '$pattern_id'
 canonical = '$canonical'
 masked_msg = '''$masked_msg'''
 session_id = '$session_id'
 patterns_file = '$patterns_file'
-now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+now = _dt.datetime.now(_dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 try:
     with open(patterns_file, 'r') as f:
@@ -307,12 +273,13 @@ check_threshold_python() {
   local pending_dir="$PENDING_DIR"
 
   python3 - <<PYEOF
-import json, sys, os, datetime
+import json, sys, os
+import datetime as _dt
 
 pattern_id = '$pattern_id'
 patterns_file = '$patterns_file'
 pending_dir = '$pending_dir'
-now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+now = _dt.datetime.now(_dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 try:
     with open(patterns_file, 'r') as f:
@@ -350,7 +317,7 @@ normalize_message() {
   local msg="$1"
   echo "$msg" \
     | tr '[:upper:]' '[:lower:]' \
-    | sed -E 's|[a-zA-Z0-9_/-]+\.(ts|tsx|js|jsx|py|md|json|sh|yaml|yml|env|toml)|FILE|g' \
+    | sed -E 's/[a-zA-Z0-9_\/-]+\.(ts|tsx|js|jsx|py|md|json|sh|yaml|yml|env|toml)/FILE/g' \
     | sed -E 's/[0-9]+/NUM/g' \
     | sed -E 's/https?:\/\/[^ ]+/URL/g' \
     | sed -E 's/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/UUID/g' \
@@ -372,8 +339,8 @@ process_messages() {
     local masked
     masked=$(echo "$msg" | mask_secrets)
 
-    # 최소 길이 필터: 20자 이상
-    if [ "${#masked}" -lt 20 ]; then
+    # 최소 길이 필터: 10자 이상 (한글 등 멀티바이트 문자 고려)
+    if [ "${#masked}" -lt 10 ]; then
       continue
     fi
 
