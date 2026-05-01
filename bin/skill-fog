@@ -130,14 +130,14 @@ cmd_status() {
     done
 
   elif [ "$JSON_TOOL" = "python3" ]; then
-    python3 - <<PYEOF
+    SF_PATTERNS_FILE="$PATTERNS_FILE" python3 - <<'PYEOF'
 import json, os
 
-patterns_file = '$PATTERNS_FILE'
+patterns_file = os.environ['SF_PATTERNS_FILE']
 try:
     with open(patterns_file) as f:
         data = json.load(f)
-except:
+except Exception:
     print("  Error reading patterns.json")
     exit(0)
 
@@ -223,10 +223,10 @@ cmd_review() {
       done
 
     elif [ "$JSON_TOOL" = "python3" ]; then
-      python3 - <<PYEOF
-import json
+      SF_FILE="$f" python3 - <<'PYEOF'
+import json, os
 try:
-    with open('$f') as fp:
+    with open(os.environ['SF_FILE']) as fp:
         p = json.load(fp)
     print(f"  Pattern: {p.get('canonical','?')[:80]}")
     print(f"  Seen {p.get('count','?')} times across {len(p.get('sessions',[]))} sessions")
@@ -418,16 +418,16 @@ cmd_clean() {
     fi
 
   elif [ "$JSON_TOOL" = "python3" ]; then
-    python3 - <<PYEOF
+    SF_PATTERNS_FILE="$PATTERNS_FILE" python3 - <<'PYEOF'
 import json, datetime, os, sys
 
-patterns_file = '$PATTERNS_FILE'
+patterns_file = os.environ['SF_PATTERNS_FILE']
 cutoff = datetime.datetime.utcnow() - datetime.timedelta(days=30)
 
 try:
     with open(patterns_file) as f:
         data = json.load(f)
-except:
+except Exception:
     print("  Error reading patterns.json")
     sys.exit(0)
 
@@ -444,7 +444,7 @@ for pid, p in patterns.items():
         last_seen = datetime.datetime.strptime(last_seen_str, '%Y-%m-%dT%H:%M:%SZ')
         if last_seen < cutoff:
             to_remove.append(pid)
-    except:
+    except Exception:
         pass
 
 if to_remove:

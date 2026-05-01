@@ -50,6 +50,13 @@ else
   exit 0
 fi
 
+# flock 없으면 python3 경로 강제 (macOS 호환성)
+# flock은 Linux(util-linux) 전용 — macOS는 python3의 fcntl.flock 사용
+if [ -n "$JQ_CMD" ] && ! command -v flock &>/dev/null; then
+  log "INFO: flock not available, using python3 for atomic operations"
+  JQ_CMD=""
+fi
+
 # JSON 쿼리 래퍼 함수 (jq 없으면 python3 — 환경변수로 전달해 따옴표 문제 회피)
 jq_query() {
   local filter="$1"

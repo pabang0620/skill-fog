@@ -1,7 +1,7 @@
 ---
 name: skill-fog
 description: 대화 중 반복 요청 패턴을 5개 메시지마다 감지하여 스킬/커맨드/에이전트 생성 제안. 임계값(3회+2세션) 도달 시 즉시 질문.
-version: 2.0.1
+version: 2.0.2
 triggers:
   - /skill-fog
 ---
@@ -47,96 +47,62 @@ Claude는 대화 중 사용자 메시지 수를 내부적으로 추적한다.
 
 ### 패턴 분석 절차
 
-**1단계: 직전 5개 사용자 메시지를 정규화**
+**1단계: 직전 5개 사용자 메시지를 각각 개별 정규화**
 
-정규화 규칙:
+stop.sh와 동일한 정규화 규칙:
 - 소문자 변환
 - 파일명(확장자 포함) → `FILE`
 - 숫자 → `NUM`
-- 경로(`/`로 시작) → `PATH`
 - URL → `URL`
-- 따옴표 안 내용 → `STR`
+- UUID → `UUID`
+- 공백 정규화, 120자 이하로 자름
 
 예: `"UserList.tsx 리팩토링해줘"` → `"FILE 리팩토링해줘"`
 
-**2단계: 정규화된 텍스트 5개를 합쳐 패턴 ID 생성**
+**2단계: 각 메시지별로 개별 패턴 ID 생성 후 patterns.json 조회 (읽기 전용)**
 
-```bash
-python3 -c "
-import hashlib
-texts = ['정규화된메시지1', '정규화된메시지2', '정규화된메시지3', '정규화된메시지4', '정규화된메시지5']
-combined = '|'.join(texts)
-print(hashlib.md5(combined.encode()).hexdigest()[:8])
-"
-```
+아래 코드를 실행한다. `MSG1`~`MSG5`는 직전 5개 사용자 메시지 원본으로 교체한다.
 
-**3단계: patterns.json 업데이트**
+```python
+import hashlib, json, os, re, sys
 
-```bash
-mkdir -p ~/.skill-fog
-python3 -c "
-import json, datetime, hashlib, os, sys
+def normalize(msg):
+    msg = msg.lower()
+    msg = re.sub(r'[a-zA-Z0-9_/\-]+\.(ts|tsx|js|jsx|py|md|json|sh|yaml|yml|env|toml)', 'FILE', msg)
+    msg = re.sub(r'[0-9]+', 'NUM', msg)
+    msg = re.sub(r'https?://\S+', 'URL', msg)
+    msg = re.sub(r'[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}', 'UUID', msg)
+    msg = re.sub(r'\s+', ' ', msg).strip()
+    return msg[:120]
+
+# Claude가 실제 직전 5개 사용자 메시지로 교체
+messages = ['MSG1', 'MSG2', 'MSG3', 'MSG4', 'MSG5']
 
 patterns_file = os.path.expanduser('~/.skill-fog/patterns.json')
-session_id = 'SESSION_ID'  # 세션 시작 시 생성한 고정 ID
-
-# 기존 데이터 로드
 try:
     with open(patterns_file) as f:
         data = json.load(f)
-except:
-    data = {'patterns': {}}
+except Exception:
+    print('NO_DATA'); sys.exit(0)
 
-pattern_id = 'PATTERN_ID'  # 2단계에서 생성한 해시
-normalized = 'NORMALIZED_TEXT'  # 정규화된 패턴
-examples = ['원본메시지1', '원본메시지2', '원본메시지3']  # 실제 사용자 메시지
-
-if pattern_id not in data['patterns']:
-    data['patterns'][pattern_id] = {
-        'canonical': normalized,
-        'count': 0,
-        'sessions': [],
-        'examples': [],
-        'status': 'tracking',
-        'first_seen': datetime.datetime.utcnow().isoformat() + 'Z',
-        'last_seen': None
-    }
-
-entry = data['patterns'][pattern_id]
-
-# 이미 제안/수락된 패턴은 업데이트하지 않음
-if entry['status'] in ('proposed', 'accepted', 'rejected'):
-    print('SKIP')
-    sys.exit(0)
-
-entry['count'] += 1
-entry['last_seen'] = datetime.datetime.utcnow().isoformat() + 'Z'
-
-if session_id not in entry['sessions']:
-    entry['sessions'].append(session_id)
-
-for ex in examples:
-    if ex not in entry['examples']:
-        entry['examples'].append(ex)
-
-entry['examples'] = entry['examples'][:5]  # 최대 5개 보관
-
-with open(patterns_file, 'w') as f:
-    json.dump(data, f, ensure_ascii=False, indent=2)
-
-# 임계값 판단 출력
-if (entry['count'] >= 3 and
-    len(entry['sessions']) >= 2 and
-    len(entry.get('examples', [])) > 0):
-    print('THRESHOLD_MET')
-else:
-    print('TRACKING')
-"
+patterns = data.get('patterns', {})
+for msg in messages:
+    if len(msg) < 10:
+        continue
+    canonical = normalize(msg)
+    if not canonical:
+        continue
+    pid = hashlib.md5(canonical.encode()).hexdigest()[:12]
+    p = patterns.get(pid)
+    if p and p.get('count', 0) >= 3 and len(p.get('sessions', [])) >= 2 and p.get('status') == 'active':
+        print(f"THRESHOLD_MET:{pid}:{p['canonical'][:60]}:{p['count']}:{json.dumps(p.get('examples', [])[:2])}")
+        sys.exit(0)
+print('TRACKING')
 ```
 
-**4단계: 임계값 도달 시 즉시 질문**
+**3단계: 임계값 도달 시 즉시 질문**
 
-3단계 결과가 `THRESHOLD_MET`이면 즉시 아래 메시지를 출력한다:
+2단계 결과가 `THRESHOLD_MET:...`이면 즉시 아래 메시지를 출력한다:
 
 ```
 **[skill-fog]** `{canonical}` 패턴이 {count}회 감지됐습니다.
@@ -149,7 +115,24 @@ else:
 (건너뛰려면 '나중에')
 ```
 
-그리고 patterns.json의 해당 패턴 status를 `proposed`로 업데이트한다.
+그리고 patterns.json의 해당 패턴 status를 `proposed`로 업데이트한다 (이 한 가지만 write):
+
+```bash
+python3 -c "
+import json, os
+pf = os.path.expanduser('~/.skill-fog/patterns.json')
+pid = 'PATTERN_ID'  # 위 2단계에서 얻은 실제 pattern id로 교체
+with open(pf) as f:
+    d = json.load(f)
+if pid in d['patterns']:
+    d['patterns'][pid]['status'] = 'proposed'
+with open(pf + '.tmp', 'w') as f:
+    json.dump(d, f, ensure_ascii=False, indent=2)
+os.replace(pf + '.tmp', pf)
+"
+```
+
+> **중요**: SKILL.md는 patterns.json을 **읽기 전용**으로 사용한다. 패턴 누적(count 증가, sessions 추가)은 stop.sh가 세션 종료 시에만 담당한다. SKILL.md는 이미 누적된 데이터를 체크하고, status를 'proposed'로 변경하는 것만 허용된다.
 
 ---
 
