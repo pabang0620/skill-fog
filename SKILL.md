@@ -1,7 +1,7 @@
 ---
 name: skill-fog
 description: 대화 중 반복 요청 패턴을 자동 감지하여 스킬/커맨드/에이전트 생성을 제안하는 스킬. 매 5번째 메시지마다 자동 실행되며, 동일 패턴이 3회 이상·2개 이상 세션에서 감지될 때 즉시 제안한다. 사용자가 /skill-fog를 명시적으로 호출하거나 세션 시작 시 pending 패턴이 있을 때도 활성화된다.
-version: 2.0.3
+version: 2.0.4
 triggers:
   - /skill-fog
 ---
