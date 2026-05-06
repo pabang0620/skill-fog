@@ -109,7 +109,7 @@ print('TRACKING')
 
 예시:
 - {examples[0]}
-(examples가 2개 이상이면) - {examples[1]}
+- {examples[1] — 없으면 이 줄 생략}
 
 **skill / command / agent** 중 어떤 형태로 만들까요?
 (건너뛰려면 '나중에')
@@ -140,8 +140,13 @@ os.replace(pf + '.tmp', pf)
 
 pending 파일이 있을 때 실행한다.
 
-각 파일에 대해: pid가 `session_proposed`에 없으면 제안하고, 있으면 건너뛴다.
-세션 시작 시에는 `session_proposed`가 빈 집합이므로 모든 pending을 제안한다.
+각 파일에 대해 아래 순서로 처리한다:
+1. pid가 `session_proposed`에 있으면 건너뛴다.
+2. `patterns.json`에서 해당 pid의 status를 확인한다:
+   - `accepted` 또는 `rejected`: pending 파일을 삭제하고 건너뛴다.
+   - `proposed`: `session_proposed`에 pid를 추가하고 건너뛴다 (stop.sh가 이미 처리 중).
+   - `active` (또는 status 필드 없음): 제안을 진행한다.
+세션 시작 시 `session_proposed`는 빈 집합이므로 조건 1은 모든 pending에 열려 있다.
 
 각 파일을 읽어 아래 형식으로 알린다:
 
@@ -150,8 +155,8 @@ pending 파일이 있을 때 실행한다.
 
 예시:
 - {examples[0]}
-{examples[1]이 있으면: - {examples[1]}}
-{examples[2]이 있으면: - {examples[2]}}
+- {examples[1] — 없으면 이 줄 생략}
+- {examples[2] — 없으면 이 줄 생략}
 
 **skill / command / agent** 중 어떤 형태로 만들까요?
 (건너뛰려면 '나중에')

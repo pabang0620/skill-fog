@@ -341,14 +341,15 @@ check_threshold_jq() {
     (
       flock -x 200
 
-      # noclobber로 원자적 생성
+      # status → proposed 먼저 업데이트 (atomic)
+      jq --arg id "$pattern_id" '.patterns[$id].status = "proposed"' \
+        "$PATTERNS_FILE" > "${PATTERNS_FILE}.tmp" 2>/dev/null \
+        && mv "${PATTERNS_FILE}.tmp" "$PATTERNS_FILE" || { log "ERROR: Failed to update status for $pattern_id"; }
+
+      # pending 파일 생성 (noclobber — 이미 존재하면 건너뜀, status는 proposed 유지)
       set -C
       if jq --arg id "$pattern_id" '.patterns[$id]' "$PATTERNS_FILE" > "$pending_file" 2>/dev/null; then
         set +C
-        # status → proposed
-        jq --arg id "$pattern_id" '.patterns[$id].status = "proposed"' \
-          "$PATTERNS_FILE" > "${PATTERNS_FILE}.tmp" 2>/dev/null \
-          && mv "${PATTERNS_FILE}.tmp" "$PATTERNS_FILE"
         log "INFO: Pattern $pattern_id promoted to pending (count=$count, sessions=$session_count)"
       else
         set +C
@@ -396,17 +397,19 @@ with open(lock_file, 'w') as lock_f:
 
         if count >= 3 and session_count >= 2 and status == 'active':
             pending_file = os.path.join(pending_dir, pattern_id + '.json')
+            # status → proposed 먼저 업데이트 (atomic)
+            p['status'] = 'proposed'
+            tmp_file = patterns_file + '.tmp'
+            with open(tmp_file, 'w') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+                f.write('\n')
+            os.replace(tmp_file, patterns_file)
+            # pending 파일 생성 (O_EXCL — 이미 존재하면 건너뜀, status는 proposed 유지)
             try:
                 fd = os.open(pending_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
                 with os.fdopen(fd, 'w') as f:
                     json.dump(p, f, indent=2, ensure_ascii=False)
                     f.write('\n')
-                p['status'] = 'proposed'
-                tmp_file = patterns_file + '.tmp'
-                with open(tmp_file, 'w') as f:
-                    json.dump(data, f, indent=2, ensure_ascii=False)
-                    f.write('\n')
-                os.replace(tmp_file, patterns_file)
             except FileExistsError:
                 pass
     finally:
