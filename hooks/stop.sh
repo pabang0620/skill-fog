@@ -9,12 +9,36 @@ PATTERNS_FILE="$HOME/.skill-fog/patterns.json"
 PENDING_DIR="$HOME/.skill-fog/pending"
 LOG_DIR="$HOME/.skill-fog/logs"
 LOG_FILE="$LOG_DIR/$(date +%Y-%m-%d).log"
+CURSOR_DIR="$HOME/.skill-fog/transcript-cursors"
+
+mkdir -p "$LOG_DIR" 2>/dev/null || true
 
 # ─────────────────────────────────────────────
 # 로그 함수
 # ─────────────────────────────────────────────
 log() {
   echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" >> "$LOG_FILE" 2>/dev/null || true
+}
+
+payload_summary() {
+  SF_PAYLOAD="$PAYLOAD" python3 - <<'PYEOF'
+import json, os
+
+try:
+    data = json.loads(os.environ.get('SF_PAYLOAD', '{}'))
+except Exception:
+    print('keys=[] session= hook_event=')
+    raise SystemExit(0)
+
+if not isinstance(data, dict):
+    print('keys=[] session= hook_event=')
+    raise SystemExit(0)
+
+keys = sorted(str(k) for k in data.keys())
+session = data.get('session_id') or data.get('sessionId') or ''
+hook_event = data.get('hook_event_name') or data.get('hookEventName') or data.get('event') or ''
+print(f"keys={keys} session={session} hook_event={hook_event}")
+PYEOF
 }
 
 # ─────────────────────────────────────────────
@@ -33,6 +57,15 @@ if command -v jq &>/dev/null; then
     log "ERROR: Invalid JSON payload (length=${#PAYLOAD})"
     exit 0
   fi
+elif command -v python3 &>/dev/null; then
+  if ! SF_PAYLOAD="$PAYLOAD" python3 - <<'PYEOF' >/dev/null 2>&1
+import json, os
+json.loads(os.environ.get('SF_PAYLOAD', ''))
+PYEOF
+  then
+    log "ERROR: Invalid JSON payload (length=${#PAYLOAD})"
+    exit 0
+  fi
 fi
 
 # ─────────────────────────────────────────────
@@ -47,6 +80,11 @@ elif command -v python3 &>/dev/null; then
   PYTHON_CMD="python3"
 else
   log "ERROR: Neither jq nor python3 available"
+  exit 0
+fi
+
+if ! command -v python3 &>/dev/null; then
+  log "ERROR: python3 is required for transcript parsing"
   exit 0
 fi
 
@@ -76,9 +114,9 @@ except Exception:
     print('')
     sys.exit(0)
 
-# .session_id // empty
-if 'session_id' in filter_str:
-    print(data.get('session_id', ''))
+# .session_id // .sessionId // empty
+if 'session_id' in filter_str or 'sessionId' in filter_str:
+    print(data.get('session_id') or data.get('sessionId') or '')
 
 # .transcript_path // empty
 elif 'transcript_path' in filter_str:
@@ -93,7 +131,7 @@ PYEOF
 # ─────────────────────────────────────────────
 # 세션 ID 추출
 # ─────────────────────────────────────────────
-SESSION_ID=$(jq_query '.session_id // empty')
+SESSION_ID=$(jq_query '.session_id // .sessionId // empty')
 if [ -z "$SESSION_ID" ]; then
   SESSION_ID="session_$(date +%s | md5sum 2>/dev/null | head -c 8 || date +%s | shasum | head -c 8)"
 fi
@@ -120,7 +158,7 @@ PYEOF
 fi
 
 if [ -z "$TRANSCRIPT_PATH" ]; then
-  log "INFO: No transcript_path in payload (session may have no transcript)"
+  log "INFO: No transcript_path in payload ($(payload_summary))"
   exit 0
 fi
 
@@ -132,19 +170,130 @@ fi
 log "INFO: Reading transcript: $TRANSCRIPT_PATH"
 
 # ─────────────────────────────────────────────
-# JSONL transcript에서 사용자 메시지 추출
-# 형식: {"role":"user","content":"..."} 또는 content가 배열인 경우
+# Transcript cursor state
 # ─────────────────────────────────────────────
-MESSAGES=$(SF_TRANSCRIPT_PATH="$TRANSCRIPT_PATH" python3 - <<'PYEOF'
-import os, json, sys
+mkdir -p "$CURSOR_DIR"
+
+TRANSCRIPT_CURSOR_KEY=$(SF_SESSION_ID="$SESSION_ID" SF_TRANSCRIPT_PATH="$TRANSCRIPT_PATH" python3 - <<'PYEOF'
+import hashlib, os
+
+session_id = os.environ.get('SF_SESSION_ID', '')
+transcript_path = os.environ.get('SF_TRANSCRIPT_PATH', '')
+print(hashlib.sha256(f'{session_id}\0{transcript_path}'.encode('utf-8', errors='replace')).hexdigest()[:32])
+PYEOF
+)
+TRANSCRIPT_CURSOR_FILE="$CURSOR_DIR/${TRANSCRIPT_CURSOR_KEY}.json"
+TRANSCRIPT_CURSOR_LOCK_DIR="$CURSOR_DIR/${TRANSCRIPT_CURSOR_KEY}.lockdir"
+TRANSCRIPT_CURSOR_LOCKED=0
+TRANSCRIPT_CURSOR_NEXT_OFFSET=0
+
+release_transcript_cursor_lock() {
+  if [ "$TRANSCRIPT_CURSOR_LOCKED" -eq 1 ]; then
+    rmdir "$TRANSCRIPT_CURSOR_LOCK_DIR" 2>/dev/null || true
+    TRANSCRIPT_CURSOR_LOCKED=0
+  fi
+}
+
+acquire_transcript_cursor_lock() {
+  local attempts=0
+  while ! mkdir "$TRANSCRIPT_CURSOR_LOCK_DIR" 2>/dev/null; do
+    attempts=$((attempts + 1))
+    if [ "$attempts" -ge 200 ]; then
+      log "WARN: Could not acquire transcript cursor lock for $TRANSCRIPT_PATH"
+      return 1
+    fi
+    sleep 0.05
+  done
+  TRANSCRIPT_CURSOR_LOCKED=1
+  trap release_transcript_cursor_lock EXIT
+}
+
+write_transcript_cursor() {
+  local offset="$1"
+
+  SF_CURSOR_FILE="$TRANSCRIPT_CURSOR_FILE" \
+  SF_SESSION_ID="$SESSION_ID" \
+  SF_TRANSCRIPT_PATH="$TRANSCRIPT_PATH" \
+  SF_OFFSET="$offset" \
+  python3 - <<'PYEOF'
+import datetime as _dt
+import json
+import os
+
+cursor_file = os.environ['SF_CURSOR_FILE']
+offset = int(os.environ.get('SF_OFFSET') or 0)
+data = {
+    'session_id': os.environ.get('SF_SESSION_ID', ''),
+    'transcript_path': os.environ.get('SF_TRANSCRIPT_PATH', ''),
+    'byte_offset': offset,
+    'updated_at': _dt.datetime.now(_dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+}
+tmp_file = cursor_file + '.tmp'
+with open(tmp_file, 'w', encoding='utf-8') as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
+    f.write('\n')
+os.replace(tmp_file, cursor_file)
+PYEOF
+}
+
+if ! acquire_transcript_cursor_lock; then
+  exit 0
+fi
+
+# ─────────────────────────────────────────────
+# JSONL transcript에서 사용자 메시지 추출
+# legacy top-level role/content와 Claude JSONL nested message.content를 지원한다.
+# content 배열은 text item만 수집하고 tool_result payload는 제외한다.
+# 각 메시지는 base64 한 줄로 출력해 멀티라인 메시지 경계를 보존한다.
+# ─────────────────────────────────────────────
+MESSAGES_OUTPUT=$(SF_TRANSCRIPT_PATH="$TRANSCRIPT_PATH" SF_CURSOR_FILE="$TRANSCRIPT_CURSOR_FILE" python3 - <<'PYEOF'
+import base64, os, json, sys
 
 transcript_path = os.environ.get('SF_TRANSCRIPT_PATH', '')
+cursor_file = os.environ.get('SF_CURSOR_FILE', '')
 results = []
+offset = 0
+next_offset = 0
+
+def clean_text(text):
+    return text.encode('utf-8', errors='replace').decode('utf-8')
+
+def text_parts(content):
+    if isinstance(content, str):
+        if content:
+            yield clean_text(content)
+    elif isinstance(content, list):
+        for item in content:
+            if not isinstance(item, dict):
+                continue
+            if item.get('type') != 'text':
+                continue
+            text = item.get('text', '')
+            if isinstance(text, str) and text:
+                yield clean_text(text)
 
 try:
-    with open(transcript_path, 'r', encoding='utf-8', errors='replace') as f:
-        for line in f:
-            line = line.strip()
+    try:
+        with open(cursor_file, 'r', encoding='utf-8') as cursor_f:
+            cursor = json.load(cursor_f)
+            offset = int(cursor.get('byte_offset') or 0)
+    except Exception:
+        offset = 0
+
+    file_size = os.path.getsize(transcript_path)
+    if offset < 0 or offset > file_size:
+        offset = 0
+
+    with open(transcript_path, 'rb') as f:
+        f.seek(offset)
+        next_offset = f.tell()
+
+        for raw_line in f:
+            next_offset = f.tell()
+            try:
+                line = raw_line.decode('utf-8', errors='replace').strip()
+            except Exception:
+                continue
             if not line:
                 continue
             try:
@@ -152,25 +301,40 @@ try:
             except json.JSONDecodeError:
                 continue
             if obj.get('role') == 'user':
-                content = obj.get('content', '')
-                if isinstance(content, str):
-                    results.append(content)
-                elif isinstance(content, list):
-                    for item in content:
-                        if isinstance(item, dict) and item.get('type') == 'text':
-                            text = item.get('text', '')
-                            if text:
-                                results.append(text)
+                results.extend(text_parts(obj.get('content', '')))
+            else:
+                message = obj.get('message')
+                if (
+                    obj.get('type') == 'user'
+                    and isinstance(message, dict)
+                    and message.get('role') == 'user'
+                ):
+                    results.extend(text_parts(message.get('content', '')))
+
+            if len(results) >= 50:
+                break
 except Exception as e:
     import sys as _sys
     _sys.stderr.write(f'[skill-fog] transcript read error: {e}\n')
 
-print('\n'.join(results))
+print(f'__SF_NEXT_OFFSET__={next_offset}')
+for message in results:
+    print(base64.b64encode(message.encode('utf-8')).decode('ascii'))
 PYEOF
 )
 
-if [ -z "$MESSAGES" ]; then
-  log "INFO: No user messages found in transcript"
+TRANSCRIPT_CURSOR_NEXT_OFFSET=$(printf '%s\n' "$MESSAGES_OUTPUT" | sed -n 's/^__SF_NEXT_OFFSET__=//p' | head -n 1)
+MESSAGES_B64=$(printf '%s\n' "$MESSAGES_OUTPUT" | sed '/^__SF_NEXT_OFFSET__=/d')
+
+if [ -z "$TRANSCRIPT_CURSOR_NEXT_OFFSET" ]; then
+  log "WARN: Could not determine transcript cursor offset for $TRANSCRIPT_PATH"
+  TRANSCRIPT_CURSOR_NEXT_OFFSET=0
+fi
+
+if [ -z "$MESSAGES_B64" ]; then
+  write_transcript_cursor "$TRANSCRIPT_CURSOR_NEXT_OFFSET"
+  release_transcript_cursor_lock
+  log "INFO: No new user messages found in transcript"
   exit 0
 fi
 
@@ -271,10 +435,24 @@ update_pattern_python() {
 import os, json, sys, fcntl
 import datetime as _dt
 
+def clean_text(value):
+    if not isinstance(value, str):
+        return value
+    return value.encode('utf-8', errors='replace').decode('utf-8')
+
+def clean_json(value):
+    if isinstance(value, str):
+        return clean_text(value)
+    if isinstance(value, list):
+        return [clean_json(item) for item in value]
+    if isinstance(value, dict):
+        return {clean_json(k): clean_json(v) for k, v in value.items()}
+    return value
+
 pattern_id = os.environ['SF_PATTERN_ID']
-canonical = os.environ['SF_CANONICAL']
-masked_msg = os.environ['SF_MASKED_MSG']
-session_id = os.environ['SF_SESSION_ID']
+canonical = clean_text(os.environ['SF_CANONICAL'])
+masked_msg = clean_text(os.environ['SF_MASKED_MSG'])
+session_id = clean_text(os.environ['SF_SESSION_ID'])
 patterns_file = os.environ['SF_PATTERNS_FILE']
 now = _dt.datetime.now(_dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
@@ -317,7 +495,7 @@ with open(lock_file, 'w') as lock_f:
 
         tmp_file = patterns_file + '.tmp'
         with open(tmp_file, 'w') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+            json.dump(clean_json(data), f, indent=2, ensure_ascii=False)
             f.write('\n')
         os.replace(tmp_file, patterns_file)
     finally:
@@ -330,33 +508,7 @@ PYEOF
 # ─────────────────────────────────────────────
 check_threshold_jq() {
   local pattern_id="$1"
-
-  local count session_count status
-  count=$(jq -r --arg id "$pattern_id" '.patterns[$id].count' "$PATTERNS_FILE" 2>/dev/null || echo "0")
-  session_count=$(jq -r --arg id "$pattern_id" '.patterns[$id].sessions | length' "$PATTERNS_FILE" 2>/dev/null || echo "0")
-  status=$(jq -r --arg id "$pattern_id" '.patterns[$id].status' "$PATTERNS_FILE" 2>/dev/null || echo "")
-
-  if [ "${count:-0}" -ge 3 ] && [ "${session_count:-0}" -ge 2 ] && [ "$status" = "active" ]; then
-    local pending_file="$PENDING_DIR/${pattern_id}.json"
-    (
-      flock -x 200
-
-      # status → proposed 먼저 업데이트 (atomic)
-      jq --arg id "$pattern_id" '.patterns[$id].status = "proposed"' \
-        "$PATTERNS_FILE" > "${PATTERNS_FILE}.tmp" 2>/dev/null \
-        && mv "${PATTERNS_FILE}.tmp" "$PATTERNS_FILE" || { log "ERROR: Failed to update status for $pattern_id"; }
-
-      # pending 파일 생성 (noclobber — 이미 존재하면 건너뜀, status는 proposed 유지)
-      set -C
-      if jq --arg id "$pattern_id" '.patterns[$id]' "$PATTERNS_FILE" > "$pending_file" 2>/dev/null; then
-        set +C
-        log "INFO: Pattern $pattern_id promoted to pending (count=$count, sessions=$session_count)"
-      else
-        set +C
-      fi
-
-    ) 200>"${PATTERNS_FILE}.lock"
-  fi
+  check_threshold_python "$pattern_id"
 }
 
 # ─────────────────────────────────────────────
@@ -371,6 +523,15 @@ check_threshold_python() {
   python3 - <<'PYEOF'
 import os, json, sys, fcntl
 import datetime as _dt
+
+def clean_json(value):
+    if isinstance(value, str):
+        return value.encode('utf-8', errors='replace').decode('utf-8')
+    if isinstance(value, list):
+        return [clean_json(item) for item in value]
+    if isinstance(value, dict):
+        return {clean_json(k): clean_json(v) for k, v in value.items()}
+    return value
 
 pattern_id = os.environ['SF_PATTERN_ID']
 patterns_file = os.environ['SF_PATTERNS_FILE']
@@ -393,25 +554,45 @@ with open(lock_file, 'w') as lock_f:
 
         count = p.get('count', 0)
         session_count = len(p.get('sessions', []))
-        status = p.get('status', '')
+        status = p.get('status', 'active')
 
-        if count >= 3 and session_count >= 2 and status == 'active':
+        if count >= 3 and session_count >= 2 and status not in ('accepted', 'rejected'):
             pending_file = os.path.join(pending_dir, pattern_id + '.json')
-            # status → proposed 먼저 업데이트 (atomic)
-            p['status'] = 'proposed'
-            tmp_file = patterns_file + '.tmp'
-            with open(tmp_file, 'w') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
+            existing_pending = {}
+            if os.path.exists(pending_file):
+                try:
+                    with open(pending_file, 'r') as f:
+                        existing_pending = json.load(f)
+                except Exception:
+                    existing_pending = {}
+
+            pending_data = {
+                'pid': pattern_id,
+                'canonical': clean_json(p.get('canonical', '')),
+                'count': p.get('count', 0),
+                'sessions': clean_json(p.get('sessions', [])),
+                'examples': clean_json(p.get('examples', [])),
+                'first_seen': clean_json(p.get('first_seen', '')),
+                'last_seen': clean_json(p.get('last_seen', '')),
+                'status': 'active',
+            }
+            if existing_pending.get('snoozed_at'):
+                pending_data['snoozed_at'] = existing_pending['snoozed_at']
+
+            p['status'] = 'active'
+
+            tmp_patterns = patterns_file + '.tmp'
+            with open(tmp_patterns, 'w') as f:
+                json.dump(clean_json(data), f, indent=2, ensure_ascii=False)
                 f.write('\n')
-            os.replace(tmp_file, patterns_file)
-            # pending 파일 생성 (O_EXCL — 이미 존재하면 건너뜀, status는 proposed 유지)
-            try:
-                fd = os.open(pending_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
-                with os.fdopen(fd, 'w') as f:
-                    json.dump(p, f, indent=2, ensure_ascii=False)
-                    f.write('\n')
-            except FileExistsError:
-                pass
+
+            tmp_pending = pending_file + '.tmp'
+            with open(tmp_pending, 'w') as f:
+                json.dump(pending_data, f, indent=2, ensure_ascii=False)
+                f.write('\n')
+
+            os.replace(tmp_pending, pending_file)
+            os.replace(tmp_patterns, patterns_file)
     finally:
         fcntl.flock(lock_f, fcntl.LOCK_UN)
 PYEOF
@@ -424,7 +605,7 @@ normalize_message() {
   local msg="$1"
   echo "$msg" \
     | tr '[:upper:]' '[:lower:]' \
-    | sed -E 's/[a-zA-Z0-9_\/-]+\.(tsx|ts|jsx|json|yaml|js|yml|py|md|sh|env|toml)/FILE/g' \
+    | sed -E 's/[a-zA-Z0-9_\/-]+\.(tsx|ts|jsx|js|py|md|json|sh|yaml|yml|env|toml)/FILE/g' \
     | sed -E 's/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/UUID/g' \
     | sed -E 's/https?:\/\/[^ ]+/URL/g' \
     | sed -E 's/[0-9]+/NUM/g' \
@@ -488,12 +669,22 @@ PYEOF
 process_messages() {
   local processed=0
 
-  while IFS= read -r msg; do
+  while IFS= read -r encoded_msg; do
+    [ -z "$encoded_msg" ] && continue
+    local msg
+    msg=$(SF_MESSAGE_B64="$encoded_msg" python3 - <<'PYEOF'
+import base64, os
+try:
+    print(base64.b64decode(os.environ.get('SF_MESSAGE_B64', ''), validate=True).decode('utf-8'), end='')
+except Exception:
+    print('', end='')
+PYEOF
+)
     [ -z "$msg" ] && continue
 
     # 시크릿 마스킹
     local masked
-    masked=$(echo "$msg" | mask_secrets)
+    masked=$(printf '%s' "$msg" | mask_secrets)
 
     # 최소 길이 필터: 10자 이상 (한글 등 멀티바이트 문자 고려)
     if [ "${#masked}" -lt 10 ]; then
@@ -534,7 +725,7 @@ process_messages() {
     # 처리 메시지 수 제한 (성능)
     [ "$processed" -ge 50 ] && break
 
-  done <<< "$MESSAGES"
+  done <<< "$MESSAGES_B64"
 
   log "INFO: Processed $processed messages for session $SESSION_ID"
 }
@@ -543,6 +734,8 @@ process_messages() {
 # MAIN
 # ─────────────────────────────────────────────
 process_messages
+write_transcript_cursor "$TRANSCRIPT_CURSOR_NEXT_OFFSET"
+release_transcript_cursor_lock
 
 # 세션 카운트 기반 오래된 패턴 정리 (매 10번째 실행마다)
 SESSION_COUNT_FILE="$HOME/.skill-fog/.session_count"

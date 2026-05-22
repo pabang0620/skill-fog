@@ -115,7 +115,7 @@ print('TRACKING')
 (건너뛰려면 '나중에')
 ```
 
-그리고 patterns.json의 해당 패턴 status를 `proposed`로 업데이트하고, 해당 pid를 `session_proposed`에 추가한다 (이중 발동 방지):
+그리고 해당 pid를 `session_proposed`에 추가한다 (이중 발동 방지). pending-backed 패턴은 사용자가 명시적으로 수락하거나 거부하기 전까지 patterns.json에서 `active` 상태를 유지한다:
 
 ```bash
 python3 -c "
@@ -125,14 +125,14 @@ pid = 'PATTERN_ID'  # 위 2단계에서 얻은 실제 pattern id로 교체
 with open(pf) as f:
     d = json.load(f)
 if pid in d['patterns']:
-    d['patterns'][pid]['status'] = 'proposed'
+    d['patterns'][pid]['status'] = 'active'
 with open(pf + '.tmp', 'w') as f:
     json.dump(d, f, ensure_ascii=False, indent=2)
 os.replace(pf + '.tmp', pf)
 "
 ```
 
-> **중요**: SKILL.md는 patterns.json을 **읽기 전용**으로 사용한다. 패턴 누적(count 증가, sessions 추가)은 stop.sh가 세션 종료 시에만 담당한다. SKILL.md는 이미 누적된 데이터를 체크하고, status를 'proposed'로 변경하는 것만 허용된다.
+> **중요**: SKILL.md는 patterns.json을 **읽기 전용**으로 사용한다. 패턴 누적(count 증가, sessions 추가)은 stop.sh가 세션 종료 시에만 담당한다. SKILL.md는 사용자가 수락/거부하기 전에는 pending-backed 패턴을 `active` 상태로 유지한다.
 
 ---
 
@@ -144,7 +144,6 @@ pending 파일이 있을 때 실행한다.
 1. pid가 `session_proposed`에 있으면 건너뛴다.
 2. `patterns.json`에서 해당 pid의 status를 확인한다:
    - `accepted` 또는 `rejected`: pending 파일을 삭제하고 건너뛴다.
-   - `proposed`: `session_proposed`에 pid를 추가하고 건너뛴다 (stop.sh가 이미 처리 중).
    - `active` (또는 status 필드 없음): 제안을 진행한다.
 세션 시작 시 `session_proposed`는 빈 집합이므로 조건 1은 모든 pending에 열려 있다.
 
@@ -188,7 +187,7 @@ if p:
     d['patterns'][pid]['status'] = 'active'
     with open(pf+'.tmp','w') as f: json.dump(d,f,ensure_ascii=False,indent=2)
     os.replace(pf+'.tmp', pf)
-    pending_data = {'pid': pid, 'canonical': p.get('canonical',''), 'count': p.get('count',0), 'sessions': p.get('sessions',[]), 'examples': p.get('examples',[]), 'snoozed_at': now}
+    pending_data = {'pid': pid, 'canonical': p.get('canonical',''), 'count': p.get('count',0), 'sessions': p.get('sessions',[]), 'examples': p.get('examples',[]), 'status': 'active', 'snoozed_at': now}
     with open(os.path.join(pending_dir, pid+'.json'),'w') as f: json.dump(pending_data,f,ensure_ascii=False,indent=2)
 "
 ```
@@ -388,7 +387,7 @@ rm -f ~/.skill-fog/pending/{PATTERN_ID}.json
 
 ## 중복 방지 규칙
 
-- 패턴 status가 `proposed` / `accepted` / `rejected`이면 새 pending을 생성하지 않는다. (count 누적은 stop.sh가 status 무관하게 처리하며, 5번째 체크 및 pending 생성은 status=`active` 패턴에만 동작한다.)
+- 패턴 status가 `accepted` / `rejected`이면 새 pending을 생성하지 않는다. pending-backed 패턴은 사용자가 명시적으로 수락/거부하기 전까지 `active`로 유지한다.
 - 같은 세션 내에서 이미 질문한 패턴은 다시 묻지 않는다.
 - `rejected` 상태 패턴은 영구적으로 무시한다.
 
@@ -416,5 +415,5 @@ cat ~/.skill-fog/patterns.json 2>/dev/null || echo '{"patterns":{}}'
    "**skill / command / agent** 중 어떤 형태로 만들까요? (건너뛰려면 '나중에')"
 2. 해당 pid를 `session_proposed`에 추가한다. (이중 발동 방지)
 3. 사용자 응답에 따라 STEP B(사용자 응답 처리) 진입.
-(proposed/accepted/rejected 상태 패턴은 상태만 표시하고 선택 불가)
+(accepted/rejected 상태 패턴은 상태만 표시하고 선택 불가)
 ```
