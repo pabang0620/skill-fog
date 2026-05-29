@@ -343,8 +343,11 @@ fi
 # ─────────────────────────────────────────────
 mask_secrets() {
   sed -E \
+    -e 's/npm_[a-zA-Z0-9_-]+/[REDACTED]/g' \
+    -e 's/github_pat_[a-zA-Z0-9_]+/[REDACTED]/g' \
     -e 's/sk-ant-[a-zA-Z0-9_-]+/[REDACTED]/g' \
     -e 's/sk-proj-[a-zA-Z0-9_-]+/[REDACTED]/g' \
+    -e 's/sk-[a-zA-Z0-9_-]{20,}/[REDACTED]/g' \
     -e 's/ghp_[a-zA-Z0-9]+/[REDACTED]/g' \
     -e 's/AKIA[A-Z0-9]{16}/[REDACTED]/g' \
     -e 's/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/[EMAIL]/g' \

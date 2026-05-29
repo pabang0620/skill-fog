@@ -75,6 +75,10 @@ PYEOF
   fi
 }
 
+pending_count() {
+  find "$PENDING_DIR" -maxdepth 1 -name "*.json" -type f 2>/dev/null | wc -l | tr -d ' '
+}
+
 # ─────────────────────────────────────────────
 # 서브커맨드: status
 # ─────────────────────────────────────────────
@@ -91,17 +95,17 @@ cmd_status() {
   fi
 
   if [ "$JSON_TOOL" = "jq" ]; then
-    local total active proposed accepted rejected
+    local total active pending accepted rejected
 
     total=$(jq '.patterns | length' "$PATTERNS_FILE" 2>/dev/null || echo "0")
     active=$(jq '[.patterns[] | select(.status == "active")] | length' "$PATTERNS_FILE" 2>/dev/null || echo "0")
-    proposed=$(jq '[.patterns[] | select(.status == "proposed")] | length' "$PATTERNS_FILE" 2>/dev/null || echo "0")
+    pending=$(pending_count)
     accepted=$(jq '[.patterns[] | select(.status == "accepted")] | length' "$PATTERNS_FILE" 2>/dev/null || echo "0")
     rejected=$(jq '[.patterns[] | select(.status == "rejected")] | length' "$PATTERNS_FILE" 2>/dev/null || echo "0")
 
     echo -e "  Total patterns : ${BOLD}$total${NC}"
     echo -e "  Active         : ${CYAN}$active${NC}"
-    echo -e "  Pending review : ${YELLOW}$proposed${NC}"
+    echo -e "  Pending review : ${YELLOW}$pending${NC}"
     echo -e "  Accepted       : ${GREEN}$accepted${NC}"
     echo -e "  Rejected       : ${RED}$rejected${NC}"
     echo ""
@@ -131,7 +135,7 @@ cmd_status() {
 
   elif [ "$JSON_TOOL" = "python3" ]; then
     SF_PATTERNS_FILE="$PATTERNS_FILE" python3 - <<'PYEOF'
-import json, os
+import glob, json, os
 
 patterns_file = os.environ['SF_PATTERNS_FILE']
 try:
@@ -143,13 +147,14 @@ except Exception:
 
 patterns = data.get('patterns', {})
 total = len(patterns)
-counts = {'active': 0, 'proposed': 0, 'accepted': 0, 'rejected': 0}
+counts = {'active': 0, 'accepted': 0, 'rejected': 0}
 for p in patterns.values():
     counts[p.get('status', 'active')] = counts.get(p.get('status', 'active'), 0) + 1
+pending = len(glob.glob(os.path.expanduser('~/.skill-fog/pending/*.json')))
 
 print(f"  Total patterns : {total}")
 print(f"  Active         : {counts.get('active', 0)}")
-print(f"  Pending review : {counts.get('proposed', 0)}")
+print(f"  Pending review : {pending}")
 print(f"  Accepted       : {counts.get('accepted', 0)}")
 print(f"  Rejected       : {counts.get('rejected', 0)}")
 print()
@@ -169,8 +174,7 @@ PYEOF
 
   # pending 파일 수
   local pending_count
-  pending_count=$(ls "$PENDING_DIR"/*.json 2>/dev/null | wc -l || echo "0")
-  pending_count=$(echo "$pending_count" | tr -d ' ')
+  pending_count=$(pending_count)
 
   if [ "${pending_count:-0}" -gt 0 ]; then
     echo -e "  ${YELLOW}${BOLD}$pending_count pattern(s) pending review!${NC} Run: ${CYAN}skill-fog review${NC}"
@@ -266,6 +270,28 @@ PYEOF
           jq --arg id "$pattern_id" '.patterns[$id].status = "rejected"' \
             "$PATTERNS_FILE" > "${PATTERNS_FILE}.tmp" 2>/dev/null \
             && mv "${PATTERNS_FILE}.tmp" "$PATTERNS_FILE"
+        elif [ "$JSON_TOOL" = "python3" ] && [ -f "$PATTERNS_FILE" ]; then
+          SF_PATTERN_ID="$pattern_id" SF_PATTERNS_FILE="$PATTERNS_FILE" python3 - <<'PYEOF'
+import json, os
+
+pattern_id = os.environ['SF_PATTERN_ID']
+patterns_file = os.environ['SF_PATTERNS_FILE']
+
+try:
+    with open(patterns_file) as f:
+        data = json.load(f)
+except Exception:
+    raise SystemExit(0)
+
+pattern = data.get('patterns', {}).get(pattern_id)
+if pattern is not None:
+    pattern['status'] = 'rejected'
+    tmp_file = patterns_file + '.tmp'
+    with open(tmp_file, 'w') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+        f.write('\n')
+    os.replace(tmp_file, patterns_file)
+PYEOF
         fi
         warn "Pattern rejected and removed."
         ;;
