@@ -342,23 +342,36 @@ fi
 # 시크릿 마스킹 함수
 # ─────────────────────────────────────────────
 mask_secrets() {
-  sed -E \
-    -e 's/npm_[a-zA-Z0-9_-]+/[REDACTED]/g' \
-    -e 's/github_pat_[a-zA-Z0-9_]+/[REDACTED]/g' \
-    -e 's/sk-ant-[a-zA-Z0-9_-]+/[REDACTED]/g' \
-    -e 's/sk-proj-[a-zA-Z0-9_-]+/[REDACTED]/g' \
-    -e 's/sk-[a-zA-Z0-9_-]{20,}/[REDACTED]/g' \
-    -e 's/ghp_[a-zA-Z0-9]+/[REDACTED]/g' \
-    -e 's/AKIA[A-Z0-9]{16}/[REDACTED]/g' \
-    -e 's/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/[EMAIL]/g' \
-    -e 's/password[=: ]+[^ ]*/password=[REDACTED]/gi' \
-    -e 's/token[=: ]+[a-zA-Z0-9_-]{10,}/token=[REDACTED]/gi' \
-    -e 's/secret[=: ]+[a-zA-Z0-9_-]{8,}/secret=[REDACTED]/gi' \
-    -e 's|postgresql://[^:]*:[^@]*@|postgresql://***:***@|g' \
-    -e 's|mysql://[^:]*:[^@]*@|mysql://***:***@|g' \
-    -e 's|mongodb://[^:]*:[^@]*@|mongodb://***:***@|g' \
-    -e 's|redis://[^:]*:[^@]*@|redis://***:***@|g' \
-    -e 's|-----BEGIN [A-Z ]* PRIVATE KEY-----|[PRIVATE_KEY_REDACTED]|g'
+  python3 -c "$(cat <<'PYEOF'
+import re
+import sys
+
+text = sys.stdin.read()
+replacements = [
+    (r'-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----.*?-----END [A-Z0-9 ]*PRIVATE KEY-----', '[PRIVATE_KEY_REDACTED]', re.S),
+    (r'npm_[a-zA-Z0-9_-]+', '[REDACTED]', 0),
+    (r'github_pat_[a-zA-Z0-9_]+', '[REDACTED]', 0),
+    (r'sk-ant-[a-zA-Z0-9_-]+', '[REDACTED]', 0),
+    (r'sk-proj-[a-zA-Z0-9_-]+', '[REDACTED]', 0),
+    (r'sk-[a-zA-Z0-9_-]{20,}', '[REDACTED]', 0),
+    (r'ghp_[a-zA-Z0-9]+', '[REDACTED]', 0),
+    (r'AKIA[A-Z0-9]{16}', '[REDACTED]', 0),
+    (r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', '[EMAIL]', 0),
+    (r'password[=: ]+[^ ]*', 'password=[REDACTED]', re.I),
+    (r'token[=: ]+[a-zA-Z0-9_-]{10,}', 'token=[REDACTED]', re.I),
+    (r'secret[=: ]+[a-zA-Z0-9_-]{8,}', 'secret=[REDACTED]', re.I),
+    (r'postgresql://[^:]*:[^@]*@', 'postgresql://***:***@', 0),
+    (r'mysql://[^:]*:[^@]*@', 'mysql://***:***@', 0),
+    (r'mongodb://[^:]*:[^@]*@', 'mongodb://***:***@', 0),
+    (r'redis://[^:]*:[^@]*@', 'redis://***:***@', 0),
+]
+
+for pattern, replacement, flags in replacements:
+    text = re.sub(pattern, replacement, text, flags=flags)
+
+print(text, end='')
+PYEOF
+)"
 }
 
 # ─────────────────────────────────────────────
@@ -581,6 +594,10 @@ with open(lock_file, 'w') as lock_f:
             }
             if existing_pending.get('snoozed_at'):
                 pending_data['snoozed_at'] = existing_pending['snoozed_at']
+            if existing_pending.get('desired_type'):
+                pending_data['desired_type'] = existing_pending['desired_type']
+            if existing_pending.get('reviewed_at'):
+                pending_data['reviewed_at'] = existing_pending['reviewed_at']
 
             p['status'] = 'active'
 

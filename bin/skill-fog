@@ -75,8 +75,105 @@ PYEOF
   fi
 }
 
+pattern_status() {
+  local pattern_id="$1"
+
+  if [ ! -f "$PATTERNS_FILE" ]; then
+    echo ""
+    return
+  fi
+
+  if [ "$JSON_TOOL" = "jq" ]; then
+    jq -r --arg id "$pattern_id" '.patterns[$id].status // ""' "$PATTERNS_FILE" 2>/dev/null || echo ""
+  elif [ "$JSON_TOOL" = "python3" ]; then
+    SF_PATTERN_ID="$pattern_id" SF_PATTERNS_FILE="$PATTERNS_FILE" python3 - <<'PYEOF'
+import json, os
+
+pattern_id = os.environ['SF_PATTERN_ID']
+patterns_file = os.environ['SF_PATTERNS_FILE']
+
+try:
+    with open(patterns_file) as f:
+        data = json.load(f)
+except Exception:
+    raise SystemExit(0)
+
+print(data.get('patterns', {}).get(pattern_id, {}).get('status', ''))
+PYEOF
+  else
+    echo ""
+  fi
+}
+
+cleanup_stale_pending() {
+  local pending_file="$1"
+  local pattern_id
+  pattern_id=$(basename "$pending_file" .json)
+
+  case "$(pattern_status "$pattern_id")" in
+    accepted|rejected)
+      rm -f "$pending_file"
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
 pending_count() {
-  find "$PENDING_DIR" -maxdepth 1 -name "*.json" -type f 2>/dev/null | wc -l | tr -d ' '
+  local count=0
+
+  if [ ! -d "$PENDING_DIR" ]; then
+    echo "0"
+    return
+  fi
+
+  local f
+  for f in "$PENDING_DIR"/*.json; do
+    [ -e "$f" ] || continue
+    if cleanup_stale_pending "$f"; then
+      continue
+    fi
+    count=$((count + 1))
+  done
+
+  echo "$count"
+}
+
+mark_pending_review_choice() {
+  local pending_file="$1"
+  local desired_type="$2"
+  local reviewed_at
+  reviewed_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+  if [ "$JSON_TOOL" = "jq" ]; then
+    jq --arg desired_type "$desired_type" --arg reviewed_at "$reviewed_at" \
+      '.desired_type = $desired_type | .reviewed_at = $reviewed_at' \
+      "$pending_file" > "${pending_file}.tmp" 2>/dev/null \
+      && mv "${pending_file}.tmp" "$pending_file"
+  elif [ "$JSON_TOOL" = "python3" ]; then
+    SF_FILE="$pending_file" SF_DESIRED_TYPE="$desired_type" SF_REVIEWED_AT="$reviewed_at" python3 - <<'PYEOF'
+import json, os
+
+pending_file = os.environ['SF_FILE']
+desired_type = os.environ['SF_DESIRED_TYPE']
+reviewed_at = os.environ['SF_REVIEWED_AT']
+
+try:
+    with open(pending_file) as f:
+        data = json.load(f)
+except Exception:
+    raise SystemExit(0)
+
+data['desired_type'] = desired_type
+data['reviewed_at'] = reviewed_at
+tmp_file = pending_file + '.tmp'
+with open(tmp_file, 'w') as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
+    f.write('\n')
+os.replace(tmp_file, pending_file)
+PYEOF
+  fi
 }
 
 # ─────────────────────────────────────────────
@@ -134,8 +231,8 @@ cmd_status() {
     done
 
   elif [ "$JSON_TOOL" = "python3" ]; then
-    SF_PATTERNS_FILE="$PATTERNS_FILE" python3 - <<'PYEOF'
-import glob, json, os
+    SF_PATTERNS_FILE="$PATTERNS_FILE" SF_PENDING_COUNT="$(pending_count)" python3 - <<'PYEOF'
+import json, os
 
 patterns_file = os.environ['SF_PATTERNS_FILE']
 try:
@@ -150,7 +247,7 @@ total = len(patterns)
 counts = {'active': 0, 'accepted': 0, 'rejected': 0}
 for p in patterns.values():
     counts[p.get('status', 'active')] = counts.get(p.get('status', 'active'), 0) + 1
-pending = len(glob.glob(os.path.expanduser('~/.skill-fog/pending/*.json')))
+pending = int(os.environ.get('SF_PENDING_COUNT', '0'))
 
 print(f"  Total patterns : {total}")
 print(f"  Active         : {counts.get('active', 0)}")
@@ -192,10 +289,11 @@ cmd_review() {
   echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
   echo ""
 
-  local pending_files
-  pending_files=$(ls "$PENDING_DIR"/*.json 2>/dev/null || true)
+  local pending_files pending_total
+  pending_total=$(pending_count)
+  pending_files=$(find "$PENDING_DIR" -maxdepth 1 -name "*.json" -type f 2>/dev/null | sort || true)
 
-  if [ -z "$pending_files" ]; then
+  if [ "${pending_total:-0}" -eq 0 ]; then
     success "No pending patterns to review."
     echo ""
     dim "  Patterns are promoted to pending when count >= 3 across >= 2 sessions."
@@ -205,6 +303,10 @@ cmd_review() {
 
   local count=0
   for f in $pending_files; do
+    if cleanup_stale_pending "$f"; then
+      continue
+    fi
+
     count=$((count + 1))
     local pattern_id
     pattern_id=$(basename "$f" .json)
@@ -252,12 +354,15 @@ PYEOF
 
     case "$choice" in
       s|skill)
+        mark_pending_review_choice "$f" "skill"
         success "Marked for skill creation. Open Claude Code and run /skill-fog to generate."
         ;;
       c|command)
+        mark_pending_review_choice "$f" "command"
         success "Marked for command creation. Open Claude Code and run /skill-fog to generate."
         ;;
       a|agent)
+        mark_pending_review_choice "$f" "agent"
         success "Marked for agent creation. Open Claude Code and run /skill-fog to generate."
         ;;
       k|keep|later|"")
