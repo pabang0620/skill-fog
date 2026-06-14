@@ -41,16 +41,6 @@ You typed it again the next day. And the day after that. The intention was there
 
 ---
 
-## Demo
-
-```
-[demo.gif — coming soon]
-```
-
-> Want to see it in action? Star the repo and we'll prioritize the recording.
-
----
-
 ## How it works
 
 ```
@@ -100,6 +90,8 @@ You typed it again the next day. And the day after that. The intention was there
 
 ## Installation
 
+`skill-fog@2.0.6` is published on npm and is the current `latest` dist-tag.
+
 ```bash
 # npm (recommended)
 npm install -g skill-fog
@@ -114,7 +106,7 @@ curl -fsSL https://raw.githubusercontent.com/pabang0620/skill-fog/main/install.s
 
 ## Verify Install
 
-Run these checks after installing from npm:
+Run these checks after installing the published npm package:
 
 ```bash
 skill-fog doctor
@@ -126,13 +118,15 @@ Expected result:
 - `skill-fog doctor` exits successfully and reports the installed files, Stop hook, and local data directory status.
 - `skill-fog doctor --self-test` exits with code `0`, reports `0 failures` inside its isolated temporary HOME, and removes its temporary directory when it exits.
 
-To inspect the package contents before installing:
+## Release Validation Assets
+
+The published package includes the release validation assets listed in `package.json`, including the release checklist, hook benchmark script, eval scripts, and fixtures. To inspect the published tarball contents without installing:
 
 ```bash
 npm pack skill-fog --dry-run --json
 ```
 
-To inspect a local checkout before publishing:
+To inspect a local checkout before a future publish:
 
 ```bash
 npm pack --dry-run --json

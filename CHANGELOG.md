@@ -6,6 +6,7 @@ All notable changes to this package are documented here.
 
 ## 2.0.6
 
+- Published `skill-fog@2.0.6` to npm as the current `latest` dist-tag.
 - Added push-protection-safe fixture placeholders for release packaging checks.
 - Prepared release-readiness harness assets for npm package distribution.
 - Fixed npm package metadata by using the canonical `git+https` repository URL.
