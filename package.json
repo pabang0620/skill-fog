@@ -1,12 +1,12 @@
 {
   "name": "skill-fog",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Auto-detect usage patterns and generate Claude Code skills, commands, and agents",
   "scripts": {
     "postinstall": "node postinstall.js"
   },
   "bin": {
-    "skill-fog": "./bin/skill-fog"
+    "skill-fog": "bin/skill-fog"
   },
   "keywords": [
     "claude-code",
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pabang0620/skill-fog.git"
+    "url": "git+https://github.com/pabang0620/skill-fog.git"
   },
   "homepage": "https://github.com/pabang0620/skill-fog#readme",
   "bugs": {

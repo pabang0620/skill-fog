@@ -3,7 +3,7 @@
   "schema_version": "1.0.0",
   "schema_description": "Self-defined npm/GitHub distribution metadata for skill-fog. This is not a marketplace manifest.",
   "name": "skill-fog",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "license": "MIT",
   "repository": "https://github.com/pabang0620/skill-fog",
   "install_command": "npm install -g skill-fog",
