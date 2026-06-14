@@ -9,9 +9,12 @@ CLAUDE_DIR="$HOME/.claude"
 SKILLS_DIR="$CLAUDE_DIR/skills/skill-fog"
 SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 SKILL_FOG_DIR="$HOME/.skill-fog"
+INSTALLED_CLI="$SKILL_FOG_DIR/bin/skill-fog"
 LOCAL_BIN_LINK="$HOME/.local/bin/skill-fog"
 HOME_BIN_LINK="$HOME/bin/skill-fog"
 HOOK_CMD="bash $HOME/.skill-fog/hooks/stop.sh"
+ASSUME_YES=0
+DATA_ACTION="prompt"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -24,10 +27,62 @@ success() { echo -e "${GREEN}[skill-fog]${NC} $*"; }
 warn()    { echo -e "${YELLOW}[skill-fog]${NC} $*"; }
 error()   { echo -e "${RED}[skill-fog]${NC} $*"; }
 
+usage() {
+  cat <<EOF
+Usage: uninstall.sh [options]
+
+Uninstall skill-fog from the current HOME.
+
+Options:
+  --yes          Answer yes to confirmation prompts.
+  --keep-data    Preserve ~/.skill-fog without prompting.
+  --remove-data  Remove ~/.skill-fog without prompting.
+  --help         Show this help message.
+EOF
+}
+
+parse_args() {
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --yes)
+        ASSUME_YES=1
+        ;;
+      --keep-data)
+        if [ "$DATA_ACTION" = "remove" ]; then
+          error "--keep-data and --remove-data cannot be used together."
+          exit 2
+        fi
+        DATA_ACTION="keep"
+        ;;
+      --remove-data)
+        if [ "$DATA_ACTION" = "keep" ]; then
+          error "--keep-data and --remove-data cannot be used together."
+          exit 2
+        fi
+        DATA_ACTION="remove"
+        ;;
+      --help|-h)
+        usage
+        exit 0
+        ;;
+      *)
+        error "Unknown option: $1"
+        usage
+        exit 2
+        ;;
+    esac
+    shift
+  done
+}
+
 confirm() {
   local prompt="$1"
   local default="${2:-n}"
   local yn
+
+  if [ "$ASSUME_YES" -eq 1 ]; then
+    return 0
+  fi
 
   if [ "$default" = "y" ]; then
     prompt="$prompt [Y/n] "
@@ -62,16 +117,15 @@ remove_hook() {
   if command -v jq &>/dev/null; then
     local tmp_file="${SETTINGS_FILE}.tmp"
 
-    # skill-fog 훅 명령어를 포함하는 항목만 제거
+    # skill-fog 훅 명령어만 제거하고 같은 Stop 항목의 다른 훅은 보존
     if ! jq \
       --arg cmd "$HOOK_CMD" \
       '
       if .hooks.Stop then
         .hooks.Stop = [
           .hooks.Stop[]
-          | select(
-              (.hooks | map(select(.command == $cmd)) | length) == 0
-            )
+          | .hooks = [ .hooks[]? | select(.command != $cmd) ]
+          | select((.hooks | length) > 0)
         ]
         | if .hooks.Stop | length == 0 then del(.hooks.Stop) else . end
         | if (.hooks | length) == 0 then del(.hooks) else . end
@@ -98,10 +152,16 @@ with open(settings_file, 'r') as f:
     settings = json.loads(content) if content else {}
 
 stop_hooks = settings.get('hooks', {}).get('Stop', [])
-new_stop = [
-    entry for entry in stop_hooks
-    if not any(h.get('command') == hook_cmd for h in entry.get('hooks', []))
-]
+new_stop = []
+for entry in stop_hooks:
+    filtered_hooks = [
+        h for h in entry.get('hooks', [])
+        if h.get('command') != hook_cmd
+    ]
+    if filtered_hooks:
+        new_entry = dict(entry)
+        new_entry['hooks'] = filtered_hooks
+        new_stop.append(new_entry)
 
 if 'hooks' in settings and 'Stop' in settings['hooks']:
     if new_stop:
@@ -141,20 +201,47 @@ remove_cli() {
   info "Removing CLI symlink(s)..."
 
   local removed=0
+  local installed_cli="$INSTALLED_CLI"
+  if [ -e "$installed_cli" ]; then
+    installed_cli="$(cd -P "$(dirname "$installed_cli")" && pwd)/$(basename "$installed_cli")"
+  fi
+
+  resolve_symlink_target() {
+    local link="$1"
+    local target
+    target="$(readlink "$link")"
+    case "$target" in
+      /*) ;;
+      *) target="$(cd -P "$(dirname "$link")" && pwd)/$target" ;;
+    esac
+    if [ -e "$target" ]; then
+      local target_dir
+      target_dir="$(cd -P "$(dirname "$target")" && pwd)"
+      echo "$target_dir/$(basename "$target")"
+    else
+      echo "$target"
+    fi
+  }
 
   for link in "$LOCAL_BIN_LINK" "$HOME_BIN_LINK"; do
     if [ -L "$link" ]; then
-      rm "$link"
-      success "Removed symlink: $link"
-      removed=$((removed + 1))
+      local target
+      target="$(resolve_symlink_target "$link")"
+      if [ "$target" = "$installed_cli" ]; then
+        rm "$link"
+        success "Removed symlink: $link"
+        removed=$((removed + 1))
+      else
+        warn "Symlink at $link points to $target, not $installed_cli; skipping."
+      fi
     elif [ -f "$link" ]; then
-      warn "Regular file at $link (not a symlink). Removing..."
-      rm "$link"
-      removed=$((removed + 1))
+      warn "Regular file at $link (not a symlink), skipping."
     fi
   done
 
-  [ "$removed" -eq 0 ] && info "No CLI symlinks found."
+  if [ "$removed" -eq 0 ]; then
+    info "No CLI symlinks found."
+  fi
 }
 
 # ─────────────────────────────────────────────
@@ -171,7 +258,12 @@ remove_data() {
   warn "Deleting it will lose all collected patterns."
   echo ""
 
-  if confirm "Delete ~/.skill-fog/ and all pattern data?" "n"; then
+  if [ "$DATA_ACTION" = "keep" ]; then
+    info "Keeping $SKILL_FOG_DIR (data preserved)."
+    return
+  fi
+
+  if [ "$DATA_ACTION" = "remove" ] || confirm "Delete ~/.skill-fog/ and all pattern data?" "n"; then
     rm -rf "$SKILL_FOG_DIR"
     success "Removed $SKILL_FOG_DIR"
   else
@@ -241,6 +333,8 @@ print_summary() {
 # MAIN
 # ─────────────────────────────────────────────
 main() {
+  parse_args "$@"
+
   echo ""
   info "Starting skill-fog uninstallation..."
   echo ""

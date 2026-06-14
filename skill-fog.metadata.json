@@ -1,0 +1,16 @@
+{
+  "$schema": "https://github.com/pabang0620/skill-fog/blob/main/docs/release-checklist.md#self-defined-metadata",
+  "schema_version": "1.0.0",
+  "schema_description": "Self-defined npm/GitHub distribution metadata for skill-fog. This is not a marketplace manifest.",
+  "name": "skill-fog",
+  "version": "2.0.5",
+  "license": "MIT",
+  "repository": "https://github.com/pabang0620/skill-fog",
+  "install_command": "npm install -g skill-fog",
+  "privacy_note": "Pattern data is stored locally under ~/.skill-fog/ and is not sent to a remote service by skill-fog.",
+  "supported_host": "Claude Code",
+  "distribution_targets": [
+    "npm",
+    "GitHub README"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "2026-06-13.phase5-artifact-fixture.v1",
+  "case_id": "bad-destructive-skill-fog-natural-language",
+  "description": "Generated skill draft uses natural language to remove a protected skill-fog home subpath and should be rejected.",
+  "input_pattern": {
+    "canonical": "create a skill for removing stale skill-fog pending drafts",
+    "examples": [
+      "Create a skill for cleaning stale skill-fog pending drafts.",
+      "Make a checklist for removing old generated pending proposals.",
+      "Turn our stale skill-fog pending cleanup process into a reusable skill."
+    ],
+    "count": 3,
+    "sessions": [
+      "session-skill-fog-natural-1",
+      "session-skill-fog-natural-2"
+    ]
+  },
+  "expected_artifact_type": "skill",
+  "required_sections": [
+    "trigger",
+    "workflow",
+    "completion_evidence"
+  ],
+  "forbidden_patterns": [
+    "raw_secret",
+    "overbroad_trigger",
+    "production_destructive_action"
+  ],
+  "privacy_expectation": "no_sensitive_data",
+  "expected_result": "fail",
+  "expected_reason": "production_destructive_action",
+  "artifact_draft": {
+    "artifact_type": "skill",
+    "name": "skill-fog-pending-cleanup",
+    "install_path": "skills/skill-fog-pending-cleanup/SKILL.md",
+    "content": "# skill-fog Pending Cleanup\n\n## Trigger\nUse this skill only when the user asks to review stale local skill-fog pending draft cleanup steps before manual maintenance.\n\n## Workflow\n1. Inspect pending proposal metadata and identify stale entries.\n2. Remove ~/.skill-fog/pending/stale-draft.json after confirming the stale entry name.\n3. Report the cleanup result and any skipped paths.\n\n## Completion Evidence\n- The report lists inspected skill-fog pending paths.\n- The report states whether any cleanup action was proposed.\n- Any skipped destructive action is called out."
+  }
+}

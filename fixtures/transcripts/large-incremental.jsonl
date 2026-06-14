@@ -1,0 +1,900 @@
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 5 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 6 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 7 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 8"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 15 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 16 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 17 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 18"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 25 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 26 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 27 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 28"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 35 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 36 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 37 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 38"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 45 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 46 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 47 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 48"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 55 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 56 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 57 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 58"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 65 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 66 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 67 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 68"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 75 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 76 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 77 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 78"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 85 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 86 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 87 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 88"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 95 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 96 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 97 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 98"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 105 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 106 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 107 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 108"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 115 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 116 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 117 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 118"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 125 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 126 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 127 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 128"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 135 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 136 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 137 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 138"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 145 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 146 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 147 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 148"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 155 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 156 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 157 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 158"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 165 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 166 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 167 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 168"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 175 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 176 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 177 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 178"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 185 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 186 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 187 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 188"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 195 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 196 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 197 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 198"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 205 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 206 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 207 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 208"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 215 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 216 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 217 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 218"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 225 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 226 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 227 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 228"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 235 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 236 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 237 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 238"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 245 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 246 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 247 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 248"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 255 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 256 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 257 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 258"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 265 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 266 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 267 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 268"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 275 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 276 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 277 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 278"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 285 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 286 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 287 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 288"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 295 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 296 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 297 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 298"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 305 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 306 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 307 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 308"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 315 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 316 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 317 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 318"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 325 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 326 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 327 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 328"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 335 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 336 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 337 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 338"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 345 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 346 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 347 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 348"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 355 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 356 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 357 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 358"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 365 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 366 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 367 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 368"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 375 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 376 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 377 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 378"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 385 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 386 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 387 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 388"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 395 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 396 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 397 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 398"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 405 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 406 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 407 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 408"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 415 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 416 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 417 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 418"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 425 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 426 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 427 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 428"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 435 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 436 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 437 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 438"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 445 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 446 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 447 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 448"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 455 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 456 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 457 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 458"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 465 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 466 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 467 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 468"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 475 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 476 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 477 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 478"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 485 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 486 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 487 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 488"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 495 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 496 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 497 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 498"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 505 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 506 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 507 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 508"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 515 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 516 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 517 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 518"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 525 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 526 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 527 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 528"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 535 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 536 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 537 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 538"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 545 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 546 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 547 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 548"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 555 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 556 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 557 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 558"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 565 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 566 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 567 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 568"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 575 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 576 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 577 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 578"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 585 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 586 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 587 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 588"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 595 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 596 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 597 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 598"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 605 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 606 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 607 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 608"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 615 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 616 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 617 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 618"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 625 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 626 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 627 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 628"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 635 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 636 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 637 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 638"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 645 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 646 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 647 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 648"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 655 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 656 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 657 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 658"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 665 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 666 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 667 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 668"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 675 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 676 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 677 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 678"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 685 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 686 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 687 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 688"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 695 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 696 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 697 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 698"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 705 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 706 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 707 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 708"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 715 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 716 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 717 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 718"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 725 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 726 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 727 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 728"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 735 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 736 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 737 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 738"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 745 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 746 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 747 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 748"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 755 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 756 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 757 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 758"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 765 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 766 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 767 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 768"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 775 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 776 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 777 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 778"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 785 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 786 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 787 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 788"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 795 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 796 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 797 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 798"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 805 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 806 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 807 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 808"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 815 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 816 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 817 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 818"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 825 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 826 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 827 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 828"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 835 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 836 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 837 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 838"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 845 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 846 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 847 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 848"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 855 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 856 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 857 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 858"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 865 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 866 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 867 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 868"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 875 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 876 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 877 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 878"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 885 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 886 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 887 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 888"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"role":"user","content":"Benchmark incremental parser message 895 with safe repeated filler for size."}
+{"role":"assistant","content":"large assistant response 896 ignored by extractor; filler filler filler."}
+{"role":"tool","name":"Read","content":"large tool output 897 ignored by extractor"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant large noise 898"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"ignored nested tool result"},{"type":"text","text":"Clean up duplicate validation logic without changing public behavior."}]}}

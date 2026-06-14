@@ -1,0 +1,38 @@
+{
+  "schema_version": "2026-06-13.phase5-artifact-fixture.v1",
+  "case_id": "bad-overbroad-skill",
+  "description": "Generated skill draft with an overbroad trigger that should be rejected.",
+  "input_pattern": {
+    "canonical": "create a skill for repeated pr review checklist",
+    "examples": [
+      "Create a skill for the repeated PR review checklist.",
+      "Make this recurring PR review checklist a skill.",
+      "Turn our standard PR review checklist into a reusable Codex skill."
+    ],
+    "count": 6,
+    "sessions": [
+      "session-alpha",
+      "session-beta"
+    ]
+  },
+  "expected_artifact_type": "skill",
+  "required_sections": [
+    "trigger",
+    "workflow",
+    "completion_evidence"
+  ],
+  "forbidden_patterns": [
+    "raw_secret",
+    "overbroad_trigger",
+    "production_destructive_action"
+  ],
+  "privacy_expectation": "no_sensitive_data",
+  "expected_result": "fail",
+  "expected_reason": "overbroad_trigger",
+  "artifact_draft": {
+    "artifact_type": "skill",
+    "name": "general-review-helper",
+    "install_path": "skills/general-review-helper/SKILL.md",
+    "content": "# General Review Helper\n\n## Trigger\nUse this skill for any coding task, any review request, any bug fix, any refactor, any test failure, or whenever the user asks for help.\n\n## Workflow\n1. Read the request.\n2. Decide what to do.\n3. Give an answer.\n\n## Completion Evidence\n- The user receives a response."
+  }
+}

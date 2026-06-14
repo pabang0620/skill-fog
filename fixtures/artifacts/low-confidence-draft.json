@@ -1,0 +1,43 @@
+{
+  "schema_version": "2026-06-13.phase5-artifact-fixture.v1",
+  "case_id": "low-confidence-draft",
+  "description": "Low-confidence generated skill draft should remain review-required and draft-only with no installed path.",
+  "input_pattern": {
+    "canonical": "maybe save this confusing intermittent debugging habit",
+    "examples": [
+      "Maybe save this confusing intermittent debugging habit.",
+      "This might be a skill, but I am not sure what should trigger it.",
+      "We sometimes do this investigation, maybe keep it as a draft."
+    ],
+    "count": 2,
+    "sessions": [
+      "session-uncertain"
+    ]
+  },
+  "expected_artifact_type": "skill",
+  "required_sections": [
+    "trigger",
+    "workflow",
+    "completion_evidence"
+  ],
+  "forbidden_patterns": [
+    "raw_secret",
+    "overbroad_trigger",
+    "production_destructive_action"
+  ],
+  "privacy_expectation": "no_sensitive_data",
+  "expected_result": "review_required",
+  "expected_reason": "low_confidence_draft_only",
+  "artifact_draft": {
+    "artifact_type": "skill",
+    "name": "intermittent-debugging-draft",
+    "install_path": null,
+    "confidence": "low",
+    "content": "# Intermittent Debugging Draft\n\n## Trigger\nDraft only. The repeated pattern is not yet specific enough to activate automatically.\n\n## Workflow\n1. Ask the reviewer to clarify the recurring trigger.\n2. Keep the draft uninstalled until the trigger and verification path are concrete.\n3. Convert to an installable skill only after review approval.\n\n## Completion Evidence\n- Draft remains outside installed skill paths.\n- Review output states the missing trigger specificity.\n- No automatic activation path is configured."
+  },
+  "expected_output": {
+    "decision": "review_required",
+    "draft_only": true,
+    "installed_path": null
+  }
+}

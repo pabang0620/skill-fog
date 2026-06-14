@@ -1,0 +1,180 @@
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 4 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 5 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 6"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 7 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 8"}]}}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 13 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 14 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 15"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 16 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 17"}]}}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 22 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 23 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 24"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 25 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 26"}]}}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 31 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 32 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 33"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 34 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 35"}]}}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 40 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 41 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 42"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 43 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 44"}]}}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 49 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 50 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 51"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 52 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 53"}]}}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 58 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 59 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 60"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 61 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 62"}]}}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 67 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 68 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 69"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 70 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 71"}]}}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 76 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 77 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 78"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 79 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 80"}]}}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 85 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 86 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 87"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 88 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 89"}]}}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 94 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 95 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 96"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 97 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 98"}]}}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 103 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 104 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 105"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 106 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 107"}]}}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 112 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 113 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 114"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 115 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 116"}]}}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 121 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 122 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 123"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 124 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 125"}]}}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 130 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 131 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 132"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 133 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 134"}]}}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 139 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 140 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 141"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 142 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 143"}]}}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 148 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 149 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 150"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 151 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 152"}]}}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 157 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 158 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 159"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 160 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 161"}]}}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 166 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 167 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 168"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 169 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 170"}]}}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."},{"type":"tool_result","content":"ignored"}]}}
+{"role":"user","content":"Investigate fixture case 175 and keep the report concise."}
+{"role":"assistant","content":"medium assistant response 176 with harmless filler text."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"nested assistant noise 177"}]}}
+{"role":"tool","name":"Search","content":"medium tool output 178 ignored"}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role ignored 179"}]}}

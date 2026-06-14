@@ -31,9 +31,22 @@
     "bin/",
     "hooks/",
     "SKILL.md",
+    "references/*.md",
     "install.sh",
     "uninstall.sh",
     "postinstall.js",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md",
+    "docs/troubleshooting.md",
+    "docs/release-checklist.md",
+    "docs/benchmarks/hook-baseline.md",
+    "scripts/bench-hook.sh",
+    "scripts/run-evals.sh",
+    "scripts/score-patterns.py",
+    "scripts/eval-artifacts.py",
+    "fixtures/transcripts/*.jsonl",
+    "fixtures/patterns/*.json",
+    "fixtures/artifacts/*.json",
+    "skill-fog.metadata.json"
   ]
 }

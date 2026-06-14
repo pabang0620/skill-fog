@@ -8,6 +8,7 @@ SKILL_FOG_DIR="$HOME/.skill-fog"
 PATTERNS_FILE="$SKILL_FOG_DIR/patterns.json"
 PENDING_DIR="$SKILL_FOG_DIR/pending"
 CLAUDE_DIR="$HOME/.claude"
+EXPECTED_HOOK_CMD="bash $HOME/.skill-fog/hooks/stop.sh"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -24,7 +25,16 @@ warn()    { echo -e "${YELLOW}⚠${NC}  $*"; }
 error()   { echo -e "${RED}✗${NC}  $*" >&2; }
 dim()     { echo -e "${DIM}$*${NC}"; }
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_PATH="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE_PATH" ]; do
+  SOURCE_DIR="$(cd -P "$(dirname "$SOURCE_PATH")" && pwd)"
+  SOURCE_PATH="$(readlink "$SOURCE_PATH")"
+  case "$SOURCE_PATH" in
+    /*) ;;
+    *) SOURCE_PATH="$SOURCE_DIR/$SOURCE_PATH" ;;
+  esac
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE_PATH")" && pwd)"
 if [ -f "$SCRIPT_DIR/../package.json" ]; then
   VERSION=$(python3 -c "import json,sys; print(json.load(sys.stdin).get('version','2.0.1'))" < "$SCRIPT_DIR/../package.json" 2>/dev/null || echo "2.0.1")
 else
@@ -118,6 +128,366 @@ cleanup_stale_pending() {
   esac
 
   return 1
+}
+
+repo_install_script() {
+  local candidate="$SCRIPT_DIR/../install.sh"
+
+  if [ -f "$candidate" ]; then
+    local install_dir
+    install_dir="$(cd "$(dirname "$candidate")" && pwd -P)"
+    echo "$install_dir/install.sh"
+  fi
+}
+
+print_install_remediation() {
+  local install_script
+  install_script="$(repo_install_script)"
+
+  if [ -n "$install_script" ]; then
+    echo -e "    bash $(printf '%q' "$install_script")"
+  else
+    echo -e "    Reinstall from a skill-fog repository checkout: cd /path/to/skill-fog && bash install.sh"
+  fi
+}
+
+cmd_doctor_self_test_layout_probe() {
+  local source_root="$SCRIPT_DIR/.."
+  local source_install
+  source_install="$(repo_install_script)"
+
+  assert_probe_path() {
+    local label="$1"
+    local path="$2"
+    if [ ! -e "$path" ]; then
+      error "Installed layout probe failed: missing $label ($path)"
+      return 1
+    fi
+  }
+
+  assert_probe_executable() {
+    local label="$1"
+    local path="$2"
+    if [ ! -x "$path" ]; then
+      error "Installed layout probe failed: $label is not executable ($path)"
+      return 1
+    fi
+  }
+
+  resolve_command_path() {
+    local path="$1"
+    while [ -L "$path" ]; do
+      local path_dir
+      path_dir="$(cd -P "$(dirname "$path")" && pwd)"
+      path="$(readlink "$path")"
+      case "$path" in
+        /*) ;;
+        *) path="$path_dir/$path" ;;
+      esac
+    done
+    local resolved_dir
+    resolved_dir="$(cd -P "$(dirname "$path")" && pwd)"
+    echo "$resolved_dir/$(basename "$path")"
+  }
+
+  if [ -z "$source_install" ]; then
+    error "Installed layout probe failed: install.sh not found next to installed bin/."
+    return 1
+  fi
+
+  assert_probe_path "install.sh" "$source_root/install.sh" || return 1
+  assert_probe_path "uninstall.sh" "$source_root/uninstall.sh" || return 1
+  assert_probe_executable "uninstall.sh" "$source_root/uninstall.sh" || return 1
+  assert_probe_path "SKILL.md" "$source_root/SKILL.md" || return 1
+  assert_probe_path "hooks/stop.sh" "$source_root/hooks/stop.sh" || return 1
+  assert_probe_path "references/" "$source_root/references" || return 1
+
+  local path_cli resolved_path_cli resolved_this
+  path_cli="$(command -v skill-fog 2>/dev/null || true)"
+  if [ -z "$path_cli" ]; then
+    error "Installed layout probe failed: skill-fog is not available in PATH"
+    return 1
+  fi
+  resolved_path_cli="$(resolve_command_path "$path_cli")"
+  resolved_this="$(resolve_command_path "$SCRIPT_DIR/skill-fog")"
+  if [ "$resolved_path_cli" != "$resolved_this" ]; then
+    error "Installed layout probe failed: PATH skill-fog resolves to $resolved_path_cli, expected $resolved_this"
+    return 1
+  fi
+
+  if ! skill-fog help | grep -q '../uninstall.sh'; then
+    error "Installed layout probe failed: help output does not include the installed uninstall.sh path"
+    return 1
+  fi
+
+  success "Installed layout probe passed: PATH CLI and runtime bundle verified."
+}
+
+cmd_doctor_self_test() {
+  if [ "${SKILL_FOG_SELF_TEST_LAYOUT_PROBE:-}" = "1" ]; then
+    cmd_doctor_self_test_layout_probe
+    return
+  fi
+
+  local source_root="$SCRIPT_DIR/.."
+  local source_install
+  source_install="$(repo_install_script)"
+
+  if [ -z "$source_install" ]; then
+    error "Self-test requires a skill-fog repository checkout with install.sh next to bin/."
+    return 1
+  fi
+
+  local temp_home
+  temp_home="$(mktemp -d)"
+  local test_repo="$temp_home/repo"
+  local first_log="$temp_home/install-first.log"
+  local second_log="$temp_home/install-second.log"
+  local doctor_log="$temp_home/doctor.log"
+  local layout_probe_log="$temp_home/layout-probe.log"
+  local uninstall_first_log="$temp_home/uninstall-first.log"
+  local uninstall_second_log="$temp_home/uninstall-second.log"
+  local regular_cli_log="$temp_home/regular-cli-install.log"
+  local unrelated_symlink_log="$temp_home/unrelated-symlink-uninstall.log"
+  local fake_hook_install_log="$temp_home/fake-hook-install.log"
+  local fake_hook_doctor_log="$temp_home/fake-hook-doctor.log"
+  SELF_TEST_TEMP_HOME="$temp_home"
+
+  cleanup_self_test() {
+    if [ -n "${SELF_TEST_TEMP_HOME:-}" ]; then
+      rm -rf "$SELF_TEST_TEMP_HOME"
+    fi
+  }
+  trap cleanup_self_test EXIT
+
+  mkdir -p "$test_repo/bin" "$test_repo/hooks"
+  cp "$source_root/install.sh" "$test_repo/install.sh"
+  cp "$source_root/uninstall.sh" "$test_repo/uninstall.sh"
+  cp "$source_root/SKILL.md" "$test_repo/SKILL.md"
+  cp "$source_root/bin/skill-fog" "$test_repo/bin/skill-fog"
+  cp "$source_root/hooks/stop.sh" "$test_repo/hooks/stop.sh"
+  cp -R "$source_root/references" "$test_repo/references"
+  if [ -f "$source_root/package.json" ]; then
+    cp "$source_root/package.json" "$test_repo/package.json"
+  fi
+
+  assert_path() {
+    local label="$1"
+    local path="$2"
+    if [ ! -e "$path" ]; then
+      error "Self-test failed: missing $label ($path)"
+      return 1
+    fi
+  }
+
+  assert_executable() {
+    local label="$1"
+    local path="$2"
+    if [ ! -x "$path" ]; then
+      error "Self-test failed: $label is not executable ($path)"
+      return 1
+    fi
+  }
+
+  assert_absent() {
+    local label="$1"
+    local path="$2"
+    if [ -e "$path" ]; then
+      error "Self-test failed: $label still exists ($path)"
+      return 1
+    fi
+  }
+
+  assert_file_content() {
+    local label="$1"
+    local path="$2"
+    local expected="$3"
+    local actual
+    actual="$(cat "$path" 2>/dev/null || true)"
+    if [ "$actual" != "$expected" ]; then
+      error "Self-test failed: $label changed unexpectedly"
+      return 1
+    fi
+  }
+
+  assert_symlink() {
+    local label="$1"
+    local path="$2"
+    if [ ! -L "$path" ]; then
+      error "Self-test failed: $label is not a symlink ($path)"
+      return 1
+    fi
+  }
+
+  assert_installed_skill_references() {
+    local skill_file="$temp_home/.claude/skills/skill-fog/SKILL.md"
+    local skill_dir="$temp_home/.claude/skills/skill-fog"
+    local refs
+
+    refs=$(grep -oE 'references/[^)[:space:]]+' "$skill_file" 2>/dev/null | sort -u || true)
+    if [ -z "$refs" ]; then
+      error "Self-test failed: SKILL.md does not reference any runtime reference files"
+      return 1
+    fi
+
+    local ref
+    while IFS= read -r ref; do
+      [ -n "$ref" ] || continue
+      assert_path "runtime reference $ref" "$skill_dir/$ref" || return 1
+    done <<< "$refs"
+  }
+
+  count_stop_hooks() {
+    local settings_file="$1"
+    local expected_cmd="$2"
+    if command -v jq &>/dev/null; then
+      jq --arg cmd "$expected_cmd" \
+        '[.hooks.Stop[]?.hooks[]? | select(.type == "command" and .command == $cmd)] | length' \
+        "$settings_file"
+    else
+      SF_SETTINGS_FILE="$settings_file" SF_EXPECTED_HOOK_CMD="$expected_cmd" python3 - <<'PYEOF'
+import json, os
+
+with open(os.environ['SF_SETTINGS_FILE']) as f:
+    settings = json.load(f)
+
+count = 0
+expected = os.environ['SF_EXPECTED_HOOK_CMD']
+for entry in settings.get('hooks', {}).get('Stop', []):
+    for hook in entry.get('hooks', []):
+        if hook.get('type') == 'command' and hook.get('command') == expected:
+            count += 1
+print(count)
+PYEOF
+    fi
+  }
+
+  run_regression_probes() {
+    local regular_home="$temp_home/probe-regular-home"
+    local unrelated_home="$temp_home/probe-unrelated-home"
+    local fake_hook_home="$temp_home/probe-fake-hook-home"
+
+    mkdir -p "$regular_home/.local/bin"
+    printf 'external cli\n' > "$regular_home/.local/bin/skill-fog"
+    if ! HOME="$regular_home" PATH="$regular_home/.local/bin:$PATH" bash "$test_repo/install.sh" >"$regular_cli_log" 2>&1; then
+      error "Self-test failed: install.sh failed with pre-existing regular CLI"
+      sed -n '1,160p' "$regular_cli_log" >&2
+      return 1
+    fi
+    assert_file_content "pre-existing regular CLI" "$regular_home/.local/bin/skill-fog" "external cli" || return 1
+    assert_absent "unexpected skill-fog.bak" "$regular_home/.local/bin/skill-fog.bak" || return 1
+
+    mkdir -p "$unrelated_home/.local/bin" "$unrelated_home/other/bin"
+    printf '#!/usr/bin/env bash\n' > "$unrelated_home/other/bin/skill-fog"
+    ln -s "$unrelated_home/other/bin/skill-fog" "$unrelated_home/.local/bin/skill-fog"
+    if ! HOME="$unrelated_home" PATH="$unrelated_home/.local/bin:$PATH" bash "$test_repo/uninstall.sh" --yes --keep-data >"$unrelated_symlink_log" 2>&1; then
+      error "Self-test failed: uninstall.sh failed with unrelated skill-fog symlink"
+      sed -n '1,160p' "$unrelated_symlink_log" >&2
+      return 1
+    fi
+    assert_symlink "unrelated skill-fog symlink" "$unrelated_home/.local/bin/skill-fog" || return 1
+
+    if ! HOME="$fake_hook_home" PATH="$fake_hook_home/.local/bin:$PATH" bash "$test_repo/install.sh" >"$fake_hook_install_log" 2>&1; then
+      error "Self-test failed: install.sh failed for fake hook probe"
+      sed -n '1,160p' "$fake_hook_install_log" >&2
+      return 1
+    fi
+    cat > "$fake_hook_home/.claude/settings.json" <<'JSONEOF'
+{"hooks":{"Stop":[{"matcher":"","hooks":[{"type":"command","command":"echo skill-fog"}]}]}}
+JSONEOF
+    HOME="$fake_hook_home" PATH="$fake_hook_home/.local/bin:$PATH" bash "$test_repo/bin/skill-fog" doctor >"$fake_hook_doctor_log" 2>&1 || true
+    if grep -q "0 failures" "$fake_hook_doctor_log"; then
+      error "Self-test failed: fake Stop hook containing skill-fog was accepted as healthy"
+      sed -n '1,200p' "$fake_hook_doctor_log" >&2
+      return 1
+    fi
+    if ! grep -q "Stop hook registered in settings.json" "$fake_hook_doctor_log"; then
+      error "Self-test failed: fake Stop hook probe did not exercise hook detection"
+      sed -n '1,200p' "$fake_hook_doctor_log" >&2
+      return 1
+    fi
+  }
+
+  echo ""
+  info "Running skill-fog self-test with temporary HOME: $temp_home"
+
+  run_regression_probes || return 1
+
+  if ! HOME="$temp_home" PATH="$temp_home/.local/bin:$PATH" bash "$test_repo/install.sh" >"$first_log" 2>&1; then
+    error "Self-test failed: first install.sh run failed"
+    sed -n '1,160p' "$first_log" >&2
+    return 1
+  fi
+
+  assert_path "~/.skill-fog directory" "$temp_home/.skill-fog" || return 1
+  assert_path "~/.skill-fog/pending directory" "$temp_home/.skill-fog/pending" || return 1
+  assert_path "~/.skill-fog/patterns.json" "$temp_home/.skill-fog/patterns.json" || return 1
+  assert_path "~/.skill-fog/hooks/stop.sh" "$temp_home/.skill-fog/hooks/stop.sh" || return 1
+  assert_executable "~/.skill-fog/hooks/stop.sh" "$temp_home/.skill-fog/hooks/stop.sh" || return 1
+  assert_path "~/.skill-fog/install.sh" "$temp_home/.skill-fog/install.sh" || return 1
+  assert_path "~/.skill-fog/uninstall.sh" "$temp_home/.skill-fog/uninstall.sh" || return 1
+  assert_executable "~/.skill-fog/uninstall.sh" "$temp_home/.skill-fog/uninstall.sh" || return 1
+  assert_path "~/.skill-fog/SKILL.md" "$temp_home/.skill-fog/SKILL.md" || return 1
+  assert_path "~/.skill-fog/references" "$temp_home/.skill-fog/references" || return 1
+  assert_path "~/.claude/skills/skill-fog/SKILL.md" "$temp_home/.claude/skills/skill-fog/SKILL.md" || return 1
+  assert_installed_skill_references || return 1
+  assert_path "~/.claude/settings.json" "$temp_home/.claude/settings.json" || return 1
+  assert_path "~/.local/bin/skill-fog" "$temp_home/.local/bin/skill-fog" || return 1
+
+  if ! HOME="$temp_home" PATH="$temp_home/.local/bin:$PATH" SKILL_FOG_SELF_TEST_LAYOUT_PROBE=1 skill-fog doctor --self-test >"$layout_probe_log" 2>&1; then
+    error "Self-test failed: installed PATH skill-fog layout probe failed"
+    sed -n '1,200p' "$layout_probe_log" >&2
+    return 1
+  fi
+
+  if ! HOME="$temp_home" PATH="$temp_home/.local/bin:$PATH" skill-fog doctor >"$doctor_log" 2>&1; then
+    error "Self-test failed: doctor exited nonzero"
+    sed -n '1,200p' "$doctor_log" >&2
+    return 1
+  fi
+
+  if ! grep -q "0 failures" "$doctor_log"; then
+    error "Self-test failed: doctor did not report 0 failures"
+    sed -n '1,200p' "$doctor_log" >&2
+    return 1
+  fi
+
+  if ! HOME="$temp_home" PATH="$temp_home/.local/bin:$PATH" bash "$test_repo/install.sh" >"$second_log" 2>&1; then
+    error "Self-test failed: second install.sh run failed"
+    sed -n '1,160p' "$second_log" >&2
+    return 1
+  fi
+
+  local hook_count
+  hook_count="$(count_stop_hooks "$temp_home/.claude/settings.json" "bash $temp_home/.skill-fog/hooks/stop.sh")"
+  if [ "$hook_count" != "1" ]; then
+    error "Self-test failed: expected 1 skill-fog Stop hook after reinstall, found $hook_count"
+    return 1
+  fi
+
+  if ! HOME="$temp_home" PATH="$temp_home/.local/bin:$PATH" bash "$test_repo/uninstall.sh" --yes --keep-data >"$uninstall_first_log" 2>&1; then
+    error "Self-test failed: first uninstall.sh run failed"
+    sed -n '1,200p' "$uninstall_first_log" >&2
+    return 1
+  fi
+
+  if ! HOME="$temp_home" PATH="$temp_home/.local/bin:$PATH" bash "$test_repo/uninstall.sh" --yes --keep-data >"$uninstall_second_log" 2>&1; then
+    error "Self-test failed: second uninstall.sh run failed"
+    sed -n '1,200p' "$uninstall_second_log" >&2
+    return 1
+  fi
+
+  assert_absent "~/.claude/skills/skill-fog directory" "$temp_home/.claude/skills/skill-fog" || return 1
+  assert_absent "~/.local/bin/skill-fog" "$temp_home/.local/bin/skill-fog" || return 1
+  assert_path "~/.skill-fog directory after uninstall --keep-data" "$temp_home/.skill-fog" || return 1
+
+  hook_count="$(count_stop_hooks "$temp_home/.claude/settings.json" "bash $temp_home/.skill-fog/hooks/stop.sh")"
+  if [ "$hook_count" != "0" ]; then
+    error "Self-test failed: expected 0 skill-fog Stop hooks after uninstall, found $hook_count"
+    return 1
+  fi
+
+  success "Self-test passed: install, doctor, reinstall, and idempotent uninstall verified."
 }
 
 pending_count() {
@@ -610,6 +980,11 @@ PYEOF
 # 서브커맨드: doctor
 # ─────────────────────────────────────────────
 cmd_doctor() {
+  if [ "${1:-}" = "--self-test" ]; then
+    cmd_doctor_self_test
+    return
+  fi
+
   echo ""
   echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
   echo -e "${BOLD}  skill-fog — Installation Diagnostics${NC}"
@@ -680,6 +1055,26 @@ cmd_doctor() {
   # SKILL.md
   if [ -f "$CLAUDE_DIR/skills/skill-fog/SKILL.md" ]; then
     check_item "SKILL.md installed" "ok"
+
+    skill_refs=$(grep -oE 'references/[^)[:space:]]+' "$CLAUDE_DIR/skills/skill-fog/SKILL.md" 2>/dev/null | sort -u || true)
+    if [ -n "$skill_refs" ]; then
+      local missing_refs=0
+      local ref
+      while IFS= read -r ref; do
+        [ -n "$ref" ] || continue
+        if [ ! -f "$CLAUDE_DIR/skills/skill-fog/$ref" ]; then
+          missing_refs=$((missing_refs + 1))
+        fi
+      done <<< "$skill_refs"
+
+      if [ "$missing_refs" -eq 0 ]; then
+        check_item "SKILL.md runtime references installed" "ok"
+      else
+        check_item "SKILL.md runtime references installed" "fail" "$missing_refs missing — run install.sh"
+      fi
+    else
+      check_item "SKILL.md runtime references installed" "warn" "no references/*.md links found"
+    fi
   else
     check_item "SKILL.md installed" "fail" "missing — run install.sh"
   fi
@@ -690,16 +1085,18 @@ cmd_doctor() {
     local hook_registered=""
     if command -v jq &>/dev/null; then
       hook_registered=$(jq -r \
-        '.hooks.Stop[]?.hooks[]? | select(.command | contains("skill-fog")) | .command' \
+        --arg cmd "$EXPECTED_HOOK_CMD" \
+        '.hooks.Stop[]?.hooks[]? | select(.type == "command" and .command == $cmd) | .command' \
         "$settings_file" 2>/dev/null || echo "")
     elif command -v python3 &>/dev/null; then
-      hook_registered=$(python3 -c "
-import json
-with open('$settings_file') as f:
+      hook_registered=$(SF_SETTINGS_FILE="$settings_file" SF_EXPECTED_HOOK_CMD="$EXPECTED_HOOK_CMD" python3 -c "
+import json, os
+with open(os.environ['SF_SETTINGS_FILE']) as f:
     s = json.load(f)
+expected = os.environ['SF_EXPECTED_HOOK_CMD']
 for entry in s.get('hooks', {}).get('Stop', []):
     for h in entry.get('hooks', []):
-        if 'skill-fog' in h.get('command', ''):
+        if h.get('type') == 'command' and h.get('command') == expected:
             print(h['command'])
 " 2>/dev/null || echo "")
     fi
@@ -726,7 +1123,7 @@ for entry in s.get('hooks', {}).get('Stop', []):
 
   if [ "$fail" -gt 0 ]; then
     echo -e "  ${RED}Installation issues detected.${NC} Re-run install.sh to fix:"
-    echo -e "    bash $(command -v skill-fog 2>/dev/null | xargs -I{} dirname {} | xargs -I{} dirname {})/install.sh"
+    print_install_remediation
     echo ""
   fi
 }
@@ -747,6 +1144,7 @@ cmd_help() {
   echo -e "  ${CYAN}list${NC}      List generated skills, commands, and agents"
   echo -e "  ${CYAN}clean${NC}     Remove rejected/stale patterns and old logs"
   echo -e "  ${CYAN}doctor${NC}    Diagnose installation health"
+  echo -e "  ${CYAN}doctor --self-test${NC}  Run an isolated temp-HOME install self-test"
   echo -e "  ${CYAN}help${NC}      Show this help message"
   echo ""
   echo -e "${BOLD}HOW IT WORKS${NC}"

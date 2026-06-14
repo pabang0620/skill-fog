@@ -1,0 +1,268 @@
+{
+  "schema_version": "2026-06-13.phase3-scoring-fixture.v1",
+  "fixture_name": "privacy-risk",
+  "description": "Privacy and redaction fixture for scoring token-like strings, emails, database URLs, and benign repeated prompts.",
+  "schema": {
+    "input.patterns": "Object keyed by stable pattern id. Raw fixture examples may contain synthetic sensitive-looking values so redaction behavior can be tested.",
+    "expected": "Strict scorer oracle. order and recommendations must match deterministic output; redaction expectations must contain only redacted previews or reason codes, never raw token, email, or database URL values.",
+    "redaction.reason_values": [
+      "token_like_secret",
+      "email_address",
+      "database_url",
+      "credential_in_url",
+      "benign_repeated_prompt"
+    ],
+    "decision_values": [
+      "auto_propose",
+      "review_required",
+      "suppress"
+    ]
+  },
+  "input": {
+    "patterns": {
+      "privacy_token_001": {
+        "canonical": "rotate exposed api token after failed deploy",
+        "count": 5,
+        "sessions": [
+          "session-red-1",
+          "session-red-2"
+        ],
+        "examples": [
+          "Rotate exposed API token REDACTED_OPENAI_TOKEN_PLACEHOLDER after failed deploy.",
+          "The bearer token REDACTED_GITHUB_TOKEN_PLACEHOLDER needs rotation."
+        ],
+        "status": "active",
+        "desired_type": "skill",
+        "first_seen_at": "2026-06-01T08:00:00Z",
+        "last_seen_at": "2026-06-12T20:10:00Z"
+      },
+      "privacy_email_001": {
+        "canonical": "remove user emails from exported support logs",
+        "count": 4,
+        "sessions": [
+          "session-red-3",
+          "session-red-4"
+        ],
+        "examples": [
+          "Remove jane.doe@example.test from exported support logs.",
+          "Scrub ops-alerts+prod@example.test before sharing the log."
+        ],
+        "status": "active",
+        "manual_decision": "needs_review",
+        "desired_type": "command",
+        "reviewed_at": "2026-06-09T12:00:00Z"
+      },
+      "privacy_db_url_001": {
+        "canonical": "sanitize database url before adding repro",
+        "count": 6,
+        "sessions": [
+          "session-red-5",
+          "session-red-6",
+          "session-red-7"
+        ],
+        "examples": [
+          "Sanitize postgres://app_user:pass123@db.example.test:5432/appdb before adding the repro.",
+          "Do not paste mysql://root:secret@127.0.0.1:3306/wecom into the issue."
+        ],
+        "status": "active",
+        "desired_type": "skill",
+        "first_seen_at": "2026-05-29T10:15:00Z",
+        "last_seen_at": "2026-06-11T17:35:00Z"
+      },
+      "privacy_mixed_001": {
+        "canonical": "redact credentials from incident summary",
+        "count": 3,
+        "sessions": [
+          "session-red-8",
+          "session-red-9"
+        ],
+        "examples": [
+          "Redact admin@example.test and REDACTED_SLACK_TOKEN_PLACEHOLDER from the incident summary.",
+          "Replace mongodb://incident_user:incident_pass@mongo.example.test:27017/audit before posting."
+        ],
+        "status": "active",
+        "manual_decision": "accept",
+        "desired_type": "skill",
+        "reviewed_at": "2026-06-12T21:30:00Z"
+      },
+      "privacy_benign_001": {
+        "canonical": "please run tests again",
+        "count": 12,
+        "sessions": [
+          "session-red-10",
+          "session-red-11",
+          "session-red-12"
+        ],
+        "examples": [
+          "Please run tests again.",
+          "Run tests again please."
+        ],
+        "status": "active",
+        "first_seen_at": "2026-05-01T09:00:00Z",
+        "last_seen_at": "2026-06-12T22:00:00Z"
+      },
+      "privacy_benign_002": {
+        "canonical": "continue from previous step",
+        "count": 9,
+        "sessions": [
+          "session-red-13",
+          "session-red-14"
+        ],
+        "examples": [
+          "Continue from the previous step.",
+          "Continue where you left off."
+        ],
+        "status": "active",
+        "manual_decision": "reject",
+        "reviewed_at": "2026-06-10T09:05:00Z"
+      }
+    }
+  },
+  "expected": {
+    "order": [
+      "privacy_db_url_001",
+      "privacy_token_001",
+      "privacy_email_001",
+      "privacy_mixed_001",
+      "privacy_benign_001",
+      "privacy_benign_002"
+    ],
+    "recommendations": {
+      "privacy_db_url_001": "review_required",
+      "privacy_token_001": "review_required",
+      "privacy_email_001": "review_required",
+      "privacy_mixed_001": "review_required",
+      "privacy_benign_001": "suppress",
+      "privacy_benign_002": "suppress"
+    },
+    "redactions": [
+      {
+        "pid": "privacy_db_url_001",
+        "rule_ids": [
+          "privacy.secret.db_url"
+        ],
+        "redactions": [
+          {
+            "field": "examples[0]",
+            "reason": "database_url",
+            "redacted_preview": "Sanitize [REDACTED:DATABASE_URL] before adding the repro."
+          },
+          {
+            "field": "examples[0]",
+            "reason": "credential_in_url",
+            "redacted_preview": "Sanitize [REDACTED:DATABASE_URL] before adding the repro."
+          },
+          {
+            "field": "examples[1]",
+            "reason": "database_url",
+            "redacted_preview": "Do not paste [REDACTED:DATABASE_URL] into the issue."
+          },
+          {
+            "field": "examples[1]",
+            "reason": "credential_in_url",
+            "redacted_preview": "Do not paste [REDACTED:DATABASE_URL] into the issue."
+          }
+        ]
+      },
+      {
+        "pid": "privacy_token_001",
+        "rule_ids": [
+          "privacy.secret.long_token"
+        ],
+        "redactions": [
+          {
+            "field": "examples[0]",
+            "reason": "token_like_secret",
+            "redacted_preview": "Rotate exposed API token [REDACTED:TOKEN] after failed deploy."
+          },
+          {
+            "field": "examples[1]",
+            "reason": "token_like_secret",
+            "redacted_preview": "The bearer token [REDACTED:TOKEN] needs rotation."
+          }
+        ]
+      },
+      {
+        "pid": "privacy_email_001",
+        "rule_ids": [
+          "privacy.email"
+        ],
+        "redactions": [
+          {
+            "field": "examples[0]",
+            "reason": "email_address",
+            "redacted_preview": "Remove [REDACTED:EMAIL] from exported support logs."
+          },
+          {
+            "field": "examples[1]",
+            "reason": "email_address",
+            "redacted_preview": "Scrub [REDACTED:EMAIL] before sharing the log."
+          }
+        ]
+      },
+      {
+        "pid": "privacy_mixed_001",
+        "rule_ids": [
+          "privacy.secret.long_token",
+          "privacy.email",
+          "privacy.secret.db_url"
+        ],
+        "redactions": [
+          {
+            "field": "examples[0]",
+            "reason": "email_address",
+            "redacted_preview": "Redact [REDACTED:EMAIL] and [REDACTED:TOKEN] from the incident summary."
+          },
+          {
+            "field": "examples[0]",
+            "reason": "token_like_secret",
+            "redacted_preview": "Redact [REDACTED:EMAIL] and [REDACTED:TOKEN] from the incident summary."
+          },
+          {
+            "field": "examples[1]",
+            "reason": "database_url",
+            "redacted_preview": "Replace [REDACTED:DATABASE_URL] before posting."
+          },
+          {
+            "field": "examples[1]",
+            "reason": "credential_in_url",
+            "redacted_preview": "Replace [REDACTED:DATABASE_URL] before posting."
+          }
+        ]
+      }
+    ],
+    "forbidden_output_values": [
+      "REDACTED_OPENAI_TOKEN_PLACEHOLDER",
+      "REDACTED_GITHUB_TOKEN_PLACEHOLDER",
+      "jane.doe@example.test",
+      "ops-alerts+prod@example.test",
+      "postgres://app_user:pass123@db.example.test:5432/appdb",
+      "mysql://root:secret@127.0.0.1:3306/wecom",
+      "admin@example.test",
+      "REDACTED_SLACK_TOKEN_PLACEHOLDER",
+      "mongodb://incident_user:incident_pass@mongo.example.test:27017/audit"
+    ],
+    "manual_overrides": {
+      "privacy_token_001": {
+        "suggested_type": "skill"
+      },
+      "privacy_email_001": {
+        "recommendation": "review_required",
+        "suggested_type": "command",
+        "raw_score_unchanged": true
+      },
+      "privacy_db_url_001": {
+        "suggested_type": "skill"
+      },
+      "privacy_mixed_001": {
+        "recommendation": "review_required",
+        "suggested_type": "skill",
+        "raw_score_unchanged": true
+      },
+      "privacy_benign_002": {
+        "recommendation": "suppress",
+        "raw_score_unchanged": true
+      }
+    }
+  }
+}

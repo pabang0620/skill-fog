@@ -112,6 +112,32 @@ curl -fsSL https://raw.githubusercontent.com/pabang0620/skill-fog/main/install.s
 
 **Requirements:** `bash >= 4.0`, `jq` (or `python3` as fallback), Claude Code
 
+## Verify Install
+
+Run these checks after installing from npm:
+
+```bash
+skill-fog doctor
+skill-fog doctor --self-test
+```
+
+Expected result:
+
+- `skill-fog doctor` exits successfully and reports the installed files, Stop hook, and local data directory status.
+- `skill-fog doctor --self-test` exits with code `0`, reports `0 failures` inside its isolated temporary HOME, and removes its temporary directory when it exits.
+
+To inspect the package contents before installing:
+
+```bash
+npm pack skill-fog --dry-run --json
+```
+
+To inspect a local checkout before publishing:
+
+```bash
+npm pack --dry-run --json
+```
+
 ---
 
 ## How it grows you
@@ -139,6 +165,81 @@ Say yes. skill-fog writes the actual `SKILL.md`, slash command, or agent definit
 | `skill-fog list` | See everything skill-fog has generated for you |
 | `skill-fog clean` | Remove old, rejected, or stale patterns |
 | `skill-fog doctor` | Diagnose installation and hook registration |
+| `skill-fog doctor --self-test` | Run isolated install and uninstall checks in a temporary HOME |
+
+---
+
+## Diagnostics
+
+Run:
+
+```bash
+skill-fog doctor
+```
+
+`doctor` reports each check with one of these statuses:
+
+- `ok` means the checked dependency, file, directory, hook, or PATH entry is present and usable.
+- `warning` means skill-fog can usually continue, but the setup is incomplete or using a fallback, such as missing `jq` while `python3` is available.
+- `failure` means a required install piece is missing or unusable, such as `~/.skill-fog/`, the Stop hook script, `SKILL.md`, or the Stop hook entry in Claude settings.
+
+For install validation, run:
+
+```bash
+skill-fog doctor --self-test
+```
+
+The self-test creates a temporary HOME, copies the local skill-fog files into it, runs `install.sh`, runs `skill-fog doctor`, then runs `install.sh` again. It proves the current checkout can install into a clean HOME, produce a doctor report with `0 failures`, and avoid duplicate Stop hook registration on reinstall. It then runs `uninstall.sh` twice with data preservation and verifies the installed skill directory, CLI link, and Stop hook registration are removed while `~/.skill-fog` remains. It deletes the temporary HOME when it exits.
+
+See [docs/troubleshooting.md](docs/troubleshooting.md) for recovery steps and uninstall behavior.
+
+---
+
+## Uninstall
+
+If installed through npm, remove the global package:
+
+```bash
+npm uninstall -g skill-fog
+```
+
+To remove Claude Code hook/skill files from a checkout or unpacked npm package, run:
+
+```bash
+bash uninstall.sh
+```
+
+Use non-interactive flags when scripting:
+
+- `--yes` answers yes to confirmation prompts.
+- `--keep-data` preserves `~/.skill-fog` without prompting.
+- `--remove-data` removes `~/.skill-fog` without prompting.
+
+`--keep-data` and `--remove-data` cannot be used together. During CLI cleanup, the uninstaller removes skill-fog-owned symlinks only. If `~/.local/bin/skill-fog` or `~/bin/skill-fog` is a regular file instead of a symlink, it is skipped.
+
+## Local Data Inspection
+
+skill-fog stores pattern data only under `~/.skill-fog/`. Inspect it with:
+
+```bash
+ls -la ~/.skill-fog
+find ~/.skill-fog -maxdepth 2 -type f -print
+python3 -m json.tool ~/.skill-fog/patterns.json
+ls -la ~/.skill-fog/pending
+tail -n 100 ~/.skill-fog/logs/*.log 2>/dev/null || true
+```
+
+Remove stale rejected patterns and old logs with:
+
+```bash
+skill-fog clean
+```
+
+Remove all local data during uninstall with:
+
+```bash
+bash uninstall.sh --yes --remove-data
+```
 
 ---
 
@@ -159,23 +260,14 @@ skill-fog doesn't try to be a memory system or an automation layer. It's a **pat
 
 ---
 
-## What people are saying
-
-> *"I had the same code review prompt copy-pasted in my notes for two months. skill-fog turned it into a slash command in 30 seconds."*
-> — Early tester
-
-> *"The threshold system is exactly right. 3 times across 2 sessions means it's actually a habit, not a coincidence."*
-> — Beta user
-
----
-
 ## Privacy
 
 All pattern data lives in `~/.skill-fog/` on your machine. Nothing is sent anywhere.
 
 - API keys, tokens, emails, and secrets are masked automatically before storage
-- You can inspect (and delete) everything with `skill-fog clean`
-- Uninstalling removes all data
+- You can inspect files directly with the commands in [Local Data Inspection](#local-data-inspection)
+- You can delete stale local entries with `skill-fog clean`
+- During uninstall, choose whether to keep or remove `~/.skill-fog/`
 
 ---
 

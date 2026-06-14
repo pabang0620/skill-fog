@@ -1,0 +1,20 @@
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"assistant","content":"small assistant response 0: safe placeholder text for filtering checks."}
+{"type":"tool_result","content":"small tool output 0 ignored by parser"}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"assistant","content":"small assistant response 1: safe placeholder text for filtering checks."}
+{"type":"tool_result","content":"small tool output 1 ignored by parser"}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"assistant","content":"small assistant response 2: safe placeholder text for filtering checks."}
+{"type":"tool_result","content":"small tool output 2 ignored by parser"}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"assistant","content":"small assistant response 3: safe placeholder text for filtering checks."}
+{"type":"tool_result","content":"small tool output 3 ignored by parser"}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"assistant","content":"small assistant response 4: safe placeholder text for filtering checks."}
+{"type":"tool_result","content":"small tool output 4 ignored by parser"}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"assistant","content":"small assistant response 5: safe placeholder text for filtering checks."}
+{"type":"tool_result","content":"small tool output 5 ignored by parser"}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor FILE to add focused regression tests before changing behavior."}]}}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong role ignored"}]}}

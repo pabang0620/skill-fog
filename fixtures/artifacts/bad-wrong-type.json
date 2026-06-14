@@ -1,0 +1,38 @@
+{
+  "schema_version": "2026-06-13.phase5-artifact-fixture.v1",
+  "case_id": "bad-wrong-type",
+  "description": "Pattern requests a skill, but the generated draft is a command artifact.",
+  "input_pattern": {
+    "canonical": "create a skill for repeated pr review checklist",
+    "examples": [
+      "Create a skill for the repeated PR review checklist.",
+      "Make this recurring PR review checklist a skill.",
+      "Turn our standard PR review checklist into a reusable Codex skill."
+    ],
+    "count": 6,
+    "sessions": [
+      "session-alpha",
+      "session-beta"
+    ]
+  },
+  "expected_artifact_type": "skill",
+  "required_sections": [
+    "trigger",
+    "workflow",
+    "completion_evidence"
+  ],
+  "forbidden_patterns": [
+    "raw_secret",
+    "overbroad_trigger",
+    "production_destructive_action"
+  ],
+  "privacy_expectation": "no_sensitive_data",
+  "expected_result": "fail",
+  "expected_reason": "wrong_artifact_type",
+  "artifact_draft": {
+    "artifact_type": "command",
+    "name": "pr-review-checklist",
+    "install_path": "commands/pr-review-checklist.md",
+    "content": "# /pr-review-checklist\n\nRun the PR review checklist on the current branch.\n\n## Workflow\n1. Inspect changed files.\n2. Summarize risks.\n3. Report findings."
+  }
+}

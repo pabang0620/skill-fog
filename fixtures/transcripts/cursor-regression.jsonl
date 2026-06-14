@@ -1,0 +1,8 @@
+{"role":"assistant","content":"old assistant noise before cursor"}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"tool","name":"Glob","content":"old tool output before cursor"}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"role":"assistant","content":"cursor should advance past these rows on first run"}
+{"role":"user","content":"Please refactor FILE to add focused regression tests before changing behavior."}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"new assistant noise"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Review this module for error handling gaps and suggest the smallest safe fix."},{"type":"tool_use","name":"Read","input":{"path":"safe-fixture.txt"}}]}}

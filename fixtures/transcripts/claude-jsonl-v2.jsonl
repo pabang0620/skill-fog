@@ -1,0 +1,7 @@
+{"type":"system","message":{"role":"system","content":[{"type":"text","text":"ignored nested system"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."},{"type":"tool_result","content":"tool payload should be ignored"}]}}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"assistant noise"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Check whether the fixture parser ignores image blocks."},{"type":"image","source":{"type":"base64","media_type":"image/png","data":"ZmFrZQ=="}}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}]}}
+{"type":"tool_result","message":{"role":"user","content":[{"type":"text","text":"wrong outer type should be ignored"}]}}
+{"type":"user","message":{"role":"assistant","content":[{"type":"text","text":"wrong nested role should be ignored"}]}}

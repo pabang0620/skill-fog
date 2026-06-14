@@ -1,0 +1,241 @@
+{
+  "schema_version": "2026-06-13.phase3-scoring-fixture.v1",
+  "fixture_name": "ranking-basic",
+  "description": "Baseline ranking fixture for scoring active skill-fog patterns into auto_propose, review_required, and suppress decisions.",
+  "schema": {
+    "input.patterns": "Object keyed by stable pattern id. Each value resembles a patterns.json entry with canonical, count, sessions, examples, status, and optional manual review metadata.",
+    "expected": "Strict scorer oracle. order must match deterministic output order and recommendations must match current threshold labels.",
+    "decision_values": [
+      "auto_propose",
+      "review_required",
+      "suppress"
+    ],
+    "reason_codes": [
+      "high_frequency",
+      "multi_session",
+      "active_status",
+      "clear_artifact_intent",
+      "manual_accept_override",
+      "manual_reject_override",
+      "manual_desired_type",
+      "borderline_frequency",
+      "weak_artifact_intent",
+      "single_session",
+      "low_frequency",
+      "already_accepted",
+      "rejected_status",
+      "stale_review"
+    ]
+  },
+  "input": {
+    "patterns": {
+      "rank_auto_001": {
+        "canonical": "create a skill for repeated pr review checklist",
+        "count": 9,
+        "sessions": [
+          "session-alpha",
+          "session-beta",
+          "session-gamma"
+        ],
+        "examples": [
+          "Create a skill for the repeated PR review checklist.",
+          "Make this recurring PR review checklist a skill."
+        ],
+        "status": "active",
+        "first_seen_at": "2026-05-01T09:00:00Z",
+        "last_seen_at": "2026-06-10T13:15:00Z"
+      },
+      "rank_auto_002": {
+        "canonical": "turn this benchmark cleanup workflow into command",
+        "count": 7,
+        "sessions": [
+          "session-alpha",
+          "session-delta"
+        ],
+        "examples": [
+          "Turn this benchmark cleanup workflow into a command.",
+          "This cleanup sequence should be a slash command."
+        ],
+        "status": "active",
+        "desired_type": "command",
+        "first_seen_at": "2026-05-05T11:22:00Z",
+        "last_seen_at": "2026-06-11T08:45:00Z"
+      },
+      "rank_auto_003": {
+        "canonical": "make agent for recurring e2e triage",
+        "count": 6,
+        "sessions": [
+          "session-epsilon",
+          "session-zeta",
+          "session-eta"
+        ],
+        "examples": [
+          "Make an agent for recurring E2E triage.",
+          "This E2E triage keeps repeating; create an agent."
+        ],
+        "status": "active",
+        "desired_type": "agent",
+        "first_seen_at": "2026-05-15T07:30:00Z",
+        "last_seen_at": "2026-06-09T19:05:00Z"
+      },
+      "rank_auto_004": {
+        "canonical": "extract migration verification checklist into skill",
+        "count": 4,
+        "sessions": [
+          "session-theta",
+          "session-iota"
+        ],
+        "examples": [
+          "Extract this migration verification checklist into a skill.",
+          "We repeat this migration verification list every time."
+        ],
+        "status": "active",
+        "manual_decision": "accept",
+        "desired_type": "skill",
+        "reviewed_at": "2026-06-12T14:30:00Z"
+      },
+      "rank_review_001": {
+        "canonical": "summarize failing tests after each build",
+        "count": 3,
+        "sessions": [
+          "session-kappa",
+          "session-lambda"
+        ],
+        "examples": [
+          "Summarize failing tests after each build.",
+          "After build failures, summarize the failing tests."
+        ],
+        "status": "active",
+        "first_seen_at": "2026-06-01T10:00:00Z",
+        "last_seen_at": "2026-06-08T10:00:00Z"
+      },
+      "rank_review_002": {
+        "canonical": "document deployment notes when release changes",
+        "count": 4,
+        "sessions": [
+          "session-mu"
+        ],
+        "examples": [
+          "Document deployment notes when release settings change.",
+          "Add deployment notes for this release change."
+        ],
+        "status": "active",
+        "first_seen_at": "2026-06-02T15:20:00Z",
+        "last_seen_at": "2026-06-12T18:00:00Z"
+      },
+      "rank_review_003": {
+        "canonical": "convert recurring lint fix notes to skill",
+        "count": 5,
+        "sessions": [
+          "session-nu",
+          "session-xi"
+        ],
+        "examples": [
+          "Convert these recurring lint fix notes to a skill.",
+          "The lint fix instructions keep repeating."
+        ],
+        "status": "active",
+        "manual_decision": "needs_review",
+        "desired_type": "skill",
+        "reviewed_at": "2026-06-05T09:10:00Z"
+      },
+      "rank_suppress_001": {
+        "canonical": "thanks that worked",
+        "count": 11,
+        "sessions": [
+          "session-omicron",
+          "session-pi",
+          "session-rho"
+        ],
+        "examples": [
+          "Thanks, that worked.",
+          "Thanks that worked."
+        ],
+        "status": "active",
+        "first_seen_at": "2026-05-11T12:00:00Z",
+        "last_seen_at": "2026-06-12T12:00:00Z"
+      },
+      "rank_suppress_002": {
+        "canonical": "create old accepted release checklist skill",
+        "count": 8,
+        "sessions": [
+          "session-sigma",
+          "session-tau"
+        ],
+        "examples": [
+          "Create the old accepted release checklist skill.",
+          "Use the release checklist skill again."
+        ],
+        "status": "accepted",
+        "generated_type": "skill",
+        "generated_name": "release-checklist",
+        "accepted_at": "2026-05-30T17:40:00Z"
+      },
+      "rank_suppress_003": {
+        "canonical": "make command for one off scratch cleanup",
+        "count": 4,
+        "sessions": [
+          "session-upsilon",
+          "session-phi"
+        ],
+        "examples": [
+          "Make a command for this one-off scratch cleanup.",
+          "This scratch cleanup could be a command."
+        ],
+        "status": "active",
+        "manual_decision": "reject",
+        "desired_type": "command",
+        "reviewed_at": "2026-06-12T16:25:00Z"
+      }
+    }
+  },
+  "expected": {
+    "order": [
+      "rank_auto_001",
+      "rank_auto_002",
+      "rank_auto_003",
+      "rank_auto_004",
+      "rank_review_003",
+      "rank_review_001",
+      "rank_suppress_002",
+      "rank_review_002",
+      "rank_suppress_003",
+      "rank_suppress_001"
+    ],
+    "recommendations": {
+      "rank_auto_001": "auto_propose",
+      "rank_auto_002": "auto_propose",
+      "rank_auto_003": "auto_propose",
+      "rank_auto_004": "auto_propose",
+      "rank_review_003": "review_required",
+      "rank_review_001": "review_required",
+      "rank_suppress_002": "suppress",
+      "rank_review_002": "suppress",
+      "rank_suppress_003": "suppress",
+      "rank_suppress_001": "suppress"
+    },
+    "manual_overrides": {
+      "rank_auto_002": {
+        "suggested_type": "command"
+      },
+      "rank_auto_003": {
+        "suggested_type": "agent"
+      },
+      "rank_auto_004": {
+        "recommendation": "auto_propose",
+        "suggested_type": "skill",
+        "raw_score_unchanged": true
+      },
+      "rank_review_003": {
+        "recommendation": "review_required",
+        "suggested_type": "skill",
+        "raw_score_unchanged": true
+      },
+      "rank_suppress_003": {
+        "recommendation": "suppress",
+        "suggested_type": "command",
+        "raw_score_unchanged": true
+      }
+    }
+  }
+}

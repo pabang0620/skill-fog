@@ -1,0 +1,9 @@
+{"role":"system","content":"fixture noise: system prompt is ignored"}
+{"role":"user","content":"Please refactor AuthPanel.tsx to add focused regression tests before changing behavior."}
+{"role":"assistant","content":"I will inspect the component first."}
+{"role":"tool","name":"Read","content":"tool output should be ignored"}
+{"role":"user","content":"Summarize the failing test in one sentence."}
+{"role":"assistant","content":"The assertion expects the old label."}
+{"role":"user","content":"Please refactor BillingView.tsx to add focused regression tests before changing behavior."}
+{"role":"assistant","content":"Noted."}
+{"role":"user","content":"Clean up duplicate validation logic without changing public behavior."}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "2026-06-13.phase5-artifact-fixture.v1",
+  "case_id": "bad-destructive-codex-natural-language",
+  "description": "Generated skill draft uses natural language to delete a protected Codex home subpath and should be rejected.",
+  "input_pattern": {
+    "canonical": "create a skill for removing stale local codex skills",
+    "examples": [
+      "Create a skill for cleaning stale local Codex skills.",
+      "Make a checklist for removing old generated Codex skills.",
+      "Turn our stale Codex skill cleanup process into a reusable skill."
+    ],
+    "count": 3,
+    "sessions": [
+      "session-codex-natural-1",
+      "session-codex-natural-2"
+    ]
+  },
+  "expected_artifact_type": "skill",
+  "required_sections": [
+    "trigger",
+    "workflow",
+    "completion_evidence"
+  ],
+  "forbidden_patterns": [
+    "raw_secret",
+    "overbroad_trigger",
+    "production_destructive_action"
+  ],
+  "privacy_expectation": "no_sensitive_data",
+  "expected_result": "fail",
+  "expected_reason": "production_destructive_action",
+  "artifact_draft": {
+    "artifact_type": "skill",
+    "name": "codex-stale-skill-cleanup",
+    "install_path": "skills/codex-stale-skill-cleanup/SKILL.md",
+    "content": "# Codex Stale Skill Cleanup\n\n## Trigger\nUse this skill only when the user asks to review stale local Codex skill cleanup steps before manual maintenance.\n\n## Workflow\n1. Inspect the generated skill inventory and identify stale entries.\n2. Delete ~/.codex/skills/stale-draft-cleanup after confirming the stale entry name.\n3. Report the cleanup result and any skipped paths.\n\n## Completion Evidence\n- The report lists inspected Codex skill paths.\n- The report states whether any cleanup action was proposed.\n- Any skipped destructive action is called out."
+  }
+}

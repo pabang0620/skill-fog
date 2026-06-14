@@ -24,6 +24,19 @@ success() { echo -e "${GREEN}[skill-fog]${NC} $*"; }
 warn()    { echo -e "${YELLOW}[skill-fog]${NC} $*"; }
 error()   { echo -e "${RED}[skill-fog]${NC} $*"; }
 
+same_path() {
+  [ "$(cd -P "$(dirname "$1")" && pwd)/$(basename "$1")" = "$(cd -P "$(dirname "$2")" && pwd)/$(basename "$2")" ]
+}
+
+copy_file_if_needed() {
+  local src="$1"
+  local dest="$2"
+  if [ -e "$dest" ] && same_path "$src" "$dest"; then
+    return 0
+  fi
+  cp "$src" "$dest"
+}
+
 CURRENT_STEP="init"
 trap 'error "Installation failed at step: $CURRENT_STEP. Run ./uninstall.sh to clean up partial installation."; exit 1' ERR
 
@@ -59,7 +72,9 @@ create_directories() {
   info "Creating ~/.skill-fog directory structure..."
 
   mkdir -p \
+    "$SKILL_FOG_DIR/bin" \
     "$SKILL_FOG_DIR/hooks" \
+    "$SKILL_FOG_DIR/references" \
     "$SKILL_FOG_DIR/pending" \
     "$SKILL_FOG_DIR/logs"
 
@@ -81,11 +96,11 @@ init_patterns() {
 }
 
 # ─────────────────────────────────────────────
-# 4. SKILL.md 복사
+# 4. SKILL.md 및 references/ 복사
 # ─────────────────────────────────────────────
 install_skill() {
   CURRENT_STEP="install_skill"
-  info "Installing SKILL.md to $SKILLS_DIR..."
+  info "Installing SKILL.md and references/ to $SKILLS_DIR..."
 
   mkdir -p "$SKILLS_DIR"
 
@@ -94,6 +109,15 @@ install_skill() {
     success "SKILL.md installed to $SKILLS_DIR/SKILL.md"
   else
     error "SKILL.md not found in $SCRIPT_DIR"
+    exit 1
+  fi
+
+  if [ -d "$SCRIPT_DIR/references" ]; then
+    rm -rf "$SKILLS_DIR/references"
+    cp -R "$SCRIPT_DIR/references" "$SKILLS_DIR/references"
+    success "references/ installed to $SKILLS_DIR/references"
+  else
+    error "references/ not found in $SCRIPT_DIR"
     exit 1
   fi
 }
@@ -106,7 +130,7 @@ install_hook() {
   info "Installing stop hook..."
 
   if [ -f "$SCRIPT_DIR/hooks/stop.sh" ]; then
-    cp "$SCRIPT_DIR/hooks/stop.sh" "$SKILL_FOG_DIR/hooks/stop.sh"
+    copy_file_if_needed "$SCRIPT_DIR/hooks/stop.sh" "$SKILL_FOG_DIR/hooks/stop.sh"
     chmod +x "$SKILL_FOG_DIR/hooks/stop.sh"
     success "stop.sh installed and made executable"
   else
@@ -116,13 +140,50 @@ install_hook() {
 }
 
 # ─────────────────────────────────────────────
-# 6. CLI 심볼릭 링크 생성
+# 6. 설치된 CLI 런타임 번들 복사
+# ─────────────────────────────────────────────
+install_runtime_bundle() {
+  CURRENT_STEP="install_runtime_bundle"
+  info "Installing CLI runtime bundle to $SKILL_FOG_DIR..."
+
+  local required_file
+  for required_file in install.sh uninstall.sh SKILL.md; do
+    if [ -f "$SCRIPT_DIR/$required_file" ]; then
+      copy_file_if_needed "$SCRIPT_DIR/$required_file" "$SKILL_FOG_DIR/$required_file"
+    else
+      error "$required_file not found in $SCRIPT_DIR"
+      exit 1
+    fi
+  done
+
+  chmod +x "$SKILL_FOG_DIR/install.sh" "$SKILL_FOG_DIR/uninstall.sh"
+
+  if [ -d "$SCRIPT_DIR/references" ]; then
+    if ! same_path "$SCRIPT_DIR/references" "$SKILL_FOG_DIR/references"; then
+      rm -rf "$SKILL_FOG_DIR/references"
+      cp -R "$SCRIPT_DIR/references" "$SKILL_FOG_DIR/references"
+    fi
+  else
+    error "references/ not found in $SCRIPT_DIR"
+    exit 1
+  fi
+
+  if [ -f "$SCRIPT_DIR/package.json" ]; then
+    copy_file_if_needed "$SCRIPT_DIR/package.json" "$SKILL_FOG_DIR/package.json"
+  fi
+
+  success "Runtime bundle installed"
+}
+
+# ─────────────────────────────────────────────
+# 7. CLI 심볼릭 링크 생성
 # ─────────────────────────────────────────────
 install_cli() {
   CURRENT_STEP="install_cli"
   info "Installing skill-fog CLI..."
 
   local cli_src="$SCRIPT_DIR/bin/skill-fog"
+  local installed_cli="$SKILL_FOG_DIR/bin/skill-fog"
   local bin_dir=""
 
   if [ ! -f "$cli_src" ]; then
@@ -131,6 +192,10 @@ install_cli() {
   fi
 
   chmod +x "$cli_src"
+  copy_file_if_needed "$cli_src" "$installed_cli"
+  chmod +x "$installed_cli"
+  cli_src="$(cd -P "$(dirname "$cli_src")" && pwd)/$(basename "$cli_src")"
+  installed_cli="$(cd -P "$(dirname "$installed_cli")" && pwd)/$(basename "$installed_cli")"
 
   # ~/.local/bin 우선, 없으면 ~/bin
   if [ -d "$LOCAL_BIN" ] || mkdir -p "$LOCAL_BIN" 2>/dev/null; then
@@ -144,16 +209,42 @@ install_cli() {
 
   local link_path="$bin_dir/skill-fog"
 
-  # 기존 심볼릭 링크 제거 후 재생성 (멱등성)
+  resolve_symlink_target() {
+    local link="$1"
+    local target
+    target="$(readlink "$link")"
+    case "$target" in
+      /*) ;;
+      *) target="$(cd -P "$(dirname "$link")" && pwd)/$target" ;;
+    esac
+    if [ -e "$target" ]; then
+      local target_dir
+      target_dir="$(cd -P "$(dirname "$target")" && pwd)"
+      echo "$target_dir/$(basename "$target")"
+    else
+      echo "$target"
+    fi
+  }
+
+  # 기존 심볼릭 링크는 이 installer가 관리하는 대상일 때만 교체한다.
   if [ -L "$link_path" ]; then
-    rm "$link_path"
-  elif [ -f "$link_path" ]; then
-    warn "Regular file exists at $link_path, backing up..."
-    mv "$link_path" "${link_path}.bak"
+    local target
+    target="$(resolve_symlink_target "$link_path")"
+    if [ "$target" = "$installed_cli" ] || [ "$target" = "$cli_src" ]; then
+      rm "$link_path"
+    else
+      warn "Existing symlink at $link_path points to $target; leaving it unchanged."
+      warn "CLI copy installed at $installed_cli, but PATH link was not changed."
+      return 0
+    fi
+  elif [ -e "$link_path" ]; then
+    warn "Existing non-symlink at $link_path; leaving it unchanged."
+    warn "CLI copy installed at $installed_cli, but PATH link was not changed."
+    return 0
   fi
 
-  ln -s "$cli_src" "$link_path"
-  success "CLI linked: $link_path -> $cli_src"
+  ln -s "$installed_cli" "$link_path"
+  success "CLI linked: $link_path -> $installed_cli"
 
   # PATH 확인
   if ! echo "$PATH" | grep -q "$bin_dir"; then
@@ -292,7 +383,10 @@ print_summary() {
   echo -e "  ${BLUE}What's installed:${NC}"
   echo -e "    ~/.skill-fog/           Pattern storage directory"
   echo -e "    ~/.claude/skills/skill-fog/SKILL.md"
+  echo -e "    ~/.claude/skills/skill-fog/references/"
   echo -e "    ~/.skill-fog/hooks/stop.sh   (Stop hook)"
+  echo -e "    ~/.skill-fog/install.sh      (Installed self-test source)"
+  echo -e "    ~/.skill-fog/uninstall.sh    (Uninstaller)"
   echo -e "    ~/.local/bin/skill-fog       (CLI)"
   echo -e "    ~/.claude/CLAUDE.md          (skill-fog always-on entry)"
   echo ""
@@ -325,6 +419,7 @@ main() {
   init_patterns
   install_skill
   install_hook
+  install_runtime_bundle
   install_cli
   backup_settings
   register_hook
