@@ -67,14 +67,15 @@ You typed it again the next day. And the day after that. The intention was there
  watching     │  pending/{id}.json │
               └───────┬────────────┘
                       │
-              Next session start
+              skill-fog review
                       │
                       ▼
-      ┌───────────────────────────────┐
-      │  "I noticed you've asked me   │
-      │   to fix line errors 5 times. │
-      │   Want me to build a skill?"  │
-      └───────────────────────────────┘
+      ┌──────────────────────────────┐
+      │ Inspect pending suggestions  │
+      │ Choose skill, command, agent  │
+      └──────────────┬───────────────┘
+                      │
+              User approval
                       │
            ┌──────────┼──────────┐
            ▼          ▼          ▼
@@ -142,11 +143,11 @@ Every time your Claude Code session ends, a Stop hook silently reads your messag
 
 ### Step 2 — Propose
 
-When the same normalized pattern appears **3+ times across 2+ sessions**, skill-fog promotes it to `pending`. The next time you open Claude Code, it surfaces the suggestion naturally — no interruptions, no popups.
+When the same normalized pattern appears **3+ times across 2+ sessions**, skill-fog saves it as a pending suggestion in `~/.skill-fog/pending/`.
 
 ### Step 3 — Generate
 
-Say yes. skill-fog writes the actual `SKILL.md`, slash command, or agent definition into `~/.claude/` — ready to use in your next session.
+Run `skill-fog review` to inspect pending suggestions. Choose whether to generate a skill, slash command, or agent; after approval, skill-fog writes it into `~/.claude/`.
 
 ---
 
