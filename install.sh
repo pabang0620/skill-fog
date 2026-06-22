@@ -127,7 +127,7 @@ install_skill() {
 # ─────────────────────────────────────────────
 install_hook() {
   CURRENT_STEP="install_hook"
-  info "Installing stop hook..."
+  info "Installing hooks..."
 
   if [ -f "$SCRIPT_DIR/hooks/stop.sh" ]; then
     copy_file_if_needed "$SCRIPT_DIR/hooks/stop.sh" "$SKILL_FOG_DIR/hooks/stop.sh"
@@ -135,6 +135,15 @@ install_hook() {
     success "stop.sh installed and made executable"
   else
     error "hooks/stop.sh not found in $SCRIPT_DIR/hooks/"
+    exit 1
+  fi
+
+  if [ -f "$SCRIPT_DIR/hooks/session-start.sh" ]; then
+    copy_file_if_needed "$SCRIPT_DIR/hooks/session-start.sh" "$SKILL_FOG_DIR/hooks/session-start.sh"
+    chmod +x "$SKILL_FOG_DIR/hooks/session-start.sh"
+    success "session-start.sh installed and made executable"
+  else
+    error "hooks/session-start.sh not found in $SCRIPT_DIR/hooks/"
     exit 1
   fi
 }
@@ -272,81 +281,81 @@ backup_settings() {
 }
 
 # ─────────────────────────────────────────────
-# 8. settings.json에 Stop 훅 등록
+# 공통: settings.json에 훅 등록 (중복 방지, jq/python3 fallback)
 # ─────────────────────────────────────────────
-register_hook() {
-  CURRENT_STEP="register_hook"
-  info "Registering Stop hook in settings.json..."
+register_single_hook() {
+  local event="$1"   # Stop, SessionStart 등
+  local cmd="$2"     # 실행할 훅 명령어
+  local label="$3"   # 로그용 이름
 
-  # 중복 확인
   if command -v jq &>/dev/null; then
-    local already_registered
-    already_registered=$(jq -r \
-      --arg cmd "$HOOK_CMD" \
-      '.hooks.Stop[]?.hooks[]? | select(.command == $cmd) | .command' \
+    local already
+    already=$(jq -r \
+      --arg cmd "$cmd" \
+      --arg event "$event" \
+      '.hooks[$event][]?.hooks[]? | select(.command == $cmd) | .command' \
       "$SETTINGS_FILE" 2>/dev/null || echo "")
 
-    if [ -n "$already_registered" ]; then
-      info "Stop hook already registered, skipping."
+    if [ -n "$already" ]; then
+      info "$label already registered, skipping."
       return
     fi
 
-    # jq로 훅 추가 (기존 훅 보존)
     local tmp_file="${SETTINGS_FILE}.tmp"
     jq \
-      --arg cmd "$HOOK_CMD" \
+      --arg event "$event" \
+      --arg cmd "$cmd" \
       '
-      # hooks 키 없으면 생성
       .hooks //= {} |
-      # Stop 키 없으면 빈 배열로
-      .hooks.Stop //= [] |
-      # 새 훅 항목 추가
-      .hooks.Stop += [{
-        "matcher": "",
-        "hooks": [{
-          "type": "command",
-          "command": $cmd
-        }]
-      }]
+      .hooks[$event] //= [] |
+      .hooks[$event] += [{"matcher": "", "hooks": [{"type": "command", "command": $cmd}]}]
       ' \
       "$SETTINGS_FILE" > "$tmp_file" && mv "$tmp_file" "$SETTINGS_FILE"
 
-    success "Stop hook registered in settings.json"
+    success "$label registered in settings.json"
 
   else
-    # python3 fallback
-    python3 - <<PYEOF
+    SF_SETTINGS_FILE="$SETTINGS_FILE" SF_EVENT="$event" SF_CMD="$cmd" SF_LABEL="$label" \
+    python3 - <<'PYEOF'
 import json, sys, os
 
-settings_file = os.path.expanduser('$SETTINGS_FILE')
-hook_cmd = '$HOOK_CMD'
+sf = os.environ['SF_SETTINGS_FILE']
+event = os.environ['SF_EVENT']
+cmd = os.environ['SF_CMD']
+label = os.environ['SF_LABEL']
 
-with open(settings_file, 'r') as f:
-    content = f.read().strip()
-    settings = json.loads(content) if content else {}
+with open(sf) as f:
+    settings = json.loads(f.read().strip() or '{}')
 
 hooks = settings.setdefault('hooks', {})
-stop_hooks = hooks.setdefault('Stop', [])
+event_hooks = hooks.setdefault(event, [])
 
-# 중복 확인
-for entry in stop_hooks:
+for entry in event_hooks:
     for h in entry.get('hooks', []):
-        if h.get('command') == hook_cmd:
-            print('[skill-fog] Hook already registered (python3 check)')
+        if h.get('command') == cmd:
+            print(f'[skill-fog] {label} already registered (python3 check)')
             sys.exit(0)
 
-stop_hooks.append({
-    'matcher': '',
-    'hooks': [{'type': 'command', 'command': hook_cmd}]
-})
+event_hooks.append({'matcher': '', 'hooks': [{'type': 'command', 'command': cmd}]})
 
-with open(settings_file, 'w') as f:
+with open(sf, 'w') as f:
     json.dump(settings, f, indent=2, ensure_ascii=False)
     f.write('\n')
 
-print('[skill-fog] Stop hook registered (python3)')
+print(f'[skill-fog] {label} registered (python3)')
 PYEOF
   fi
+}
+
+# ─────────────────────────────────────────────
+# 8. settings.json에 훅 등록
+# ─────────────────────────────────────────────
+register_hook() {
+  CURRENT_STEP="register_hook"
+  info "Registering hooks in settings.json..."
+
+  register_single_hook "Stop" "$HOOK_CMD" "Stop hook"
+  register_single_hook "SessionStart" "bash $HOME/.skill-fog/hooks/session-start.sh" "SessionStart hook"
 }
 
 # ─────────────────────────────────────────────
@@ -365,7 +374,7 @@ register_claude_md() {
   cat >> "$claude_md" << 'CLAUDEMD'
 
 # skill-fog: 대화 중 반복 패턴 감지 및 스킬 자동 생성 (자동 로드)
-skill-fog 스킬을 항상 활성 상태로 유지한다. 매 5번째 사용자 메시지마다 ~/.skill-fog/patterns.json을 확인하고 반복 패턴을 감지한다. 임계값(동일 패턴 3회 + 2개 이상 세션) 도달 시 즉시 사용자에게 skill / command / agent 생성을 제안한다.
+skill-fog 스킬을 항상 활성 상태로 유지한다. SessionStart 훅이 세션 시작 시 자동으로 pending 패턴을 컨텍스트에 주입하면 STEP A부터 응답한다. /skill-fog 수동 호출 시에도 동일하게 동작한다.
 CLAUDEMD
 
   success "skill-fog registered in CLAUDE.md"

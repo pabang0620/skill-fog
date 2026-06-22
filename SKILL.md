@@ -1,7 +1,7 @@
 ---
 name: skill-fog
-description: 대화 중 반복 요청 패턴을 자동 감지하여 스킬/커맨드/에이전트 생성을 제안하는 스킬. 매 5번째 메시지마다 자동 실행되며, 동일 패턴이 3회 이상·2개 이상 세션에서 감지될 때 즉시 제안한다. 사용자가 /skill-fog를 명시적으로 호출하거나 세션 시작 시 pending 패턴이 있을 때도 활성화된다.
-version: 2.0.6
+description: 반복 요청 패턴을 자동 감지하여 스킬/커맨드/에이전트 생성을 제안하는 스킬. SessionStart 훅이 세션 시작 시 pending 패턴을 자동 주입하며, 사용자가 /skill-fog를 명시적으로 호출할 때도 활성화된다.
+version: 2.1.0
 triggers:
   - /skill-fog
 ---
@@ -9,38 +9,18 @@ triggers:
 # skill-fog 스킬
 
 ## 역할
-Claude Code 대화 중 사용자의 반복 요청 패턴을 실시간으로 감지하여, 임계값 도달 시 즉시 스킬/커맨드/에이전트 생성을 제안하는 도우미.
+사용자의 반복 요청 패턴을 감지하여, 임계값 도달 시 스킬/커맨드/에이전트 생성을 제안하는 도우미.
 
 ## 활성화 조건
-- 세션 시작 시 `~/.skill-fog/pending/*.json` 파일이 하나 이상 있을 때
-- 사용자 메시지 카운터가 5의 배수(5, 10, 15...)가 되었을 때
-- 사용자가 `/skill-fog` 를 명시적으로 입력했을 때
+- **SessionStart 훅**이 세션 시작 시 pending 패턴을 컨텍스트에 자동 주입했을 때 → STEP A 실행
+- 사용자가 `/skill-fog` 를 명시적으로 입력했을 때 → STEP A 실행
 
-## 세션 시작 시 초기화
-세션이 시작되면 즉시 pending 파일을 확인한다.
-
-```bash
-ls ~/.skill-fog/pending/*.json 2>/dev/null
-```
-
-pending 파일이 있으면 STEP A(pending 제안)를 먼저 실행한다.
-STEP A에서 제안한 패턴의 pid를 세션 내부적으로 `session_proposed` 집합에 추가한다.
-이후 5번째 메시지 체크 시 `session_proposed`에 포함된 pid는 건너뛴다 (이중 발동 방지).
+## 세션 시작 시 동작
+SessionStart 훅(`~/.skill-fog/hooks/session-start.sh`)이 세션 시작(startup/resume) 시 자동 실행된다.
+pending 패턴이 있으면 해당 정보가 컨텍스트에 주입되어 `[skill-fog] 검토 대기 중인 반복 패턴 N개가 있습니다.` 메시지가 보인다.
+이 메시지가 보이면 즉시 STEP A를 실행한다.
+STEP A에서 제안한 패턴의 pid를 세션 내부적으로 `session_proposed` 집합에 추가한다(이중 발동 방지).
 세션이 새로 시작되면 `session_proposed`는 항상 빈 집합으로 초기화된다.
-없으면 아무것도 하지 않고 조용히 대기한다.
-
-## 5개 메시지마다 패턴 분석 요약
-Claude는 대화 중 사용자 메시지 수를 내부적으로 추적한다.
-
-- 세션 시작 시 카운터 = 0
-- 사용자 메시지가 올 때마다 카운터 +1
-- 카운터가 5의 배수일 때 조용히 패턴 분석을 실행한다
-- 직전 5개 사용자 메시지를 각각 개별 정규화한다
-- 각 메시지별로 개별 pattern id를 생성하고 `~/.skill-fog/patterns.json`을 읽기 전용으로 조회한다
-- `count >= 3`, `sessions >= 2`, `status == active`, `pid not in session_proposed`이면 즉시 제안한다
-- 제안한 pid는 `session_proposed`에 추가한다
-
-정규화, pid 생성, 조회 조건, 출력 형식은 [pattern-scoring.md](references/pattern-scoring.md)를 로드한다.
 
 ## 단계 라우팅
 
@@ -88,7 +68,7 @@ cat ~/.skill-fog/patterns.json 2>/dev/null || echo '{"patterns":{}}'
 ## Reference Loading
 | 필요 상황 | 로드할 reference | 포함 내용 |
 | --- | --- | --- |
-| pending review, 5-message checks, threshold checks, manual `/skill-fog` listing | [pattern-scoring.md](references/pattern-scoring.md) | 정규화, pid 생성, 임계값 조건, pending 정렬, 제안 메시지 |
+| pending review, threshold checks, manual `/skill-fog` listing | [pattern-scoring.md](references/pattern-scoring.md) | 정규화, pid 생성, 임계값 조건, pending 정렬, 제안 메시지 |
 | scoring/threshold checks | [pattern-scoring.md](references/pattern-scoring.md) | `THRESHOLD_MET`, `TRACKING`, `NO_DATA` 결과 해석 |
 | artifact generation | [artifact-generation.md](references/artifact-generation.md) | 유사 항목 스캔, 미리보기 템플릿, 이름/경로 규칙, 완료 처리 |
 | privacy/redaction, status updates, pending writes | [privacy-and-redaction.md](references/privacy-and-redaction.md) | active/rejected/accepted 전이, pending 생성/삭제, 원자적 JSON 쓰기 |

@@ -13,6 +13,7 @@ INSTALLED_CLI="$SKILL_FOG_DIR/bin/skill-fog"
 LOCAL_BIN_LINK="$HOME/.local/bin/skill-fog"
 HOME_BIN_LINK="$HOME/bin/skill-fog"
 HOOK_CMD="bash $HOME/.skill-fog/hooks/stop.sh"
+SESSION_START_HOOK_CMD="bash $HOME/.skill-fog/hooks/session-start.sh"
 ASSUME_YES=0
 DATA_ACTION="prompt"
 
@@ -99,84 +100,96 @@ confirm() {
 }
 
 # ─────────────────────────────────────────────
+# 공통: settings.json에서 특정 훅 명령어 제거
+# ─────────────────────────────────────────────
+remove_hook_by_cmd() {
+  local event="$1"
+  local cmd="$2"
+  local label="$3"
+
+  if command -v jq &>/dev/null; then
+    local tmp_file="${SETTINGS_FILE}.tmp"
+    if ! jq \
+      --arg event "$event" \
+      --arg cmd "$cmd" \
+      '
+      if .hooks[$event] then
+        .hooks[$event] = [
+          .hooks[$event][]
+          | .hooks = [ .hooks[]? | select(.command != $cmd) ]
+          | select((.hooks | length) > 0)
+        ]
+        | if .hooks[$event] | length == 0 then del(.hooks[$event]) else . end
+        | if (.hooks | length) == 0 then del(.hooks) else . end
+      else . end
+      ' \
+      "$SETTINGS_FILE" > "$tmp_file" 2>/dev/null; then
+      error "Failed to parse settings.json for $label removal."
+      return 1
+    fi
+    mv "$tmp_file" "$SETTINGS_FILE"
+    success "$label removed from settings.json"
+  else
+    SF_SETTINGS_FILE="$SETTINGS_FILE" SF_EVENT="$event" SF_CMD="$cmd" SF_LABEL="$label" \
+    python3 - <<'PYEOF'
+import json, sys, os
+
+sf = os.environ['SF_SETTINGS_FILE']
+event = os.environ['SF_EVENT']
+cmd = os.environ['SF_CMD']
+label = os.environ['SF_LABEL']
+
+with open(sf) as f:
+    settings = json.loads(f.read().strip() or '{}')
+
+event_hooks = settings.get('hooks', {}).get(event, [])
+new_hooks = []
+for entry in event_hooks:
+    filtered = [h for h in entry.get('hooks', []) if h.get('command') != cmd]
+    if filtered:
+        new_entry = dict(entry)
+        new_entry['hooks'] = filtered
+        new_hooks.append(new_entry)
+
+if 'hooks' in settings and event in settings['hooks']:
+    if new_hooks:
+        settings['hooks'][event] = new_hooks
+    else:
+        del settings['hooks'][event]
+    if not settings['hooks']:
+        del settings['hooks']
+
+with open(sf, 'w') as f:
+    json.dump(settings, f, indent=2, ensure_ascii=False)
+    f.write('\n')
+
+print(f'[skill-fog] {label} removed (python3)')
+PYEOF
+  fi
+}
+
+# ─────────────────────────────────────────────
 # 1. settings.json에서 skill-fog 훅 제거
 # ─────────────────────────────────────────────
 remove_hook() {
-  info "Removing Stop hook from settings.json..."
+  info "Removing skill-fog hooks from settings.json..."
 
   if [ ! -f "$SETTINGS_FILE" ]; then
     info "settings.json not found, skipping hook removal."
     return
   fi
 
-  # 백업 먼저
   local backup_file="${SETTINGS_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
   cp "$SETTINGS_FILE" "$backup_file"
   info "Backed up settings.json to: $backup_file"
 
-  if command -v jq &>/dev/null; then
-    local tmp_file="${SETTINGS_FILE}.tmp"
+  remove_hook_by_cmd "Stop" "$HOOK_CMD" "Stop hook"
+  remove_hook_by_cmd "SessionStart" "$SESSION_START_HOOK_CMD" "SessionStart hook"
 
-    # skill-fog 훅 명령어만 제거하고 같은 Stop 항목의 다른 훅은 보존
-    if ! jq \
-      --arg cmd "$HOOK_CMD" \
-      '
-      if .hooks.Stop then
-        .hooks.Stop = [
-          .hooks.Stop[]
-          | .hooks = [ .hooks[]? | select(.command != $cmd) ]
-          | select((.hooks | length) > 0)
-        ]
-        | if .hooks.Stop | length == 0 then del(.hooks.Stop) else . end
-        | if (.hooks | length) == 0 then del(.hooks) else . end
-      else . end
-      ' \
-      "$SETTINGS_FILE" > "$tmp_file" 2>/dev/null; then
-      error "Failed to parse settings.json. Backup available at: $backup_file"
-      return 1
-    fi
-    mv "$tmp_file" "$SETTINGS_FILE"
-
-    success "Stop hook removed from settings.json"
-
-  else
-    # python3 fallback
-    python3 - <<PYEOF
-import json, sys, os
-
-settings_file = os.path.expanduser('$SETTINGS_FILE')
-hook_cmd = '$HOOK_CMD'
-
-with open(settings_file, 'r') as f:
-    content = f.read().strip()
-    settings = json.loads(content) if content else {}
-
-stop_hooks = settings.get('hooks', {}).get('Stop', [])
-new_stop = []
-for entry in stop_hooks:
-    filtered_hooks = [
-        h for h in entry.get('hooks', [])
-        if h.get('command') != hook_cmd
-    ]
-    if filtered_hooks:
-        new_entry = dict(entry)
-        new_entry['hooks'] = filtered_hooks
-        new_stop.append(new_entry)
-
-if 'hooks' in settings and 'Stop' in settings['hooks']:
-    if new_stop:
-        settings['hooks']['Stop'] = new_stop
-    else:
-        del settings['hooks']['Stop']
-    if not settings['hooks']:
-        del settings['hooks']
-
-with open(settings_file, 'w') as f:
-    json.dump(settings, f, indent=2, ensure_ascii=False)
-    f.write('\n')
-
-print('[skill-fog] Stop hook removed (python3)')
-PYEOF
+  # session-start.sh 파일 삭제
+  if [ -f "$SKILL_FOG_DIR/hooks/session-start.sh" ]; then
+    rm "$SKILL_FOG_DIR/hooks/session-start.sh"
+    success "session-start.sh removed"
   fi
 }
 
@@ -294,7 +307,7 @@ remove_claude_md() {
   cp "$claude_md" "$backup_file"
   info "Backed up CLAUDE.md to: $backup_file"
 
-  # skill-fog 블록 제거 (마커 줄부터 다음 빈 줄 이후까지 포함하는 2줄 블록)
+  # skill-fog 블록 제거 (마커부터 다음 섹션 헤더 또는 파일 끝까지)
   python3 - <<PYEOF
 import re, os
 
@@ -303,9 +316,9 @@ claude_md = os.path.expanduser('$claude_md')
 with open(claude_md, 'r', encoding='utf-8') as f:
     content = f.read()
 
-# 빈 줄 + 마커 줄 + 다음 줄(내용) 패턴 제거
-pattern = r'\n# skill-fog: 대화 중 반복 패턴 감지[^\n]*\n[^\n]*\n?'
-new_content = re.sub(pattern, '', content)
+# 빈 줄 + 마커 + 내용 줄(들) 패턴 제거 — 줄 수 변화에 유연하게 대응
+pattern = r'\n# skill-fog: 대화 중 반복 패턴 감지.*?(?=\n#|\Z)'
+new_content = re.sub(pattern, '', content, flags=re.DOTALL)
 
 with open(claude_md, 'w', encoding='utf-8') as f:
     f.write(new_content)

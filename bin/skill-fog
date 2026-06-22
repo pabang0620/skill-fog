@@ -9,6 +9,7 @@ PATTERNS_FILE="$SKILL_FOG_DIR/patterns.json"
 PENDING_DIR="$SKILL_FOG_DIR/pending"
 CLAUDE_DIR="$HOME/.claude"
 EXPECTED_HOOK_CMD="bash $HOME/.skill-fog/hooks/stop.sh"
+EXPECTED_SESSION_START_HOOK_CMD="bash $HOME/.skill-fog/hooks/session-start.sh"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -266,6 +267,7 @@ cmd_doctor_self_test() {
   cp "$source_root/SKILL.md" "$test_repo/SKILL.md"
   cp "$source_root/bin/skill-fog" "$test_repo/bin/skill-fog"
   cp "$source_root/hooks/stop.sh" "$test_repo/hooks/stop.sh"
+  cp "$source_root/hooks/session-start.sh" "$test_repo/hooks/session-start.sh"
   cp -R "$source_root/references" "$test_repo/references"
   if [ -f "$source_root/package.json" ]; then
     cp "$source_root/package.json" "$test_repo/package.json"
@@ -337,29 +339,39 @@ cmd_doctor_self_test() {
     done <<< "$refs"
   }
 
-  count_stop_hooks() {
+  count_hooks_by_cmd() {
     local settings_file="$1"
-    local expected_cmd="$2"
+    local event="$2"
+    local expected_cmd="$3"
     if command -v jq &>/dev/null; then
-      jq --arg cmd "$expected_cmd" \
-        '[.hooks.Stop[]?.hooks[]? | select(.type == "command" and .command == $cmd)] | length' \
+      jq --arg event "$event" --arg cmd "$expected_cmd" \
+        '[.hooks[$event][]?.hooks[]? | select(.type == "command" and .command == $cmd)] | length' \
         "$settings_file"
     else
-      SF_SETTINGS_FILE="$settings_file" SF_EXPECTED_HOOK_CMD="$expected_cmd" python3 - <<'PYEOF'
+      SF_SETTINGS_FILE="$settings_file" SF_EVENT="$event" SF_EXPECTED_HOOK_CMD="$expected_cmd" python3 - <<'PYEOF'
 import json, os
 
 with open(os.environ['SF_SETTINGS_FILE']) as f:
     settings = json.load(f)
 
 count = 0
+event = os.environ['SF_EVENT']
 expected = os.environ['SF_EXPECTED_HOOK_CMD']
-for entry in settings.get('hooks', {}).get('Stop', []):
+for entry in settings.get('hooks', {}).get(event, []):
     for hook in entry.get('hooks', []):
         if hook.get('type') == 'command' and hook.get('command') == expected:
             count += 1
 print(count)
 PYEOF
     fi
+  }
+
+  count_stop_hooks() {
+    count_hooks_by_cmd "$1" "Stop" "$2"
+  }
+
+  count_session_start_hooks() {
+    count_hooks_by_cmd "$1" "SessionStart" "$2"
   }
 
   run_regression_probes() {
@@ -393,11 +405,11 @@ PYEOF
       return 1
     fi
     cat > "$fake_hook_home/.claude/settings.json" <<'JSONEOF'
-{"hooks":{"Stop":[{"matcher":"","hooks":[{"type":"command","command":"echo skill-fog"}]}]}}
+{"hooks":{"Stop":[{"matcher":"","hooks":[{"type":"command","command":"echo skill-fog"}]}],"SessionStart":[{"matcher":"","hooks":[{"type":"command","command":"echo skill-fog"}]}]}}
 JSONEOF
     HOME="$fake_hook_home" PATH="$fake_hook_home/.local/bin:$PATH" bash "$test_repo/bin/skill-fog" doctor >"$fake_hook_doctor_log" 2>&1 || true
     if grep -q "0 failures" "$fake_hook_doctor_log"; then
-      error "Self-test failed: fake Stop hook containing skill-fog was accepted as healthy"
+      error "Self-test failed: fake hooks containing skill-fog were accepted as healthy"
       sed -n '1,200p' "$fake_hook_doctor_log" >&2
       return 1
     fi
@@ -424,6 +436,8 @@ JSONEOF
   assert_path "~/.skill-fog/patterns.json" "$temp_home/.skill-fog/patterns.json" || return 1
   assert_path "~/.skill-fog/hooks/stop.sh" "$temp_home/.skill-fog/hooks/stop.sh" || return 1
   assert_executable "~/.skill-fog/hooks/stop.sh" "$temp_home/.skill-fog/hooks/stop.sh" || return 1
+  assert_path "~/.skill-fog/hooks/session-start.sh" "$temp_home/.skill-fog/hooks/session-start.sh" || return 1
+  assert_executable "~/.skill-fog/hooks/session-start.sh" "$temp_home/.skill-fog/hooks/session-start.sh" || return 1
   assert_path "~/.skill-fog/install.sh" "$temp_home/.skill-fog/install.sh" || return 1
   assert_path "~/.skill-fog/uninstall.sh" "$temp_home/.skill-fog/uninstall.sh" || return 1
   assert_executable "~/.skill-fog/uninstall.sh" "$temp_home/.skill-fog/uninstall.sh" || return 1
@@ -465,6 +479,13 @@ JSONEOF
     return 1
   fi
 
+  local ss_hook_count
+  ss_hook_count="$(count_session_start_hooks "$temp_home/.claude/settings.json" "bash $temp_home/.skill-fog/hooks/session-start.sh")"
+  if [ "$ss_hook_count" != "1" ]; then
+    error "Self-test failed: expected 1 skill-fog SessionStart hook after reinstall, found $ss_hook_count"
+    return 1
+  fi
+
   if ! HOME="$temp_home" PATH="$temp_home/.local/bin:$PATH" bash "$test_repo/uninstall.sh" --yes --keep-data >"$uninstall_first_log" 2>&1; then
     error "Self-test failed: first uninstall.sh run failed"
     sed -n '1,200p' "$uninstall_first_log" >&2
@@ -484,6 +505,12 @@ JSONEOF
   hook_count="$(count_stop_hooks "$temp_home/.claude/settings.json" "bash $temp_home/.skill-fog/hooks/stop.sh")"
   if [ "$hook_count" != "0" ]; then
     error "Self-test failed: expected 0 skill-fog Stop hooks after uninstall, found $hook_count"
+    return 1
+  fi
+
+  ss_hook_count="$(count_session_start_hooks "$temp_home/.claude/settings.json" "bash $temp_home/.skill-fog/hooks/session-start.sh")"
+  if [ "$ss_hook_count" != "0" ]; then
+    error "Self-test failed: expected 0 skill-fog SessionStart hooks after uninstall, found $ss_hook_count"
     return 1
   fi
 
@@ -1052,6 +1079,17 @@ cmd_doctor() {
     check_item "stop.sh hook" "fail" "missing — run install.sh"
   fi
 
+  # session-start.sh hook
+  if [ -f "$SKILL_FOG_DIR/hooks/session-start.sh" ]; then
+    if [ -x "$SKILL_FOG_DIR/hooks/session-start.sh" ]; then
+      check_item "session-start.sh hook (executable)" "ok"
+    else
+      check_item "session-start.sh hook (executable)" "fail" "not executable — run: chmod +x ~/.skill-fog/hooks/session-start.sh"
+    fi
+  else
+    check_item "session-start.sh hook" "fail" "missing — run install.sh"
+  fi
+
   # SKILL.md
   if [ -f "$CLAUDE_DIR/skills/skill-fog/SKILL.md" ]; then
     check_item "SKILL.md installed" "ok"
@@ -1106,6 +1144,31 @@ for entry in s.get('hooks', {}).get('Stop', []):
     else
       check_item "Stop hook registered in settings.json" "fail" "not found — run install.sh"
     fi
+
+    local ss_hook_registered=""
+    if command -v jq &>/dev/null; then
+      ss_hook_registered=$(jq -r \
+        --arg cmd "$EXPECTED_SESSION_START_HOOK_CMD" \
+        '.hooks.SessionStart[]?.hooks[]? | select(.type == "command" and .command == $cmd) | .command' \
+        "$settings_file" 2>/dev/null || echo "")
+    elif command -v python3 &>/dev/null; then
+      ss_hook_registered=$(SF_SETTINGS_FILE="$settings_file" SF_EXPECTED_HOOK_CMD="$EXPECTED_SESSION_START_HOOK_CMD" python3 -c "
+import json, os
+with open(os.environ['SF_SETTINGS_FILE']) as f:
+    s = json.load(f)
+expected = os.environ['SF_EXPECTED_HOOK_CMD']
+for entry in s.get('hooks', {}).get('SessionStart', []):
+    for h in entry.get('hooks', []):
+        if h.get('type') == 'command' and h.get('command') == expected:
+            print(h['command'])
+" 2>/dev/null || echo "")
+    fi
+
+    if [ -n "$ss_hook_registered" ]; then
+      check_item "SessionStart hook registered in settings.json" "ok"
+    else
+      check_item "SessionStart hook registered in settings.json" "fail" "not found — run install.sh"
+    fi
   else
     check_item "settings.json exists" "warn" "will be created by install.sh"
   fi
@@ -1156,9 +1219,10 @@ cmd_help() {
   echo -e "${BOLD}FILES${NC}"
   echo -e "  ${DIM}~/.skill-fog/patterns.json${NC}   Pattern database"
   echo -e "  ${DIM}~/.skill-fog/pending/*.json${NC}  Patterns awaiting review"
-  echo -e "  ${DIM}~/.skill-fog/logs/*.log${NC}      Session processing logs"
-  echo -e "  ${DIM}~/.skill-fog/hooks/stop.sh${NC}   Claude Code Stop hook"
-  echo -e "  ${DIM}~/.claude/skills/skill-fog/${NC}  SKILL.md for Claude"
+  echo -e "  ${DIM}~/.skill-fog/logs/*.log${NC}               Session processing logs"
+  echo -e "  ${DIM}~/.skill-fog/hooks/stop.sh${NC}            Claude Code Stop hook"
+  echo -e "  ${DIM}~/.skill-fog/hooks/session-start.sh${NC}   Claude Code SessionStart hook"
+  echo -e "  ${DIM}~/.claude/skills/skill-fog/${NC}           SKILL.md for Claude"
   echo ""
   echo -e "${BOLD}UNINSTALL${NC}"
   echo -e "  bash \$(dirname \$(readlink -f \$(which skill-fog)))/../uninstall.sh"

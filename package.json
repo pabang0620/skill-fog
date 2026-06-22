@@ -1,6 +1,6 @@
 {
   "name": "skill-fog",
-  "version": "2.0.6",
+  "version": "2.1.0",
   "description": "Auto-detect usage patterns and generate Claude Code skills, commands, and agents",
   "scripts": {
     "postinstall": "node postinstall.js"
