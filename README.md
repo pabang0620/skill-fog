@@ -232,19 +232,25 @@ skill-fog clean
 
 ## Why skill-fog?
 
-> *"Hermes remembers. OpenClaw automates. skill-fog evolves."*
+> *"ECC collects. Hermes remembers. OpenClaw automates. skill-fog proposes."*
 
-| | Hermes | OpenClaw | **skill-fog** |
-|---|---|---|---|
-| What it does | Persistent memory across sessions | Automated code actions | Detects your patterns, builds your tools |
-| Requires server | Yes | Yes | **No — pure bash** |
-| Learns from you | No | No | **Yes — gets smarter every session** |
-| Auto-proposes at session start | No | No | **Yes — via SessionStart hook (v2.1.0+)** |
-| Output | Context | Actions | **Reusable skills, commands, agents** |
-| Runtime | Custom | Custom | **bash + SKILL.md — Claude Code native** |
-| Setup complexity | Medium | Medium | **One curl command** |
+The closest existing tool is **ECC's `continuous-learning-v2`** (Everything Claude Code, 210K+ GitHub stars). It also uses a Stop hook to extract patterns from your sessions and can promote them into SKILL.md files via `/evolve`. If you're already in the ECC ecosystem, that's worth knowing.
 
-skill-fog doesn't try to be a memory system or an automation layer. It's a **pattern → tool compiler**. The more you use Claude Code, the more skill-fog learns what deserves to be a permanent tool in your workflow.
+**Where skill-fog differs:**
+
+ECC requires you to run `/evolve` manually. skill-fog watches your repeat count, and when the same request crosses the threshold, it surfaces the proposal automatically — at the start of your next session, before you type anything. You don't have to remember to check.
+
+| | ECC continuous-learning-v2 | Hermes | OpenClaw | **skill-fog** |
+|---|---|---|---|---|
+| What it does | Extract session patterns → manual `/evolve` | Agent framework (uses Claude Code as sub-agent) | Life automation (WhatsApp, calendar, smart home) | Count repeats → auto-propose at session start |
+| Requires server | No | Yes | Yes | **No — pure bash** |
+| Auto-proposes at session start | No — manual trigger | No | No | **Yes — SessionStart hook** |
+| Threshold-based trigger | No | No | No | **Yes — 3x across 2+ sessions** |
+| Output | SKILL.md (manual) | Skills (agent-written) | Automation recipes | **Skills, commands, agents (auto-proposed)** |
+| Runtime | Claude Code native | Custom | Custom | **bash + SKILL.md — Claude Code native** |
+| Setup | Part of larger ECC suite | Medium | Medium | **One curl command** |
+
+skill-fog is a single-purpose tool: **repeat detection → automatic proposal → file generation**. No suite required, no manual triggers, nothing to remember.
 
 ---
 
