@@ -4,6 +4,13 @@ All notable changes to this package are documented here.
 
 ## Unreleased
 
+## 2.2.0
+
+### Added
+- **STEP E.5 — 자동 품질 개선 루프**: 아티팩트 생성 직후 사용자에게 1회 승인 요청. 승인 시 `agent-evaluator-v2`가 생성된 파일을 100점 척도로 평가하고 점수 < 80이면 라인 단위 개선안을 자동 적용. skill/command/agent 모든 타입 지원.
+- `references/artifact-generation.md`: 품질 개선 루프 절차, 에이전트 호출 방식, 점수 임계값(80), 완료 출력 형식 명시.
+- `SKILL.md`: STEP E.5 단계 추가 (STEP E와 STEP F 사이).
+
 ## 2.1.0
 
 ### Added

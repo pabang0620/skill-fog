@@ -1,7 +1,7 @@
 ---
 name: skill-fog
 description: 반복 요청 패턴을 자동 감지하여 스킬/커맨드/에이전트 생성을 제안하는 스킬. SessionStart 훅이 세션 시작 시 pending 패턴을 자동 주입하며, 사용자가 /skill-fog를 명시적으로 호출할 때도 활성화된다.
-version: 2.1.0
+version: 2.2.0
 triggers:
   - /skill-fog
 ---
