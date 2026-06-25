@@ -43,6 +43,9 @@ pending 파일이 있을 때 실행한다. 각 파일은 pid 중복, `patterns.j
 ### STEP E: 실제 파일 생성
 사용자 확인 후 파일을 생성한다. 이름 검증 규칙과 타입별 경로 규칙은 [artifact-generation.md](references/artifact-generation.md)를 로드한다.
 
+### STEP E.5: 자동 품질 개선 (선택)
+파일 생성 직후 사용자에게 1회 승인 요청한다. 승인 시 평가 에이전트를 호출하여 개선안을 적용한다. 승인 메시지, 에이전트 호출 방식, 점수 임계값, 개선 적용 절차는 [artifact-generation.md](references/artifact-generation.md)를 로드한다.
+
 ### STEP F: 완료 처리
 생성 완료 후 `patterns.json` status를 `accepted`로 업데이트하고 pending 파일을 삭제한 뒤 완료 메시지를 출력한다. 정확한 업데이트 필드와 완료 메시지는 [artifact-generation.md](references/artifact-generation.md)를 로드한다.
 

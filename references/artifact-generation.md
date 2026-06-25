@@ -153,6 +153,49 @@ Generated metadata fields:
 - `generated_name`: the created artifact name
 - `accepted_at`: current UTC timestamp formatted as `%Y-%m-%dT%H:%M:%SZ`
 
+## 품질 개선 루프 (STEP E.5)
+
+파일 생성 완료 직후 사용자에게 **1회만** 묻는다:
+
+```text
+✅ `{이름}` {타입} 생성 완료.
+자동 품질 개선을 실행할까요? agent-evaluator-v2가 평가 후 개선안을 적용합니다. [y/n]
+```
+
+### 승인한 경우
+
+`agent-evaluator-v2` 에이전트를 호출한다:
+
+```
+Agent(
+  subagent_type="agent-evaluator-v2",
+  prompt="다음 파일을 평가하고 100점 척도 점수와 라인 단위 개선안을 제공해주세요: ~/.claude/{경로}"
+)
+```
+
+| 타입 | 평가 대상 경로 |
+| --- | --- |
+| skill | `~/.claude/skills/{이름}/SKILL.md` |
+| command | `~/.claude/commands/{이름}.md` |
+| agent | `~/.claude/agents/{이름}.md` |
+
+반환된 결과 처리:
+
+- **80점 이상**: 개선 불필요. 점수를 출력하고 STEP F로 진행.
+- **80점 미만**: 제안된 라인 단위 개선안을 파일에 즉시 반영한다. 반영 후 개선된 최종 점수를 출력하고 STEP F로 진행.
+
+완료 출력 형식:
+
+```text
+품질 개선 완료: {이전_점수}점 → {최종_점수}점
+```
+
+### 거부한 경우
+
+즉시 STEP F로 진행한다.
+
+---
+
 ## Generation quality rules
 1. Single responsibility: one skill means one clear job.
 2. Clear trigger conditions: always state when to use the skill.
