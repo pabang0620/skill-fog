@@ -572,7 +572,7 @@ with open(lock_file, 'w') as lock_f:
         session_count = len(p.get('sessions', []))
         status = p.get('status', 'active')
 
-        if count >= 3 and session_count >= 2 and status not in ('accepted', 'rejected'):
+        if count >= 3 and session_count >= 2 and status not in ('accepted', 'rejected', 'snoozed'):
             pending_file = os.path.join(pending_dir, pattern_id + '.json')
             existing_pending = {}
             if os.path.exists(pending_file):

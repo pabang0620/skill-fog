@@ -50,10 +50,12 @@ fi
 
 # pending 패턴 파싱 후 stdout 출력 (Claude context에 주입됨)
 # 최대 5개, count 내림차순
-SF_PENDING_DIR="$PENDING_DIR" python3 - <<'PYEOF'
+# 제안 후 즉시 pending 파일 삭제 + patterns.json snoozed 전환 (재제안 방지)
+SF_PENDING_DIR="$PENDING_DIR" SF_PATTERNS_FILE="$HOME/.skill-fog/patterns.json" python3 - <<'PYEOF'
 import json, os, sys
 
 pending_dir = os.environ['SF_PENDING_DIR']
+patterns_file = os.environ['SF_PATTERNS_FILE']
 items = []
 
 for fname in sorted(os.listdir(pending_dir)):
@@ -67,18 +69,19 @@ for fname in sorted(os.listdir(pending_dir)):
         continue
     if data.get('status') in ('rejected', 'accepted'):
         continue
-    items.append(data)
+    pid = os.path.splitext(fname)[0]
+    items.append((fpath, pid, data))
 
 if not items:
     sys.exit(0)
 
-items.sort(key=lambda x: x.get('count', 0), reverse=True)
+items.sort(key=lambda x: x[2].get('count', 0), reverse=True)
 total = len(items)
 items = items[:5]
 
 print(f'[skill-fog] 검토 대기 중인 반복 패턴 {total}개가 있습니다.')
 print()
-for i, item in enumerate(items, 1):
+for i, (fpath, pid, item) in enumerate(items, 1):
     canonical = item.get('canonical', '').strip()
     count = item.get('count', 0)
     sessions = len(item.get('sessions', []))
@@ -92,4 +95,32 @@ for i, item in enumerate(items, 1):
 print()
 print('STEP A를 실행하세요: 각 패턴에 대해 skill / command / agent 생성을 사용자에게 제안합니다.')
 print('/skill-fog 로 수동 호출도 가능합니다.')
+
+# ── 제안 후 정리: pending 삭제 + snoozed 전환 (무시해도 다음 세션 재제안 없음) ──
+proposed_pids = [pid for _, pid, _ in items]
+
+for fpath, pid, _ in items:
+    try:
+        os.remove(fpath)
+    except Exception:
+        pass
+
+if proposed_pids and os.path.exists(patterns_file):
+    try:
+        with open(patterns_file, 'r', encoding='utf-8') as f:
+            pdata = json.load(f)
+        changed = False
+        for pid in proposed_pids:
+            p = pdata.get('patterns', {}).get(pid)
+            if p and p.get('status') == 'active':
+                p['status'] = 'snoozed'
+                changed = True
+        if changed:
+            tmp = patterns_file + '.tmp'
+            with open(tmp, 'w', encoding='utf-8') as f:
+                json.dump(pdata, f, indent=2, ensure_ascii=False)
+                f.write('\n')
+            os.replace(tmp, patterns_file)
+    except Exception:
+        pass
 PYEOF

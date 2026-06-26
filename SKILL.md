@@ -28,8 +28,8 @@ STEP A에서 제안한 패턴의 pid를 세션 내부적으로 `session_proposed
 pending 파일이 있을 때 실행한다. 각 파일은 pid 중복, `patterns.json` status, 정렬 순서, 메시지 형식을 [pattern-scoring.md](references/pattern-scoring.md)에 따라 처리한다.
 
 ### STEP B: 사용자 응답 처리
-- `나중에` / `스킵` / `skip` / `later`: status를 `active`로 되돌리고 pending 파일을 생성하여 다음 세션에서 다시 제안한다.
-- `거부` / `아니오` / `필요없어`: status를 `rejected`로 업데이트하고 pending 파일을 즉시 삭제한다.
+- `나중에` / `스킵` / `skip` / `later`: 이미 `snoozed` 상태이므로 별도 처리 없이 건너뛴다. `/skill-fog`로 언제든 다시 호출 가능하다고 안내한다.
+- `거부` / `아니오` / `필요없어`: status를 `rejected`로 업데이트하고 pending 파일이 남아있으면 삭제한다.
 - `skill` / `command` / `agent`: STEP C로 진행한다.
 
 상태 전이와 파일 쓰기 절차는 [privacy-and-redaction.md](references/privacy-and-redaction.md)를 로드한다.
@@ -60,8 +60,9 @@ cat ~/.skill-fog/patterns.json 2>/dev/null || echo '{"patterns":{}}'
 
 ## 안전 규칙
 - SKILL.md는 `patterns.json`을 읽기 전용으로 사용한다. 패턴 누적(count 증가, sessions 추가)은 `stop.sh`가 세션 종료 시에만 담당한다.
-- pending-backed 패턴은 사용자가 명시적으로 수락하거나 거부하기 전까지 `active` 상태를 유지한다.
-- 패턴 status가 `accepted` / `rejected`이면 새 pending을 생성하지 않는다.
+- 세션 시작 시 제안된 패턴은 `snoozed` 상태로 전환된다. 무시해도 다음 세션에서 재제안하지 않는다.
+- 패턴 status가 `accepted` / `rejected` / `snoozed`이면 새 pending을 생성하지 않는다.
+- `snoozed` 패턴은 `/skill-fog` 수동 호출로 목록에서 확인하고 선택해 생성할 수 있다.
 - 같은 세션 내에서 이미 질문한 패턴은 다시 묻지 않는다.
 - `rejected` 상태 패턴은 영구적으로 무시한다.
 - 생성 품질 규칙은 [artifact-generation.md](references/artifact-generation.md)를 따른다.

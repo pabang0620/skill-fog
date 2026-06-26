@@ -134,10 +134,12 @@ Output:
 검토할 패턴 번호를 선택하세요. (없으면 '종료' — 일반 대화로 복귀)
 ```
 
-When the user selects a number for an active pattern:
+When the user selects a number for an active or snoozed pattern:
 
 1. Show examples and ask: `**skill / command / agent** 중 어떤 형태로 만들까요? (건너뛰려면 '나중에')`
 2. Add that pid to `session_proposed`.
 3. Enter STEP B user-response handling.
+
+`snoozed` 패턴은 이전 세션에서 제안됐지만 무시된 패턴이다. `active` 패턴과 동일하게 처리한다.
 
 Accepted/rejected patterns are shown for visibility but are not selectable.
