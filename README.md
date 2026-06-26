@@ -80,6 +80,23 @@ Claude Code generates many internal messages that look like user patterns but ar
 
 ---
 
+## What's new in v2.3
+
+**Propose once, never repeat.**
+
+Previously, if you ignored a suggestion and kept working, the same pattern would appear again at the start of the next session — and the one after that, indefinitely.
+
+v2.3 fixes this: once a pattern is proposed, it's immediately moved to `snoozed` state. If you ignore it, it won't come up again automatically. When you're ready to act on it, use `/skill-fog` to pull up the full list including snoozed patterns and pick what to build.
+
+| Behavior | Before v2.3 | v2.3+ |
+|---|---|---|
+| Ignore the proposal | Asked again next session | Not asked again |
+| Explicitly skip ("나중에") | Re-queued for next session | Stays snoozed |
+| Explicitly reject ("거부") | Marked rejected, never again | Same |
+| Want to revisit later | — | `/skill-fog` shows snoozed patterns |
+
+---
+
 ## What's new in v2.1.0
 
 **Session-start auto-proposal via hook.**
@@ -169,6 +186,8 @@ Every time your Claude Code session ends, a Stop hook silently reads your messag
 When the same normalized pattern appears **3+ times across 2+ sessions**, skill-fog saves it as a pending suggestion in `~/.skill-fog/pending/`.
 
 At the **start of your next session**, a SessionStart hook fires before you type anything. Pending patterns are injected into Claude's context. Claude sees them and immediately asks what you want to do — no commands needed.
+
+After proposing, skill-fog immediately marks the patterns as **snoozed** and removes the pending files. If you ignore the proposal and continue working, you won't be asked again next session. Use `/skill-fog` to revisit snoozed patterns whenever you're ready.
 
 ### Step 3 — Generate
 
@@ -301,6 +320,7 @@ All pattern data lives in `~/.skill-fog/` on your machine. Nothing is sent anywh
 - [x] **System noise filtering — Claude Code internal messages excluded (v2.2.0)**
 - [x] **Smart type recommendation with auto-accept (v2.2.0)**
 - [x] **Bundled evaluators — skill-evaluator + agent-evaluator-v2 (v2.2.0)**
+- [x] **Propose-once snooze — ignored proposals never repeat (v2.3.1)**
 - [ ] Interactive review TUI (`skill-fog review --interactive`)
 - [ ] Pattern similarity clustering (catch near-duplicates)
 - [ ] Team export/import (`skill-fog export --team`)
