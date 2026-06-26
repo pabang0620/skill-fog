@@ -1,79 +1,82 @@
 ---
 name: skill-fog
-description: 반복 요청 패턴을 자동 감지하여 스킬/커맨드/에이전트 생성을 제안하는 스킬. SessionStart 훅이 세션 시작 시 pending 패턴을 자동 주입하며, 사용자가 /skill-fog를 명시적으로 호출할 때도 활성화된다.
-version: 2.2.0
+description: Detects repeated request patterns and proposes generating a skill, command, or agent. A SessionStart hook injects pending patterns at session start, and it also activates when the user explicitly runs /skill-fog.
+version: 2.4.0
 triggers:
   - /skill-fog
 ---
 
-# skill-fog 스킬
+# skill-fog skill
 
-## 역할
-사용자의 반복 요청 패턴을 감지하여, 임계값 도달 시 스킬/커맨드/에이전트 생성을 제안하는 도우미.
+## Role
+A helper that detects the user's repeated request patterns and, once a threshold is reached, proposes generating a skill, command, or agent.
 
-## 활성화 조건
-- **SessionStart 훅**이 세션 시작 시 pending 패턴을 컨텍스트에 자동 주입했을 때 → STEP A 실행
-- 사용자가 `/skill-fog` 를 명시적으로 입력했을 때 → STEP A 실행
+## Language rule (IMPORTANT)
+Always communicate with the user in the **same language the user is using**. Every template and message in this skill and its references is written in English as a reference — translate the user-facing text into the user's language before showing it. (e.g. if the user writes in Korean, respond in Korean.)
 
-## 세션 시작 시 동작
-SessionStart 훅(`~/.skill-fog/hooks/session-start.sh`)이 세션 시작(startup/resume) 시 자동 실행된다.
-pending 패턴이 있으면 해당 정보가 컨텍스트에 주입되어 `[skill-fog] 검토 대기 중인 반복 패턴 N개가 있습니다.` 메시지가 보인다.
-이 메시지가 보이면 즉시 STEP A를 실행한다.
-STEP A에서 제안한 패턴의 pid를 세션 내부적으로 `session_proposed` 집합에 추가한다(이중 발동 방지).
-세션이 새로 시작되면 `session_proposed`는 항상 빈 집합으로 초기화된다.
+## Activation conditions
+- When the **SessionStart hook** injects pending patterns into context at session start → run STEP A.
+- When the user explicitly types `/skill-fog` → run STEP A.
 
-## 단계 라우팅
+## Behavior at session start
+The SessionStart hook (`~/.skill-fog/hooks/session-start.sh`) runs automatically at session start (startup/resume).
+If pending patterns exist, that information is injected into context and a `[skill-fog] You have N repeated pattern(s) pending review.` message appears.
+When you see this message, run STEP A immediately.
+Add the pid of each proposed pattern to the in-session `session_proposed` set (prevents double-firing).
+`session_proposed` is always reset to an empty set when a new session starts.
 
-### STEP A: 세션 시작 시 pending 제안
-pending 파일이 있을 때 실행한다. 각 파일은 pid 중복, `patterns.json` status, 정렬 순서, 메시지 형식을 [pattern-scoring.md](references/pattern-scoring.md)에 따라 처리한다.
+## Step routing
 
-### STEP B: 사용자 응답 처리
-- `나중에` / `스킵` / `skip` / `later`: 이미 `snoozed` 상태이므로 별도 처리 없이 건너뛴다. `/skill-fog`로 언제든 다시 호출 가능하다고 안내한다.
-- `거부` / `아니오` / `필요없어`: status를 `rejected`로 업데이트하고 pending 파일이 남아있으면 삭제한다.
-- `skill` / `command` / `agent`: STEP C로 진행한다.
+### STEP A: Propose pending patterns at session start
+Run when pending patterns were injected. Handle pid de-duplication, `patterns.json` status, sort order, and message format per [pattern-scoring.md](references/pattern-scoring.md).
 
-상태 전이와 파일 쓰기 절차는 [privacy-and-redaction.md](references/privacy-and-redaction.md)를 로드한다.
+### STEP B: Handle the user's response
+- `later` / `skip` / `나중에` / `스킵`: The pattern is already `snoozed`. Do nothing further; just tell the user they can call it up anytime with `/skill-fog`.
+- `reject` / `no` / `거부` / `아니오`: Update status to `rejected` and delete the pending file if it still exists.
+- `skill` / `command` / `agent`: Proceed to STEP C.
 
-### STEP C: 유사 항목 스캔
-선택 전 기존 skill, command, agent 파일과 겹치는지 확인한다. 스캔 경로와 유사 항목 발견 시 질문 형식은 [artifact-generation.md](references/artifact-generation.md)를 로드한다.
+State transitions and file writes are described in [privacy-and-redaction.md](references/privacy-and-redaction.md).
 
-### STEP D: 미리보기 생성 및 확인
-실제 파일 생성 전, 선택 타입별 미리보기를 보여준다. skill/command/agent 템플릿, examples 섹션 포함 규칙, 확인 질문은 [artifact-generation.md](references/artifact-generation.md)를 로드한다.
+### STEP C: Scan for similar items
+Before the choice, check whether it overlaps with existing skill, command, or agent files. Scan paths and the question format when a similar item is found are in [artifact-generation.md](references/artifact-generation.md).
 
-### STEP E: 실제 파일 생성
-사용자 확인 후 파일을 생성한다. 이름 검증 규칙과 타입별 경로 규칙은 [artifact-generation.md](references/artifact-generation.md)를 로드한다.
+### STEP D: Generate preview and confirm
+Before actually creating the file, show a preview for the chosen type. Skill/command/agent templates, the examples-section inclusion rules, and the confirmation question are in [artifact-generation.md](references/artifact-generation.md).
 
-### STEP E.5: 자동 품질 개선 (선택)
-파일 생성 직후 사용자에게 1회 승인 요청한다. 승인 시 평가 에이전트를 호출하여 개선안을 적용한다. 승인 메시지, 에이전트 호출 방식, 점수 임계값, 개선 적용 절차는 [artifact-generation.md](references/artifact-generation.md)를 로드한다.
+### STEP E: Create the actual file
+After user confirmation, create the file. Name-validation rules and per-type path rules are in [artifact-generation.md](references/artifact-generation.md).
 
-### STEP F: 완료 처리
-생성 완료 후 `patterns.json` status를 `accepted`로 업데이트하고 pending 파일을 삭제한 뒤 완료 메시지를 출력한다. 정확한 업데이트 필드와 완료 메시지는 [artifact-generation.md](references/artifact-generation.md)를 로드한다.
+### STEP E.5: Automatic quality improvement (optional)
+Right after file creation, ask the user once for approval. On approval, call the evaluator agent and apply its suggestions. The approval message, agent invocation, score threshold, and improvement procedure are in [artifact-generation.md](references/artifact-generation.md).
 
-## 수동 호출 (/skill-fog)
-사용자가 `/skill-fog` 를 명시적으로 입력한 경우:
+### STEP F: Completion
+After creation, update `patterns.json` status to `accepted`, delete the pending file, and print the completion message. The exact update fields and completion message are in [artifact-generation.md](references/artifact-generation.md).
+
+## Manual invocation (/skill-fog)
+When the user explicitly types `/skill-fog`:
 
 ```bash
 cat ~/.skill-fog/patterns.json 2>/dev/null || echo '{"patterns":{}}'
 ```
 
-출력 형식, active 패턴 선택 처리, `session_proposed` 업데이트, STEP B 진입 조건은 [pattern-scoring.md](references/pattern-scoring.md)를 로드한다.
+The output format, handling of active pattern selection, `session_proposed` updates, and STEP B entry conditions are in [pattern-scoring.md](references/pattern-scoring.md).
 
-## 안전 규칙
-- SKILL.md는 `patterns.json`을 읽기 전용으로 사용한다. 패턴 누적(count 증가, sessions 추가)은 `stop.sh`가 세션 종료 시에만 담당한다.
-- 세션 시작 시 제안된 패턴은 `snoozed` 상태로 전환된다. 무시해도 다음 세션에서 재제안하지 않는다.
-- 패턴 status가 `accepted` / `rejected` / `snoozed`이면 새 pending을 생성하지 않는다.
-- `snoozed` 패턴은 `/skill-fog` 수동 호출로 목록에서 확인하고 선택해 생성할 수 있다.
-- 같은 세션 내에서 이미 질문한 패턴은 다시 묻지 않는다.
-- `rejected` 상태 패턴은 영구적으로 무시한다.
-- 생성 품질 규칙은 [artifact-generation.md](references/artifact-generation.md)를 따른다.
-- 민감정보, redaction, 원자적 쓰기, 로컬 파일 상태 전이는 [privacy-and-redaction.md](references/privacy-and-redaction.md)를 따른다.
-- 문제 진단이 필요할 때만 [troubleshooting.md](references/troubleshooting.md)를 로드한다.
+## Safety rules
+- SKILL.md uses `patterns.json` as read-only. Pattern accumulation (count increment, session additions) is handled only by `stop.sh` at session end.
+- Patterns proposed at session start are moved to `snoozed` state. If ignored, they are not re-proposed in the next session.
+- If a pattern's status is `accepted` / `rejected` / `snoozed`, do not create a new pending file.
+- `snoozed` patterns can be reviewed and selected for generation via the `/skill-fog` manual invocation list.
+- Do not ask again about a pattern already proposed within the same session.
+- `rejected` patterns are ignored permanently.
+- Follow the generation quality rules in [artifact-generation.md](references/artifact-generation.md).
+- Follow [privacy-and-redaction.md](references/privacy-and-redaction.md) for sensitive data, redaction, atomic writes, and local file state transitions.
+- Load [troubleshooting.md](references/troubleshooting.md) only when diagnosis is needed.
 
 ## Reference Loading
-| 필요 상황 | 로드할 reference | 포함 내용 |
+| Situation | Reference to load | Contents |
 | --- | --- | --- |
-| pending review, threshold checks, manual `/skill-fog` listing | [pattern-scoring.md](references/pattern-scoring.md) | 정규화, pid 생성, 임계값 조건, pending 정렬, 제안 메시지 |
-| scoring/threshold checks | [pattern-scoring.md](references/pattern-scoring.md) | `THRESHOLD_MET`, `TRACKING`, `NO_DATA` 결과 해석 |
-| artifact generation | [artifact-generation.md](references/artifact-generation.md) | 유사 항목 스캔, 미리보기 템플릿, 이름/경로 규칙, 완료 처리 |
-| privacy/redaction, status updates, pending writes | [privacy-and-redaction.md](references/privacy-and-redaction.md) | active/rejected/accepted 전이, pending 생성/삭제, 원자적 JSON 쓰기 |
-| troubleshooting | [troubleshooting.md](references/troubleshooting.md) | 누락 파일, 깨진 JSON, 중복 제안, pack/설치 문제 진단 |
+| pending review, threshold checks, manual `/skill-fog` listing | [pattern-scoring.md](references/pattern-scoring.md) | normalization, pid generation, threshold conditions, pending sort, proposal messages |
+| scoring/threshold checks | [pattern-scoring.md](references/pattern-scoring.md) | interpreting `THRESHOLD_MET`, `TRACKING`, `NO_DATA` results |
+| artifact generation | [artifact-generation.md](references/artifact-generation.md) | similar-item scan, preview templates, name/path rules, completion handling |
+| privacy/redaction, status updates, pending writes | [privacy-and-redaction.md](references/privacy-and-redaction.md) | active/rejected/accepted transitions, pending create/delete, atomic JSON writes |
+| troubleshooting | [troubleshooting.md](references/troubleshooting.md) | diagnosing missing files, broken JSON, duplicate proposals, pack/install issues |

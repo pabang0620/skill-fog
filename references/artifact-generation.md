@@ -2,6 +2,8 @@
 
 Load this reference when the user chooses `skill`, `command`, or `agent`.
 
+All user-facing text below is in English as a reference — translate it into the user's language before showing it.
+
 ## Similar item scan
 Before generating a preview, check whether the requested artifact overlaps with existing files.
 
@@ -14,10 +16,10 @@ find ~/.claude/agents/ -name "*.md" 2>/dev/null
 If a similar item is found, ask:
 
 ```text
-기존 `{기존_이름}`과 유사한 기능으로 보입니다.
-- 합치기: 기존 파일에 이 패턴을 예시로 추가
-- 별도 생성: 새 파일로 분리
-어떻게 하시겠어요?
+This looks similar to the existing `{existing_name}`.
+- Merge: add this pattern as an example to the existing file
+- Create separately: split into a new file
+Which would you like?
 ```
 
 If no similar item is found, proceed directly to preview generation.
@@ -28,37 +30,37 @@ Show a preview before creating a file.
 For skill previews, include sections based on available examples:
 
 - `examples[0]` is always included.
-- Add the "예시 2" section only when `examples[1]` exists.
-- Add the "예시 3" section only when `examples[2]` exists.
+- Add the "Example 2" section only when `examples[1]` exists.
+- Add the "Example 3" section only when `examples[2]` exists.
 
 Skill preview:
 
 ```markdown
 ---
-name: {자동생성_이름}
-description: {3인칭으로 작성한 설명}
+name: {auto_generated_name}
+description: {description written in the third person}
 ---
 
-# {스킬명}
+# {skill name}
 
-## 역할
-{관찰된 패턴 기반 역할 설명}
+## Role
+{role description based on the observed pattern}
 
-## 언제 사용하나
-{트리거 조건 - 명확하게}
+## When to use
+{trigger conditions — be explicit}
 
-## 동작 방식
-{단계별 절차}
+## How it works
+{step-by-step procedure}
 
-## 예시
-### 예시 1
+## Examples
+### Example 1
 {examples[0] — use the redacted/sanitized form when the original includes secrets, private URLs, local absolute paths, credentials, tokens, or personal data}
 
-### 예시 2
-{examples[1] — examples[1]이 없으면 이 섹션 전체 생략; use the redacted/sanitized form when needed}
+### Example 2
+{examples[1] — omit this entire section if examples[1] does not exist; use the redacted/sanitized form when needed}
 
-### 예시 3
-{examples[2] — examples[2]가 없으면 이 섹션 전체 생략; use the redacted/sanitized form when needed}
+### Example 3
+{examples[2] — omit this entire section if examples[2] does not exist; use the redacted/sanitized form when needed}
 
 ## Completion Evidence
 - Generated preview states the concrete evidence required to consider the artifact complete.
@@ -70,11 +72,11 @@ Command preview:
 
 ```markdown
 ---
-name: {커맨드명}
-description: {설명}
+name: {command name}
+description: {description}
 ---
 
-/{커맨드명} 커맨드 동작 설명...
+Description of the /{command name} command behavior...
 
 ## Completion Evidence
 - Command output includes the concrete success evidence.
@@ -86,17 +88,17 @@ Agent preview:
 
 ```markdown
 ---
-name: {에이전트명}
-description: {설명}
+name: {agent name}
+description: {description}
 model: claude-sonnet-4-6
 ---
 
-# {에이전트명} 에이전트
+# {agent name} agent
 
-## 역할
+## Role
 ...
 
-## 실행 절차
+## Execution procedure
 ...
 
 ## Completion Evidence
@@ -108,26 +110,26 @@ model: claude-sonnet-4-6
 After the preview, ask:
 
 ```text
-이대로 생성할까요? (수정하려면 원하는 내용을 말씀해주세요)
+Create it as-is? (tell me what to change if you want edits)
 ```
 
 ## Name validation
 - Skill names: English lowercase letters, numbers, and hyphen (`-`) only, following the official Skill spec, maximum 64 characters.
 - Command and agent names: English lowercase letters, numbers, hyphen (`-`), and underscore (`_`) only.
 - If special characters, spaces, or slashes are included, replace spaces with hyphens and remove the rest.
-- Example: `"코드 리뷰"` becomes `code-review`; `"PR/MR check"` becomes `pr-mr-check`.
+- Example: `"code review"` becomes `code-review`; `"PR/MR check"` becomes `pr-mr-check`.
 
 ## Path rules
 | Type | Path |
 | --- | --- |
-| skill | `~/.claude/skills/{이름}/SKILL.md` |
-| command | `~/.claude/commands/{이름}.md` |
-| agent | `~/.claude/agents/{이름}.md` |
+| skill | `~/.claude/skills/{name}/SKILL.md` |
+| command | `~/.claude/commands/{name}.md` |
+| agent | `~/.claude/agents/{name}.md` |
 
 For a skill:
 
 ```bash
-mkdir -p ~/.claude/skills/{이름}
+mkdir -p ~/.claude/skills/{name}
 ```
 
 Then write the previewed content with the file-write tool.
@@ -142,8 +144,8 @@ After file creation:
 Completion message:
 
 ```text
-`{이름}` {타입}이 생성되었습니다: ~/.claude/{경로}
-다음 메시지부터 바로 사용할 수 있습니다.
+The `{name}` {type} has been created: ~/.claude/{path}
+You can use it starting from your next message.
 ```
 
 Generated metadata fields:
@@ -153,46 +155,46 @@ Generated metadata fields:
 - `generated_name`: the created artifact name
 - `accepted_at`: current UTC timestamp formatted as `%Y-%m-%dT%H:%M:%SZ`
 
-## 품질 개선 루프 (STEP E.5)
+## Quality improvement loop (STEP E.5)
 
-파일 생성 완료 직후 사용자에게 **1회만** 묻는다:
+Right after the file is created, ask the user **once**:
 
 ```text
-✅ `{이름}` {타입} 생성 완료.
-자동 품질 개선을 실행할까요? [y/n]
+✅ `{name}` {type} created.
+Run automatic quality improvement? [y/n]
 ```
 
-### 승인한 경우
+### If approved
 
-타입에 따라 다른 평가 에이전트를 호출한다:
+Call a different evaluator agent depending on the type:
 
-| 타입 | 평가 에이전트 | 평가 대상 경로 |
+| Type | Evaluator agent | Target path |
 | --- | --- | --- |
-| skill | `skill-evaluator` | `~/.claude/skills/{이름}/SKILL.md` |
-| command | `agent-evaluator-v2` | `~/.claude/commands/{이름}.md` |
-| agent | `agent-evaluator-v2` | `~/.claude/agents/{이름}.md` |
+| skill | `skill-evaluator` | `~/.claude/skills/{name}/SKILL.md` |
+| command | `agent-evaluator-v2` | `~/.claude/commands/{name}.md` |
+| agent | `agent-evaluator-v2` | `~/.claude/agents/{name}.md` |
 
 ```
 Agent(
-  subagent_type="{타입별 평가 에이전트}",
-  prompt="다음 파일을 평가하고 100점 척도 점수와 라인 단위 개선안을 제공해주세요: ~/.claude/{경로}"
+  subagent_type="{evaluator agent for the type}",
+  prompt="Evaluate the following file and provide a 100-point score and line-level improvements: ~/.claude/{path}"
 )
 ```
 
-반환된 결과 처리:
+Handling the returned result:
 
-- **80점 이상**: 개선 불필요. 점수를 출력하고 STEP F로 진행.
-- **80점 미만**: 제안된 라인 단위 개선안을 파일에 즉시 반영한다. 반영 후 개선된 최종 점수를 출력하고 STEP F로 진행.
+- **80 or above**: No improvement needed. Print the score and proceed to STEP F.
+- **Below 80**: Apply the suggested line-level improvements to the file immediately. After applying, print the improved final score and proceed to STEP F.
 
-완료 출력 형식:
+Completion output format:
 
 ```text
-품질 개선 완료: {이전_점수}점 → {최종_점수}점
+Quality improvement complete: {previous_score} → {final_score}
 ```
 
-### 거부한 경우
+### If declined
 
-즉시 STEP F로 진행한다.
+Proceed directly to STEP F.
 
 ---
 
@@ -200,5 +202,5 @@ Agent(
 1. Single responsibility: one skill means one clear job.
 2. Clear trigger conditions: always state when to use the skill.
 3. Few-shot examples: include three observed examples when available, but only after redacting or sanitizing secrets, private URLs, local absolute paths, credentials, tokens, and personal data.
-4. Third-person descriptions: use forms like "~하는 스킬" or "~를 담당하는 에이전트".
+4. Third-person descriptions: use forms like "a skill that ..." or "an agent responsible for ...".
 5. Avoid over-abstraction: stay faithful to the observed pattern.

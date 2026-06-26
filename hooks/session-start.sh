@@ -79,7 +79,7 @@ items.sort(key=lambda x: x[2].get('count', 0), reverse=True)
 total = len(items)
 items = items[:5]
 
-print(f'[skill-fog] 검토 대기 중인 반복 패턴 {total}개가 있습니다.')
+print(f'[skill-fog] You have {total} repeated pattern(s) pending review.')
 print()
 for i, (fpath, pid, item) in enumerate(items, 1):
     canonical = item.get('canonical', '').strip()
@@ -88,13 +88,14 @@ for i, (fpath, pid, item) in enumerate(items, 1):
     examples = item.get('examples', [])
     example = examples[0][:80].strip() if examples else ''
 
-    print(f'{i}. "{canonical}" — {count}회, {sessions}세션')
+    print(f'{i}. "{canonical}" — {count}x, {sessions} session(s)')
     if example and example.lower() != canonical.lower():
-        print(f'   예시: {example}')
+        print(f'   example: {example}')
 
 print()
-print('STEP A를 실행하세요: 각 패턴에 대해 skill / command / agent 생성을 사용자에게 제안합니다.')
-print('/skill-fog 로 수동 호출도 가능합니다.')
+print('Run STEP A: for each pattern, propose creating a skill / command / agent to the user.')
+print('Manual invocation is also available via /skill-fog.')
+print('(Respond in the same language the user is using.)')
 
 # ── 제안 후 정리: pending 삭제 + snoozed 전환 (무시해도 다음 세션 재제안 없음) ──
 proposed_pids = [pid for _, pid, _ in items]

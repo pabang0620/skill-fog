@@ -63,11 +63,11 @@ print('TRACKING')
 - STEP A execution: add each pending pid only after its proposal is shown to the user.
 - THRESHOLD_MET handling: add the pid that was proposed.
 
-If the script prints `THRESHOLD_MET:...`, immediately print:
+If the script prints `THRESHOLD_MET:...`, immediately print (translated into the user's language):
 
 ```text
-[skill-fog] "{canonical}" 패턴이 {count}회 반복됐어요.
-추천: {타입} ({한 줄 이유}) — 바로 만들까요? (엔터로 확인 / 다른 타입 입력 / 안함)
+[skill-fog] The pattern "{canonical}" has repeated {count} times.
+Recommended: {type} ({one-line reason}) — create it now? (Enter to confirm / type another type / skip)
 ```
 
 Then add that pid to `session_proposed` to prevent duplicate firing.
@@ -88,30 +88,30 @@ When multiple pending files exist, sort by `snoozed_at` ascending, oldest first.
 
 **Before showing the list, classify each pattern into a recommended type using these rules:**
 
-| 조건 | 추천 타입 | 이유 |
+| Condition | Recommended type | Reason |
 |------|-----------|------|
-| 단순 반복 실행 ("해줘", "실행해", "확인해줘") | `command` | 한 번 실행하는 트리거성 작업 |
-| 행동 지침·절차 기억 ("이렇게 해줘", "할 때마다") | `skill` | Claude 동작 방식 가이드 |
-| 도구 사용·파일 탐색·분석 필요 ("분석해", "찾아줘", "정리해줘") | `agent` | 멀티스텝 자율 실행 필요 |
-| 상태 복구·재개 ("계속진행해줘", "이어서 해줘") | `command` | 단발성 재개 트리거 |
-| 프로젝트 컨텍스트 요약·파악 ("정리해봐", "파악했어?") | `command` | 현재 상태 즉시 조회 |
+| Simple repeated execution ("do X", "run X", "check X") | `command` | A one-shot trigger task |
+| Remembering behavior/procedure ("do it like this", "every time you...") | `skill` | Guides how Claude behaves |
+| Needs tool use / file exploration / analysis ("analyze", "find", "organize") | `agent` | Needs multi-step autonomous execution |
+| State recovery / resumption ("continue", "resume from where we left off") | `command` | A one-shot resume trigger |
+| Project context summary / understanding ("summarize", "did you get the gist?") | `command` | Instant current-state lookup |
 
-**Show ALL pending patterns at once with recommendations, then wait for the user's response.**
+**Show ALL pending patterns at once with recommendations, then wait for the user's response. Translate the message into the user's language.**
 
 ```text
-[skill-fog] 반복 패턴 {N}개를 자동화할 수 있어요.
+[skill-fog] I can automate {N} repeated pattern(s).
 
-1. "{canonical}" ({count}회/{sessions}세션) → 추천: command (재개 트리거)
-2. "{canonical}" ({count}회/{sessions}세션) → 추천: skill (배포 절차 기억)
-3. "{canonical}" ({count}회/{sessions}세션) → 추천: agent (분석 필요)
+1. "{canonical}" ({count}x/{sessions} sessions) → recommended: command (resume trigger)
+2. "{canonical}" ({count}x/{sessions} sessions) → recommended: skill (remember deploy steps)
+3. "{canonical}" ({count}x/{sessions} sessions) → recommended: agent (needs analysis)
 
-추천대로 진행할까요? (엔터 또는 "자동")
-개별 변경: "1 스킬, 3 안함" 처럼 입력
+Proceed with the recommendations? (Enter or "auto")
+To change individually: type e.g. "1 skill, 3 none"
 ```
 
-- 사용자가 엔터 or "자동" or "응" → 모든 패턴을 추천 타입으로 일괄 생성
-- 개별 응답 시 해당 항목만 변경, 나머지는 추천 타입 적용
-- "안함"으로 지정한 항목은 STEP B에서 rejected 처리
+- User presses Enter / "auto" / "yes" → generate every pattern with its recommended type
+- On an individual response, change only that item; apply the recommended type to the rest
+- Items marked "none" / "skip" are handled as rejected in STEP B
 
 User responds, then enter STEP B per item.
 
@@ -122,24 +122,24 @@ Read current patterns:
 cat ~/.skill-fog/patterns.json 2>/dev/null || echo '{"patterns":{}}'
 ```
 
-Output:
+Output (translate into the user's language):
 
 ```text
-[skill-fog] 현재까지 감지된 패턴:
+[skill-fog] Patterns detected so far:
 
-1. `{canonical}` — {count}회 / {sessions 배열의 길이}개 세션 / 상태: {status}
-2. `{canonical}` — {count}회 / {sessions 배열의 길이}개 세션 / 상태: {status}
+1. `{canonical}` — {count}x / {length of sessions array} session(s) / status: {status}
+2. `{canonical}` — {count}x / {length of sessions array} session(s) / status: {status}
 ...
 
-검토할 패턴 번호를 선택하세요. (없으면 '종료' — 일반 대화로 복귀)
+Pick a pattern number to review. (Type 'exit' if none — return to normal conversation.)
 ```
 
 When the user selects a number for an active or snoozed pattern:
 
-1. Show examples and ask: `**skill / command / agent** 중 어떤 형태로 만들까요? (건너뛰려면 '나중에')`
+1. Show examples and ask: `Which form should I create — **skill / command / agent**? (type 'later' to skip)`
 2. Add that pid to `session_proposed`.
 3. Enter STEP B user-response handling.
 
-`snoozed` 패턴은 이전 세션에서 제안됐지만 무시된 패턴이다. `active` 패턴과 동일하게 처리한다.
+A `snoozed` pattern was proposed in a previous session but ignored. Handle it the same as an `active` pattern.
 
 Accepted/rejected patterns are shown for visibility but are not selectable.

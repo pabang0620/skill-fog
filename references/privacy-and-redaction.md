@@ -28,37 +28,34 @@ os.replace(pf + '.tmp', pf)
 ```
 
 ## Later / skip response
-For `나중에`, `스킵`, `skip`, or `later`:
+For `later`, `skip`, `나중에`, or `스킵`:
 
-- Set the pattern status back to `active`.
-- Create or replace the pending file so the next session proposes it again.
-- Include `snoozed_at` with current UTC timestamp formatted as `%Y-%m-%dT%H:%M:%SZ`.
-- Tell the user: `알겠습니다. 다음 세션에서 다시 확인할게요.`
+- The SessionStart hook already moved the pattern to `snoozed` and removed the pending file when it was proposed, so **no state change is needed**.
+- Do not re-create the pending file. A `snoozed` pattern is not re-proposed automatically next session.
+- Tell the user (in their language): `Got it. It won't come up again automatically — run /skill-fog anytime to revisit it.`
+
+(If for any reason the status is still `active` and a pending file remains, set the status to `snoozed` and delete the pending file so it is not re-proposed.)
 
 ```python
 import json, os
-from datetime import datetime, timezone
 
 pf = os.path.expanduser('~/.skill-fog/patterns.json')
 pid = 'PATTERN_ID'
 pending_dir = os.path.expanduser('~/.skill-fog/pending')
-os.makedirs(pending_dir, exist_ok=True)
-now = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 with open(pf) as f:
     d = json.load(f)
-p = d['patterns'].get(pid, {})
-if p:
-    d['patterns'][pid]['status'] = 'active'
+if pid in d['patterns'] and d['patterns'][pid].get('status') == 'active':
+    d['patterns'][pid]['status'] = 'snoozed'
     with open(pf + '.tmp', 'w') as f:
         json.dump(d, f, ensure_ascii=False, indent=2)
     os.replace(pf + '.tmp', pf)
-    pending_data = {'pid': pid, 'canonical': p.get('canonical', ''), 'count': p.get('count', 0), 'sessions': p.get('sessions', []), 'examples': p.get('examples', []), 'status': 'active', 'snoozed_at': now}
-    with open(os.path.join(pending_dir, pid + '.json'), 'w') as f:
-        json.dump(pending_data, f, ensure_ascii=False, indent=2)
+pending_file = os.path.join(pending_dir, pid + '.json')
+if os.path.exists(pending_file):
+    os.remove(pending_file)
 ```
 
 ## Reject response
-For `거부`, `아니오`, or `필요없어`:
+For `reject`, `no`, `거부`, or `아니오`:
 
 - Set the pattern status to `rejected`.
 - Delete the pending file immediately.
@@ -87,7 +84,7 @@ from datetime import datetime, timezone
 pf = os.path.expanduser('~/.skill-fog/patterns.json')
 pid = 'PATTERN_ID'
 gtype = 'skill'
-gname = '생성된_이름'
+gname = 'generated_name'
 now = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 with open(pf) as f: d = json.load(f)
 if pid in d['patterns']:

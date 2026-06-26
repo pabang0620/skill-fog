@@ -97,6 +97,24 @@ v2.3 fixes this: once a pattern is proposed, it's immediately moved to `snoozed`
 
 ---
 
+## What's new in v2.4
+
+**Speaks your language.**
+
+Previously all proposals were hardcoded in Korean. v2.4 makes every user-facing message English by default and instructs Claude to **respond in the same language you're using** — so if you chat in English you get English proposals, and Korean users still get Korean. Korean input words like `나중에` (later) and `거부` (reject) are still recognized.
+
+```
+[skill-fog] You have 3 repeated pattern(s) pending review.
+
+1. "deploy the frontend build to staging" — 4x, 3 sessions → recommended: command (resume trigger)
+2. "summarize the overall scope of the project" — 3x, 2 sessions → recommended: command (context lookup)
+3. "find every place that calls the old API" — 3x, 3 sessions → recommended: agent (needs analysis)
+
+Proceed with the recommendations? (Enter or "auto")
+```
+
+---
+
 ## What's new in v2.1.0
 
 **Session-start auto-proposal via hook.**
@@ -321,6 +339,7 @@ All pattern data lives in `~/.skill-fog/` on your machine. Nothing is sent anywh
 - [x] **Smart type recommendation with auto-accept (v2.2.0)**
 - [x] **Bundled evaluators — skill-evaluator + agent-evaluator-v2 (v2.2.0)**
 - [x] **Propose-once snooze — ignored proposals never repeat (v2.3.1)**
+- [x] **Internationalization — English by default, mirrors the user's language (v2.4.0)**
 - [ ] Interactive review TUI (`skill-fog review --interactive`)
 - [ ] Pattern similarity clustering (catch near-duplicates)
 - [ ] Team export/import (`skill-fog export --team`)

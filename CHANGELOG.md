@@ -4,6 +4,33 @@ All notable changes to this package are documented here.
 
 ## Unreleased
 
+## 2.4.0
+
+### Changed
+- **Internationalization**: all user-facing output is now English by default, and SKILL.md/references instruct Claude to **respond in the same language the user is using**. English users now get English proposals; Korean users still get Korean. Korean input trigger words (`나중에`, `거부`, etc.) remain recognized.
+- `SKILL.md`: fully translated to English; added an explicit language-mirroring rule.
+- `hooks/session-start.sh`: injected proposal text translated to English with a "respond in the user's language" reminder.
+- `references/pattern-scoring.md`, `references/artifact-generation.md`: proposal/preview/completion templates translated to English.
+- `install.sh` / `uninstall.sh`: the CLAUDE.md trigger block is now English (marker `# skill-fog: pattern detection`). Install migrates the legacy Korean block; uninstall removes both old and new markers.
+
+### Fixed
+- `references/privacy-and-redaction.md`: the "later/skip" section no longer contradicts snooze — it now reflects that a proposed pattern is already `snoozed` and is not re-queued.
+
+## 2.3.1
+
+### Fixed
+- **Propose-once snooze**: once a pattern is proposed at session start, it is immediately moved to `snoozed` and its pending file removed, so ignoring a proposal no longer re-asks every session. `stop.sh` excludes `snoozed` from pending re-promotion. Revisit anytime via `/skill-fog`.
+
+## 2.3.0
+
+### Added
+- **System noise filtering** (`hooks/stop.sh`): Claude Code internal messages (`[request interrupted]`, `<local-command-stdout>`, `this session is being continued`, etc.) are filtered at collection time.
+- **Smart type recommendation**: each pending pattern is classified into a recommended skill/command/agent with a one-line reason; press Enter to accept all.
+- **Bundled evaluators**: `skill-evaluator` and `agent-evaluator-v2` are included in the package and installed to `~/.claude/agents/`.
+
+### Fixed
+- `uninstall.sh`: now removes the bundled evaluator agents on uninstall.
+
 ## 2.2.0
 
 ### Added

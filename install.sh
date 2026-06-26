@@ -389,17 +389,32 @@ register_hook() {
 register_claude_md() {
   CURRENT_STEP="register_claude_md"
   local claude_md="$HOME/.claude/CLAUDE.md"
-  local marker="# skill-fog: 대화 중 반복 패턴 감지"
+  local marker="# skill-fog: pattern detection"
+  local old_marker="# skill-fog: 대화 중 반복 패턴 감지"
 
   if [ -f "$claude_md" ] && grep -q "$marker" "$claude_md"; then
     info "CLAUDE.md already configured"
     return
   fi
 
+  # 구버전(한국어) 블록이 있으면 먼저 제거하여 중복/고아 방지
+  if [ -f "$claude_md" ] && grep -q "$old_marker" "$claude_md"; then
+    SF_CLAUDE_MD="$claude_md" python3 - <<'PYEOF'
+import os, re
+claude_md = os.environ['SF_CLAUDE_MD']
+with open(claude_md, 'r', encoding='utf-8') as f:
+    content = f.read()
+content = re.sub(r'\n# skill-fog: 대화 중 반복 패턴 감지.*?(?=\n#|\Z)', '', content, flags=re.DOTALL)
+with open(claude_md, 'w', encoding='utf-8') as f:
+    f.write(content)
+PYEOF
+    info "Migrated legacy skill-fog entry in CLAUDE.md"
+  fi
+
   cat >> "$claude_md" << 'CLAUDEMD'
 
-# skill-fog: 대화 중 반복 패턴 감지 및 스킬 자동 생성 (자동 로드)
-skill-fog 스킬을 항상 활성 상태로 유지한다. system-reminder에 "[skill-fog]" 텍스트가 포함된 경우, 사용자 메시지가 무엇이든 관계없이 반드시 첫 번째 응답으로 STEP A를 실행하여 패턴을 제안한다. 사용자가 "안녕" 같은 무관한 메시지를 보내도 skill-fog 제안이 먼저다. /skill-fog 수동 호출 시에도 동일하게 동작한다.
+# skill-fog: pattern detection & auto-generation (always loaded)
+Keep the skill-fog skill always active. When a system-reminder contains the text "[skill-fog]", your FIRST response must run STEP A to propose patterns — regardless of what the user's message says. Even if the user sends an unrelated message like "hi", the skill-fog proposal comes first. The same applies when /skill-fog is invoked manually. Always respond in the same language the user is using.
 CLAUDEMD
 
   success "skill-fog registered in CLAUDE.md"

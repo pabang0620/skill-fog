@@ -313,14 +313,15 @@ remove_data() {
 # ─────────────────────────────────────────────
 remove_claude_md() {
   local claude_md="$HOME/.claude/CLAUDE.md"
-  local marker="# skill-fog: 대화 중 반복 패턴 감지"
+  local marker="# skill-fog: pattern detection"
+  local old_marker="# skill-fog: 대화 중 반복 패턴 감지"
 
   if [ ! -f "$claude_md" ]; then
     info "CLAUDE.md not found, skipping."
     return
   fi
 
-  if ! grep -q "$marker" "$claude_md"; then
+  if ! grep -q "$marker" "$claude_md" && ! grep -q "$old_marker" "$claude_md"; then
     info "skill-fog entry not found in CLAUDE.md, skipping."
     return
   fi
@@ -330,7 +331,7 @@ remove_claude_md() {
   cp "$claude_md" "$backup_file"
   info "Backed up CLAUDE.md to: $backup_file"
 
-  # skill-fog 블록 제거 (마커부터 다음 섹션 헤더 또는 파일 끝까지)
+  # skill-fog 블록 제거 (구버전 한국어 / 신버전 영어 마커 둘 다)
   python3 - <<PYEOF
 import re, os
 
@@ -340,11 +341,14 @@ with open(claude_md, 'r', encoding='utf-8') as f:
     content = f.read()
 
 # 빈 줄 + 마커 + 내용 줄(들) 패턴 제거 — 줄 수 변화에 유연하게 대응
-pattern = r'\n# skill-fog: 대화 중 반복 패턴 감지.*?(?=\n#|\Z)'
-new_content = re.sub(pattern, '', content, flags=re.DOTALL)
+for pat in (
+    r'\n# skill-fog: pattern detection.*?(?=\n#|\Z)',
+    r'\n# skill-fog: 대화 중 반복 패턴 감지.*?(?=\n#|\Z)',
+):
+    content = re.sub(pat, '', content, flags=re.DOTALL)
 
 with open(claude_md, 'w', encoding='utf-8') as f:
-    f.write(new_content)
+    f.write(content)
 
 print('[skill-fog] skill-fog entry removed from CLAUDE.md')
 PYEOF
