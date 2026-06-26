@@ -194,7 +194,30 @@ remove_hook() {
 }
 
 # ─────────────────────────────────────────────
-# 2. ~/.claude/skills/skill-fog/ 삭제
+# 2. ~/.claude/agents/ 에서 평가 에이전트 제거
+# ─────────────────────────────────────────────
+remove_agents() {
+  info "Removing evaluator agents from ~/.claude/agents/..."
+
+  local agents_dir="$CLAUDE_DIR/agents"
+  local removed=0
+
+  for agent_file in skill-evaluator.md agent-evaluator-v2.md; do
+    local dest="$agents_dir/$agent_file"
+    if [ -f "$dest" ]; then
+      rm "$dest"
+      success "Removed $dest"
+      removed=$((removed + 1))
+    fi
+  done
+
+  if [ "$removed" -eq 0 ]; then
+    info "No evaluator agents found, skipping."
+  fi
+}
+
+# ─────────────────────────────────────────────
+# 3. ~/.claude/skills/skill-fog/ 삭제
 # ─────────────────────────────────────────────
 remove_skill() {
   info "Removing skill files..."
@@ -353,6 +376,7 @@ main() {
   echo ""
 
   remove_hook
+  remove_agents
   remove_skill
   remove_cli
   remove_claude_md

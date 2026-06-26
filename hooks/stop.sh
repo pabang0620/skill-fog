@@ -706,6 +706,34 @@ PYEOF
     local masked
     masked=$(printf '%s' "$msg" | mask_secrets)
 
+    # 시스템 노이즈 필터 (Claude Code 내부 자동 생성 메시지 제외)
+    if SF_MSG="$masked" python3 - <<'PYEOF'
+import os, re, sys
+msg = os.environ.get('SF_MSG', '').strip()
+msg_lower = msg.lower()
+NOISE_PREFIXES = (
+    '[request interrupted',
+    'this session is being continued from a previous conversation',
+    '<local-command-',
+    '<command-name>',
+    '<command-message>',
+    '<system-reminder>',
+    'set model to ',
+    '[skill-fog]',
+    '# /loop',
+    'run the "',
+    'continue from where you left off',
+)
+for prefix in NOISE_PREFIXES:
+    if msg_lower.startswith(prefix.lower()):
+        sys.exit(0)
+sys.exit(1)
+PYEOF
+    then
+      log "DEBUG: Skipping system noise: ${masked:0:60}"
+      continue
+    fi
+
     # 최소 길이 필터: 10자 이상 (한글 등 멀티바이트 문자 고려)
     if [ "${#masked}" -lt 10 ]; then
       continue

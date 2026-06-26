@@ -159,25 +159,25 @@ Generated metadata fields:
 
 ```text
 ✅ `{이름}` {타입} 생성 완료.
-자동 품질 개선을 실행할까요? agent-evaluator-v2가 평가 후 개선안을 적용합니다. [y/n]
+자동 품질 개선을 실행할까요? [y/n]
 ```
 
 ### 승인한 경우
 
-`agent-evaluator-v2` 에이전트를 호출한다:
+타입에 따라 다른 평가 에이전트를 호출한다:
+
+| 타입 | 평가 에이전트 | 평가 대상 경로 |
+| --- | --- | --- |
+| skill | `skill-evaluator` | `~/.claude/skills/{이름}/SKILL.md` |
+| command | `agent-evaluator-v2` | `~/.claude/commands/{이름}.md` |
+| agent | `agent-evaluator-v2` | `~/.claude/agents/{이름}.md` |
 
 ```
 Agent(
-  subagent_type="agent-evaluator-v2",
+  subagent_type="{타입별 평가 에이전트}",
   prompt="다음 파일을 평가하고 100점 척도 점수와 라인 단위 개선안을 제공해주세요: ~/.claude/{경로}"
 )
 ```
-
-| 타입 | 평가 대상 경로 |
-| --- | --- |
-| skill | `~/.claude/skills/{이름}/SKILL.md` |
-| command | `~/.claude/commands/{이름}.md` |
-| agent | `~/.claude/agents/{이름}.md` |
 
 반환된 결과 처리:
 

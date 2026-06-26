@@ -123,7 +123,32 @@ install_skill() {
 }
 
 # ─────────────────────────────────────────────
-# 5. hooks/stop.sh 복사
+# 5. 평가 에이전트 설치 (skill-evaluator, agent-evaluator-v2)
+# ─────────────────────────────────────────────
+install_agents() {
+  CURRENT_STEP="install_agents"
+  local agents_dir="$CLAUDE_DIR/agents"
+  info "Installing evaluator agents to $agents_dir..."
+
+  mkdir -p "$agents_dir"
+
+  for agent_file in skill-evaluator.md agent-evaluator-v2.md; do
+    if [ -f "$SCRIPT_DIR/agents/$agent_file" ]; then
+      local dest="$agents_dir/$agent_file"
+      if [ -f "$dest" ]; then
+        info "$agent_file already exists at $dest, skipping."
+      else
+        cp "$SCRIPT_DIR/agents/$agent_file" "$dest"
+        success "$agent_file installed to $dest"
+      fi
+    else
+      warn "agents/$agent_file not found in $SCRIPT_DIR/agents/ — skipping"
+    fi
+  done
+}
+
+# ─────────────────────────────────────────────
+# 6. hooks/stop.sh 복사
 # ─────────────────────────────────────────────
 install_hook() {
   CURRENT_STEP="install_hook"
@@ -374,7 +399,7 @@ register_claude_md() {
   cat >> "$claude_md" << 'CLAUDEMD'
 
 # skill-fog: 대화 중 반복 패턴 감지 및 스킬 자동 생성 (자동 로드)
-skill-fog 스킬을 항상 활성 상태로 유지한다. SessionStart 훅이 세션 시작 시 자동으로 pending 패턴을 컨텍스트에 주입하면 STEP A부터 응답한다. /skill-fog 수동 호출 시에도 동일하게 동작한다.
+skill-fog 스킬을 항상 활성 상태로 유지한다. system-reminder에 "[skill-fog]" 텍스트가 포함된 경우, 사용자 메시지가 무엇이든 관계없이 반드시 첫 번째 응답으로 STEP A를 실행하여 패턴을 제안한다. 사용자가 "안녕" 같은 무관한 메시지를 보내도 skill-fog 제안이 먼저다. /skill-fog 수동 호출 시에도 동일하게 동작한다.
 CLAUDEMD
 
   success "skill-fog registered in CLAUDE.md"
@@ -393,6 +418,8 @@ print_summary() {
   echo -e "    ~/.skill-fog/           Pattern storage directory"
   echo -e "    ~/.claude/skills/skill-fog/SKILL.md"
   echo -e "    ~/.claude/skills/skill-fog/references/"
+  echo -e "    ~/.claude/agents/skill-evaluator.md"
+  echo -e "    ~/.claude/agents/agent-evaluator-v2.md"
   echo -e "    ~/.skill-fog/hooks/stop.sh   (Stop hook)"
   echo -e "    ~/.skill-fog/install.sh      (Installed self-test source)"
   echo -e "    ~/.skill-fog/uninstall.sh    (Uninstaller)"
@@ -427,6 +454,7 @@ main() {
   create_directories
   init_patterns
   install_skill
+  install_agents
   install_hook
   install_runtime_bundle
   install_cli

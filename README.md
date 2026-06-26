@@ -46,6 +46,40 @@ You typed it again the next day. And the day after that. The intention was there
 
 ---
 
+## What's new in v2.2
+
+**Smart type recommendation + bundled evaluators + noise filtering.**
+
+### Auto-recommend skill / command / agent
+
+Previously you had to choose the type yourself, which was confusing. v2.2 analyzes each pattern and recommends the most appropriate type with a one-line reason. Press Enter to accept all recommendations at once — or override per item.
+
+```
+[skill-fog] 반복 패턴 3개를 자동화할 수 있어요.
+
+1. "계속진행해줘 실수로 취소했어" (3회/3세션) → 추천: command (재개 트리거)
+2. "서버에 반영해야할 파일 뭐 더라?" (3회/2세션) → 추천: command (현재 상태 조회)
+3. "일단 사업의 전반적인 이해를..." (3회/3세션) → 추천: command (컨텍스트 파악)
+
+추천대로 진행할까요? (엔터 또는 "자동")
+개별 변경: "1 스킬, 3 안함" 처럼 입력
+```
+
+### Bundled quality evaluators
+
+Generated artifacts are immediately evaluated by the right agent:
+
+- **Skill** → `skill-evaluator` (SKILL.md 전용 10개 차원 평가)
+- **Command / Agent** → `agent-evaluator-v2` (9관점 100점 평가)
+
+Both agents are included in the package and installed automatically. No separate setup needed.
+
+### System noise filtering
+
+Claude Code generates many internal messages that look like user patterns but aren't — `[request interrupted by user]`, `<local-command-stdout>`, `this session is being continued`, etc. v2.2 filters these at collection time so they never appear as suggestions.
+
+---
+
 ## What's new in v2.1.0
 
 **Session-start auto-proposal via hook.**
@@ -138,7 +172,7 @@ At the **start of your next session**, a SessionStart hook fires before you type
 
 ### Step 3 — Generate
 
-Choose whether to generate a skill, slash command, or agent. After approval, skill-fog writes it into `~/.claude/` and the pattern is marked as accepted.
+skill-fog recommends the most appropriate type (skill / command / agent) for each pattern. Press Enter to accept all recommendations, or override per item. After approval, skill-fog writes the file into `~/.claude/` and immediately runs the matching quality evaluator — `skill-evaluator` for skills, `agent-evaluator-v2` for commands and agents. The pattern is then marked as accepted.
 
 ---
 
@@ -264,6 +298,9 @@ All pattern data lives in `~/.skill-fog/` on your machine. Nothing is sent anywh
 - [x] Skill / command / agent generation
 - [x] CLI (`status`, `review`, `list`, `clean`, `doctor`)
 - [x] **SessionStart hook — deterministic auto-proposal at session start (v2.1.0)**
+- [x] **System noise filtering — Claude Code internal messages excluded (v2.2.0)**
+- [x] **Smart type recommendation with auto-accept (v2.2.0)**
+- [x] **Bundled evaluators — skill-evaluator + agent-evaluator-v2 (v2.2.0)**
 - [ ] Interactive review TUI (`skill-fog review --interactive`)
 - [ ] Pattern similarity clustering (catch near-duplicates)
 - [ ] Team export/import (`skill-fog export --team`)

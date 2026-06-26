@@ -66,14 +66,8 @@ print('TRACKING')
 If the script prints `THRESHOLD_MET:...`, immediately print:
 
 ```text
-**[skill-fog]** `{canonical}` 패턴이 {count}회 감지됐습니다.
-
-예시:
-- {examples[0]}
-- {examples[1] — 없으면 이 줄 생략}
-
-**skill / command / agent** 중 어떤 형태로 만들까요?
-(건너뛰려면 '나중에')
+[skill-fog] "{canonical}" 패턴이 {count}회 반복됐어요.
+추천: {타입} ({한 줄 이유}) — 바로 만들까요? (엔터로 확인 / 다른 타입 입력 / 안함)
 ```
 
 Then add that pid to `session_proposed` to prevent duplicate firing.
@@ -90,21 +84,36 @@ When pending files exist, process each file in this order:
 
 At session start, `session_proposed` is empty, so condition 1 is open to all pending entries.
 
-When multiple pending files exist, sort by `snoozed_at` ascending, oldest first. Files without `snoozed_at` are treated as newly detected patterns and placed first. After the user finishes responding to one pattern, immediately propose the next pending pattern. Extract the pid by removing the `.json` extension from the file name.
+When multiple pending files exist, sort by `snoozed_at` ascending, oldest first. Files without `snoozed_at` are treated as newly detected patterns and placed first.
 
-Pending proposal text:
+**Before showing the list, classify each pattern into a recommended type using these rules:**
+
+| 조건 | 추천 타입 | 이유 |
+|------|-----------|------|
+| 단순 반복 실행 ("해줘", "실행해", "확인해줘") | `command` | 한 번 실행하는 트리거성 작업 |
+| 행동 지침·절차 기억 ("이렇게 해줘", "할 때마다") | `skill` | Claude 동작 방식 가이드 |
+| 도구 사용·파일 탐색·분석 필요 ("분석해", "찾아줘", "정리해줘") | `agent` | 멀티스텝 자율 실행 필요 |
+| 상태 복구·재개 ("계속진행해줘", "이어서 해줘") | `command` | 단발성 재개 트리거 |
+| 프로젝트 컨텍스트 요약·파악 ("정리해봐", "파악했어?") | `command` | 현재 상태 즉시 조회 |
+
+**Show ALL pending patterns at once with recommendations, then wait for the user's response.**
 
 ```text
-**[skill-fog]** `{canonical}` 패턴이 {count}회({sessions 배열의 길이}개 세션)에서 감지되었습니다.
+[skill-fog] 반복 패턴 {N}개를 자동화할 수 있어요.
 
-예시:
-- {examples[0]}
-- {examples[1] — 없으면 이 줄 생략}
-- {examples[2] — 없으면 이 줄 생략}
+1. "{canonical}" ({count}회/{sessions}세션) → 추천: command (재개 트리거)
+2. "{canonical}" ({count}회/{sessions}세션) → 추천: skill (배포 절차 기억)
+3. "{canonical}" ({count}회/{sessions}세션) → 추천: agent (분석 필요)
 
-**skill / command / agent** 중 어떤 형태로 만들까요?
-(건너뛰려면 '나중에')
+추천대로 진행할까요? (엔터 또는 "자동")
+개별 변경: "1 스킬, 3 안함" 처럼 입력
 ```
+
+- 사용자가 엔터 or "자동" or "응" → 모든 패턴을 추천 타입으로 일괄 생성
+- 개별 응답 시 해당 항목만 변경, 나머지는 추천 타입 적용
+- "안함"으로 지정한 항목은 STEP B에서 rejected 처리
+
+User responds, then enter STEP B per item.
 
 ## Manual `/skill-fog`
 Read current patterns:
