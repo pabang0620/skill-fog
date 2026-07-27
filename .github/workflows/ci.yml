@@ -1,0 +1,195 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  release-checklist:
+    name: Release checklist
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check python3 and jq availability
+        run: |
+          command -v python3
+          python3 --version
+          command -v jq
+          jq --version
+
+      - name: JSON syntax check
+        run: |
+          set -euo pipefail
+          files=(
+            ".claude-plugin/plugin.json"
+            ".claude-plugin/marketplace.json"
+            "hooks/hooks.json"
+            "package.json"
+            "skill-fog.metadata.json"
+          )
+          fail=0
+          for f in "${files[@]}"; do
+            if node -e "JSON.parse(require('fs').readFileSync('$f', 'utf8'))"; then
+              echo "OK: $f"
+            else
+              echo "INVALID JSON: $f" >&2
+              fail=1
+            fi
+          done
+          exit "$fail"
+
+      - name: Shell syntax check
+        run: |
+          set -euo pipefail
+          files=(
+            "install.sh"
+            "uninstall.sh"
+            "bin/skill-fog"
+            "hooks/stop.sh"
+            "hooks/session-start.sh"
+          )
+          while IFS= read -r -d '' f; do
+            files+=("$f")
+          done < <(find scripts -maxdepth 1 -name '*.sh' -print0 | sort -z)
+          fail=0
+          for f in "${files[@]}"; do
+            if bash -n "$f"; then
+              echo "OK: $f"
+            else
+              echo "SYNTAX ERROR: $f" >&2
+              fail=1
+            fi
+          done
+          exit "$fail"
+
+      - name: Python syntax check
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/*.py
+          echo "OK: scripts/*.py"
+
+      - name: Version consistency check
+        run: |
+          set -euo pipefail
+
+          package_version=$(jq -r '.version' package.json)
+          metadata_version=$(jq -r '.version' skill-fog.metadata.json)
+          plugin_version=$(jq -r '.version' .claude-plugin/plugin.json)
+          skill_version=$(grep -m1 '^version:' skills/skill-fog/SKILL.md | sed -E 's/^version:[[:space:]]*//' | tr -d '\r')
+
+          echo "package.json:            $package_version"
+          echo "skill-fog.metadata.json: $metadata_version"
+          echo "plugin.json:              $plugin_version"
+          echo "SKILL.md frontmatter:     $skill_version"
+
+          if [ -z "$package_version" ] || [ -z "$metadata_version" ] || [ -z "$plugin_version" ] || [ -z "$skill_version" ]; then
+            echo "one or more version values could not be read" >&2
+            exit 1
+          fi
+
+          if [ "$package_version" != "$metadata_version" ] || \
+             [ "$package_version" != "$plugin_version" ] || \
+             [ "$package_version" != "$skill_version" ]; then
+            echo "version mismatch detected across package.json, skill-fog.metadata.json, .claude-plugin/plugin.json, skills/skill-fog/SKILL.md" >&2
+            exit 1
+          fi
+
+          echo "all versions match: $package_version"
+
+      - name: Doctor self-test
+        run: bash bin/skill-fog doctor --self-test
+
+      - name: Hook assertions
+        run: bash scripts/bench-hook.sh --assert-only
+
+      - name: SessionStart hook test
+        run: bash scripts/test-session-start.sh
+
+      - name: Privacy redaction hook test
+        run: bash scripts/test-privacy-redaction.sh
+
+      - name: Scoring fixtures
+        run: |
+          set -euo pipefail
+
+          check_fixture() {
+            local fixture="$1"
+            local output
+            output=$(python3 scripts/score-patterns.py --fixture "$fixture")
+
+            local ok failures_len
+            ok=$(echo "$output" | jq -r '.ok')
+            failures_len=$(echo "$output" | jq -r '.failures | length')
+
+            if [ "$ok" != "true" ] || [ "$failures_len" != "0" ]; then
+              echo "scoring fixture failed: $fixture" >&2
+              echo "$output" >&2
+              return 1
+            fi
+
+            local forbidden_count
+            forbidden_count=$(jq -r '.expected.forbidden_output_values // [] | length' "$fixture")
+            if [ "$forbidden_count" -gt 0 ]; then
+              local i value
+              for ((i = 0; i < forbidden_count; i++)); do
+                value=$(jq -r ".expected.forbidden_output_values[$i]" "$fixture")
+                if echo "$output" | grep -qF -- "$value"; then
+                  echo "forbidden secret value leaked in scorer output for $fixture: $value" >&2
+                  return 1
+                fi
+              done
+            fi
+
+            echo "OK: $fixture"
+          }
+
+          check_fixture fixtures/patterns/ranking-basic.json
+          check_fixture fixtures/patterns/privacy-risk.json
+
+      - name: Artifact evals
+        run: |
+          set -euo pipefail
+          output=$(scripts/run-evals.sh --all)
+          ok=$(echo "$output" | jq -r '.ok')
+          if [ "$ok" != "true" ]; then
+            echo "run-evals.sh --all reported ok=false" >&2
+            echo "$output" >&2
+            exit 1
+          fi
+
+          mismatch=$(echo "$output" | jq -r '[.cases[] | select(.result != .expected_result)] | length')
+          if [ "$mismatch" != "0" ]; then
+            echo "one or more eval cases did not match expected_result" >&2
+            echo "$output" >&2
+            exit 1
+          fi
+
+          echo "OK: run-evals.sh --all"
+
+      - name: npm pack dry-run and file list check
+        run: |
+          set -euo pipefail
+          output=$(npm pack --dry-run --json)
+          echo "$output" | node -e "JSON.parse(require('fs').readFileSync(0, 'utf8'))"
+
+          required=(
+            "skills/skill-fog/SKILL.md"
+            ".claude-plugin/plugin.json"
+            "hooks/hooks.json"
+          )
+          for path in "${required[@]}"; do
+            if ! echo "$output" | grep -qF "$path"; then
+              echo "npm pack file list is missing required path: $path" >&2
+              exit 1
+            fi
+          done
+          echo "OK: npm pack includes required files"

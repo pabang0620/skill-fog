@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
 # skill-fog: Stop hook
-# Claude Code 세션 종료 시 자동 실행 — 사용자 메시지 패턴 수집 및 분석
+# Runs automatically at the end of each assistant turn (Claude Code Stop hook)
+# Collects and analyzes user message patterns
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
@@ -364,6 +365,7 @@ replacements = [
     (r'mysql://[^:]*:[^@]*@', 'mysql://***:***@', 0),
     (r'mongodb://[^:]*:[^@]*@', 'mongodb://***:***@', 0),
     (r'redis://[^:]*:[^@]*@', 'redis://***:***@', 0),
+    (r"(?<!\w)(?:/home|/Users|/var|/tmp)/[^\s'\"<>]+", '[LOCAL_PATH]', 0),
 ]
 
 for pattern, replacement, flags in replacements:
@@ -730,7 +732,7 @@ for prefix in NOISE_PREFIXES:
 sys.exit(1)
 PYEOF
     then
-      log "DEBUG: Skipping system noise: ${masked:0:60}"
+      log "DEBUG: Skipping system noise (len=${#masked})"
       continue
     fi
 

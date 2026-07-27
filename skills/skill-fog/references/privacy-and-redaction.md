@@ -4,7 +4,7 @@ Load this reference for status transitions, pending file writes/deletes, local s
 
 ## State ownership
 - `SKILL.md` reads `patterns.json` for threshold and manual review decisions.
-- Pattern accumulation (`count` increments and `sessions` additions) is owned only by `stop.sh` at session end.
+- Pattern accumulation (`count` increments and `sessions` additions) is owned only by `stop.sh` at the end of each assistant turn.
 - Pending-backed patterns stay `active` until the user explicitly accepts or rejects them.
 - `accepted` and `rejected` patterns must not create new pending proposals.
 - `rejected` patterns are permanently ignored.

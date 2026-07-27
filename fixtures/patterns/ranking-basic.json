@@ -2,7 +2,9 @@
   "schema_version": "2026-06-13.phase3-scoring-fixture.v1",
   "fixture_name": "ranking-basic",
   "description": "Baseline ranking fixture for scoring active skill-fog patterns into auto_propose, review_required, and suppress decisions.",
+  "now": "2026-06-13T00:00:00Z",
   "schema": {
+    "now": "Fixed UTC timestamp used as the fixed 'current time' anchor for recency scoring, so last_seen_age_days is computed deterministically instead of drifting with wall-clock time.",
     "input.patterns": "Object keyed by stable pattern id. Each value resembles a patterns.json entry with canonical, count, sessions, examples, status, and optional manual review metadata.",
     "expected": "Strict scorer oracle. order must match deterministic output order and recommendations must match current threshold labels.",
     "decision_values": [

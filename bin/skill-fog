@@ -261,14 +261,14 @@ cmd_doctor_self_test() {
   }
   trap cleanup_self_test EXIT
 
-  mkdir -p "$test_repo/bin" "$test_repo/hooks"
+  mkdir -p "$test_repo/bin" "$test_repo/hooks" "$test_repo/skills/skill-fog"
   cp "$source_root/install.sh" "$test_repo/install.sh"
   cp "$source_root/uninstall.sh" "$test_repo/uninstall.sh"
-  cp "$source_root/SKILL.md" "$test_repo/SKILL.md"
+  cp "$source_root/skills/skill-fog/SKILL.md" "$test_repo/skills/skill-fog/SKILL.md"
   cp "$source_root/bin/skill-fog" "$test_repo/bin/skill-fog"
   cp "$source_root/hooks/stop.sh" "$test_repo/hooks/stop.sh"
   cp "$source_root/hooks/session-start.sh" "$test_repo/hooks/session-start.sh"
-  cp -R "$source_root/references" "$test_repo/references"
+  cp -R "$source_root/skills/skill-fog/references" "$test_repo/skills/skill-fog/references"
   if [ -f "$source_root/package.json" ]; then
     cp "$source_root/package.json" "$test_repo/package.json"
   fi
@@ -1211,7 +1211,7 @@ cmd_help() {
   echo -e "  ${CYAN}help${NC}      Show this help message"
   echo ""
   echo -e "${BOLD}HOW IT WORKS${NC}"
-  echo -e "  1. Claude Code session ends → stop.sh analyzes message patterns"
+  echo -e "  1. After each assistant turn → stop.sh analyzes message patterns"
   echo -e "  2. Pattern seen ≥3 times across ≥2 sessions → moved to pending"
   echo -e "  3. Session start → skill-fog proposes skill/command/agent creation"
   echo -e "  4. You confirm → file generated in ~/.claude/skills|commands|agents"

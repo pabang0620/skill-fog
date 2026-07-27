@@ -22,6 +22,8 @@ except Exception:
     print('')
 PYEOF
 )
+else
+  >&2 echo "[skill-fog] python3 not found; pending pattern injection disabled"
 fi
 
 # startup / resume 이외에는 조용히 종료

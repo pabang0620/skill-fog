@@ -32,299 +32,216 @@
 
 ---
 
-## The fog clears when you stop repeating yourself.
+## What it does
 
 Remember the first time you realized you'd been copy-pasting the same prompt for the third week in a row?
 
 You thought: *"I should turn this into a skill."*
 
-You didn't.
+You didn't. You typed it again the next day, and the day after that. The intention was there - the action never followed.
 
-You typed it again the next day. And the day after that. The intention was there — the action never followed.
-
-**skill-fog closes that gap.** It watches what you ask Claude to do, counts the repetitions, and when you've typed the same thing enough times, it tells you — automatically, at the start of your next session — *"Want me to build a tool for this?"* Then it actually builds it.
+**skill-fog closes that gap.** It watches what you ask Claude Code to do across sessions, counts the repetitions, and once the same request pattern has repeated enough, it proposes generating a skill, command, or agent for it - automatically, at the start of your next session. Accept the recommendation and skill-fog writes the file for you.
 
 ---
 
-## What's new in v2.2
-
-**Smart type recommendation + bundled evaluators + noise filtering.**
-
-### Auto-recommend skill / command / agent
-
-Previously you had to choose the type yourself, which was confusing. v2.2 analyzes each pattern and recommends the most appropriate type with a one-line reason. Press Enter to accept all recommendations at once — or override per item.
+## Install (recommended): Claude Code plugin
 
 ```
-[skill-fog] 반복 패턴 3개를 자동화할 수 있어요.
-
-1. "계속진행해줘 실수로 취소했어" (3회/3세션) → 추천: command (재개 트리거)
-2. "서버에 반영해야할 파일 뭐 더라?" (3회/2세션) → 추천: command (현재 상태 조회)
-3. "일단 사업의 전반적인 이해를..." (3회/3세션) → 추천: command (컨텍스트 파악)
-
-추천대로 진행할까요? (엔터 또는 "자동")
-개별 변경: "1 스킬, 3 안함" 처럼 입력
+/plugin marketplace add pabang0620/skill-fog
+/plugin install skill-fog
 ```
 
-### Bundled quality evaluators
+That's it. Hooks activate automatically - no `~/.claude/settings.json` or `~/.claude/CLAUDE.md` changes needed. Claude Code discovers `.claude-plugin/plugin.json` and `hooks/hooks.json` and wires up the Stop and SessionStart hooks for you.
 
-Generated artifacts are immediately evaluated by the right agent:
+For local development (testing a checkout before publishing to the marketplace):
 
-- **Skill** → `skill-evaluator` (SKILL.md 전용 10개 차원 평가)
-- **Command / Agent** → `agent-evaluator-v2` (9관점 100점 평가)
-
-Both agents are included in the package and installed automatically. No separate setup needed.
-
-### System noise filtering
-
-Claude Code generates many internal messages that look like user patterns but aren't — `[request interrupted by user]`, `<local-command-stdout>`, `this session is being continued`, etc. v2.2 filters these at collection time so they never appear as suggestions.
-
----
-
-## What's new in v2.3
-
-**Propose once, never repeat.**
-
-Previously, if you ignored a suggestion and kept working, the same pattern would appear again at the start of the next session — and the one after that, indefinitely.
-
-v2.3 fixes this: once a pattern is proposed, it's immediately moved to `snoozed` state. If you ignore it, it won't come up again automatically. When you're ready to act on it, use `/skill-fog` to pull up the full list including snoozed patterns and pick what to build.
-
-| Behavior | Before v2.3 | v2.3+ |
-|---|---|---|
-| Ignore the proposal | Asked again next session | Not asked again |
-| Explicitly skip ("나중에") | Re-queued for next session | Stays snoozed |
-| Explicitly reject ("거부") | Marked rejected, never again | Same |
-| Want to revisit later | — | `/skill-fog` shows snoozed patterns |
-
----
-
-## What's new in v2.4
-
-**Speaks your language.**
-
-Previously all proposals were hardcoded in Korean. v2.4 makes every user-facing message English by default and instructs Claude to **respond in the same language you're using** — so if you chat in English you get English proposals, and Korean users still get Korean. Korean input words like `나중에` (later) and `거부` (reject) are still recognized.
-
-```
-[skill-fog] You have 3 repeated pattern(s) pending review.
-
-1. "deploy the frontend build to staging" — 4x, 3 sessions → recommended: command (resume trigger)
-2. "summarize the overall scope of the project" — 3x, 2 sessions → recommended: command (context lookup)
-3. "find every place that calls the old API" — 3x, 3 sessions → recommended: agent (needs analysis)
-
-Proceed with the recommendations? (Enter or "auto")
+```bash
+claude --plugin-dir /path/to/skill-fog
 ```
 
----
+**Note:** the plugin path does not install the standalone `skill-fog` CLI (`status` / `review` / `doctor` / `clean`). If you want that, use the npm path below instead (or in addition - see [Using both install paths](#using-both-install-paths-not-recommended)).
 
-## What's new in v2.1.0
+## Alternative install: npm / installer script
 
-**Session-start auto-proposal via hook.**
+```bash
+npm install -g skill-fog
+```
 
-Previously, skill-fog asked Claude to remind you about pending patterns every few messages — which meant Claude sometimes forgot, got distracted, or skipped it entirely. It was LLM-dependent and unreliable.
+`postinstall` runs `install.sh` for you, which registers the Stop and SessionStart hooks directly in `~/.claude/settings.json` and installs the skill under `~/.claude/skills/skill-fog/`.
 
-v2.1.0 replaces that with a `SessionStart` hook. The moment Claude Code opens a new session, a shell script fires and injects any pending patterns directly into Claude's context — before you type your first message. Claude sees them. Claude always proposes them. No prompting required.
+This path also gives you the standalone `skill-fog` CLI, which the plugin path does not provide:
+
+```bash
+skill-fog status    # show all tracked patterns and their counts
+skill-fog review    # browse pending patterns and decide what to build
+skill-fog list      # see everything skill-fog has generated for you
+skill-fog clean     # remove old, rejected, or stale patterns
+skill-fog doctor    # diagnose installation and hook registration
+```
+
+Prefer running the installer script directly from a checkout instead of npm:
+
+```bash
+git clone https://github.com/pabang0620/skill-fog.git
+cd skill-fog
+bash install.sh
+```
+
+This is not a legacy or deprecated path - it is the only way to get the CLI. Use it if you want `skill-fog doctor`, `skill-fog status`, or scriptable diagnostics; use the plugin path if you just want the hooks with zero setup.
 
 ---
 
 ## How it works
 
 ```
-  Session ends                Session starts
-       │                            │
-       ▼                            ▼
-  ┌──────────────┐         ┌──────────────────────┐
-  │  Stop Hook   │         │  SessionStart Hook    │
-  │  (stop.sh)   │         │  (session-start.sh)   │
-  └──────┬───────┘         └──────────┬────────────┘
-         │                            │
-         ▼                            ▼
-  ┌──────────────────┐      pending/ exists?
-  │ Normalize + Hash │           │
-  │ "fix line 23"    │      Yes ─┤
-  │  → pattern ID    │           ▼
-  └──────┬───────────┘    ┌──────────────────────┐
-         │                │ Inject into context  │
-    ┌────┴──────┐         │ before first message │
-    │           │         └──────────┬───────────┘
-  < 3x      >= 3x                   │
-    │       2+ sessions             ▼
-  Keep      ┌──────────┐    [skill-fog] 검토 대기 중인
- watching   │ pending/ │    반복 패턴 N개가 있습니다.
-            └────┬─────┘           │
-                 │                  ▼
-                 └──────► STEP A: 제안 + 사용자 선택
-                                    │
-                         ┌──────────┼──────────┐
-                         ▼          ▼          ▼
-                      skill      command     agent
-                         │          │          │
-                         └──────────┴──────────┘
-                                    │
-                                    ▼
-                           ~/.claude/ (done.)
+   Every assistant turn ends            Session starts (startup / resume)
+            │                                        │
+            ▼                                        ▼
+     ┌──────────────┐                     ┌───────────────────────┐
+     │  Stop hook   │                     │  SessionStart hook    │
+     │  (stop.sh)   │                     │  (session-start.sh)   │
+     └──────┬───────┘                     └───────────┬───────────┘
+            │                                          │
+            ▼                                          ▼
+  Read new transcript lines                 pending/ has files?
+  since last cursor position                          │
+            │                                    yes ─┤
+            ▼                                          ▼
+  Normalize + hash each                    Sort by count (desc),
+  user message -> pattern ID               take top 5, inject into
+            │                              context, mark snoozed
+       ┌────┴──────┐                                  │
+       │           │                                  ▼
+     < 3x       >= 3x                     [skill-fog] You have N
+     2+ sessions                          repeated pattern(s)
+       │           │                      pending review.
+     keep      write to                              │
+    tracking   pending/                               ▼
+                                          STEP A: propose + user picks
+                                                       │
+                                        ┌──────────────┼──────────────┐
+                                        ▼              ▼              ▼
+                                     skill         command          agent
+                                        │              │              │
+                                        └──────────────┴──────────────┘
+                                                       │
+                                                       ▼
+                                              ~/.claude/ (done.)
 ```
 
----
+1. **Detect** - the Stop hook fires at the end of *every assistant turn* (not at session end). It incrementally parses new lines from the transcript since the last cursor position, masks secrets, normalizes each new user message (strips filenames, UUIDs, URLs, numbers), and hashes it into a pattern ID stored in `~/.skill-fog/patterns.json`.
+2. **Promote** - once a pattern's normalized text has appeared **3 or more times across 2 or more sessions**, it is written to `~/.skill-fog/pending/` as a candidate.
+3. **Propose** - at the start of your *next* session (`startup` or `resume`, not mid-session `/clear` or `/compact`), the SessionStart hook reads `pending/`, sorts by repeat count descending, takes the top 5, and injects them directly into Claude's context before you type anything. The proposed patterns are immediately marked `snoozed` so they are not re-proposed if ignored.
+4. **Generate** - Claude runs STEP A through STEP F: propose a recommended type (skill / command / agent) for each pattern, scan for similar existing artifacts, show a preview, and on confirmation write the file under `~/.claude/` and run the matching quality evaluator (`skill-evaluator` for skills, `agent-evaluator-v2` for commands and agents).
 
-## Installation
-
-```bash
-# npm (recommended)
-npm install -g skill-fog
-```
-
-```bash
-# curl (no node required)
-curl -fsSL https://raw.githubusercontent.com/pabang0620/skill-fog/main/install.sh | bash
-```
-
-**Requirements:** `bash >= 4.0`, `jq` (or `python3` as fallback), Claude Code
-
-## Verify Install
-
-```bash
-skill-fog doctor
-skill-fog doctor --self-test
-```
-
-Expected result:
-
-- `skill-fog doctor` exits successfully and reports the installed files, Stop hook, SessionStart hook, and local data directory status.
-- `skill-fog doctor --self-test` exits with code `0`, reports `0 failures`, and removes its temporary directory when it exits.
-
----
-
-## How it grows you
-
-### Step 1 — Detect
-
-Every time your Claude Code session ends, a Stop hook silently reads your message history. It normalizes the text (strips filenames, numbers, specifics) and hashes the pattern. No data leaves your machine.
-
-### Step 2 — Propose (automatically)
-
-When the same normalized pattern appears **3+ times across 2+ sessions**, skill-fog saves it as a pending suggestion in `~/.skill-fog/pending/`.
-
-At the **start of your next session**, a SessionStart hook fires before you type anything. Pending patterns are injected into Claude's context. Claude sees them and immediately asks what you want to do — no commands needed.
-
-After proposing, skill-fog immediately marks the patterns as **snoozed** and removes the pending files. If you ignore the proposal and continue working, you won't be asked again next session. Use `/skill-fog` to revisit snoozed patterns whenever you're ready.
-
-### Step 3 — Generate
-
-skill-fog recommends the most appropriate type (skill / command / agent) for each pattern. Press Enter to accept all recommendations, or override per item. After approval, skill-fog writes the file into `~/.claude/` and immediately runs the matching quality evaluator — `skill-evaluator` for skills, `agent-evaluator-v2` for commands and agents. The pattern is then marked as accepted.
-
----
-
-## Auto-Proposal Reliability
-
-| Trigger method | Reliability | Notes |
-|---|---|---|
-| SessionStart hook (v2.1.0+) | **Deterministic** | Shell runs before first message; Claude always sees it |
-| LLM instruction (≤v2.0.x) | ~60–70% | Claude could forget, skip, or deprioritize |
-
-The hook approach fires via Claude Code's native hook system (`~/.claude/settings.json`). It doesn't depend on Claude's attention or memory — it works the same way every time.
-
----
-
-## CLI Commands
-
-| Command | Description |
-|---|---|
-| `skill-fog status` | Show all tracked patterns and their counts |
-| `skill-fog review` | Browse pending patterns and decide what to build |
-| `skill-fog list` | See everything skill-fog has generated for you |
-| `skill-fog clean` | Remove old, rejected, or stale patterns |
-| `skill-fog doctor` | Diagnose installation and hook registration |
-| `skill-fog doctor --self-test` | Run isolated install/uninstall checks in a temporary HOME |
-
-You can also trigger the review flow any time with `/skill-fog` inside Claude Code.
-
----
-
-## Diagnostics
-
-```bash
-skill-fog doctor
-```
-
-`doctor` reports each check with one of these statuses:
-
-- `ok` — dependency, file, directory, or hook is present and usable.
-- `warning` — skill-fog can usually continue, but setup is incomplete (e.g. missing `jq` while `python3` is available).
-- `failure` — a required piece is missing: `~/.skill-fog/`, Stop hook script, SessionStart hook script, `SKILL.md`, or hook registration in Claude settings.
-
-For install validation:
-
-```bash
-skill-fog doctor --self-test
-```
-
-The self-test creates a temporary HOME, runs `install.sh`, verifies both Stop and SessionStart hooks are registered and executable, runs `doctor` (expects `0 failures`), reinstalls (expects no duplicate hooks), then runs `uninstall.sh` twice and verifies all hooks and skill files are removed cleanly.
-
-See [docs/troubleshooting.md](docs/troubleshooting.md) for recovery steps and uninstall behavior.
+You can also trigger the review flow manually at any time with `/skill-fog` inside Claude Code, which lists active and snoozed patterns for you to pick from.
 
 ---
 
 ## Uninstall
 
-```bash
-# If installed via npm
-npm uninstall -g skill-fog
+**Plugin install:**
 
-# Remove hooks/skills from a checkout
-bash uninstall.sh
+```
+/plugin uninstall skill-fog
 ```
 
-Non-interactive flags:
+**npm install:**
 
-- `--yes` — answer yes to all prompts
-- `--keep-data` — preserve `~/.skill-fog` without prompting
-- `--remove-data` — remove `~/.skill-fog` without prompting
+```bash
+npm uninstall -g skill-fog
+```
+
+`preuninstall` automatically runs `uninstall.sh --keep-data --yes`, which removes the registered hooks, the installed skill, and the bundled evaluator agents, while preserving `~/.skill-fog` (your pattern data). Removed files are backed up to `~/.claude/.skill-fog-uninstall-backup.<timestamp>/` before deletion.
+
+To also delete your local pattern data:
+
+```bash
+bash uninstall.sh --remove-data
+```
+
+`--keep-data` and `--remove-data` are mutually exclusive; running `uninstall.sh` interactively (no flags) prompts you to choose.
 
 ---
 
-## Local Data Inspection
+## Requirements
+
+- `bash`
+- `python3` (required - used for transcript parsing, JSON state writes, and secret masking)
+- `jq` (optional - used when available for faster JSON queries; skill-fog falls back to `python3` automatically if `jq` is missing)
+- Windows: use WSL. skill-fog is a bash-first tool and does not run natively on Windows.
+
+---
+
+## Using both install paths (not recommended)
+
+Installing via both the plugin and npm at the same time registers the hooks twice - once through `hooks/hooks.json` (plugin discovery) and once through entries written into `~/.claude/settings.json` (npm's `install.sh`). This is safe: hook state lives in `~/.skill-fog/` and is cursor-based, so a duplicate Stop/SessionStart invocation is effectively a no-op (it finds nothing new to process). It is still not recommended - pick one install path to keep your setup simple to reason about and uninstall cleanly.
+
+---
+
+## Configuration
+
+skill-fog has no config file today. Behavior is fixed:
+
+- Threshold: 3+ repeats across 2+ sessions before a pattern is promoted to pending.
+- Proposals are capped at 5 per session-start injection.
+- Cleanup runs automatically every 10 Stop-hook invocations: `rejected` patterns are always removed, and any pattern not seen in the last 30 days is removed regardless of status.
+
+See the [Roadmap](#roadmap) for configurable thresholds as a planned feature.
+
+## Diagnostics (npm install only)
+
+```bash
+skill-fog doctor
+skill-fog doctor --self-test
+```
+
+`doctor` reports each check as `ok`, `warning`, or `failure` - covering JSON tooling, `~/.skill-fog/`, the Stop and SessionStart hook scripts, the installed skill files, and hook registration in Claude settings. `doctor --self-test` runs an isolated install/uninstall cycle in a temporary `HOME` and exits `0` with `0 failures` when the checkout installs and uninstalls cleanly.
+
+See [docs/troubleshooting.md](docs/troubleshooting.md) for recovery steps for specific `doctor` warnings and failures, and for the full uninstall flag reference.
+
+## Local data inspection
 
 skill-fog stores pattern data only under `~/.skill-fog/`. Nothing is sent anywhere.
 
 ```bash
 ls -la ~/.skill-fog
-find ~/.skill-fog -maxdepth 2 -type f -print
 python3 -m json.tool ~/.skill-fog/patterns.json
 ls -la ~/.skill-fog/pending
 tail -n 100 ~/.skill-fog/logs/*.log 2>/dev/null || true
 ```
 
-Remove stale rejected patterns and old logs:
+## Privacy
 
-```bash
-skill-fog clean
-```
+- API keys, tokens, database URLs, emails, and other common secret patterns are masked at collection time, before anything is written to disk.
+- All data stays local under `~/.skill-fog/` - skill-fog does not call any network service.
+- Inspect stored data at any time with the commands above, or clean stale entries with `skill-fog clean` (npm install) / by deleting files under `~/.skill-fog/` directly.
+- During uninstall, you choose whether to keep or remove `~/.skill-fog/`.
+
+## FAQ
+
+**Why didn't my pattern get proposed?**
+Check that it has repeated at least 3 times across at least 2 different Claude Code sessions, that the message isn't shorter than 10 characters after secret masking (before normalization), and that it isn't already `snoozed` or `rejected`. Run `skill-fog status` (npm install) or inspect `~/.skill-fog/patterns.json` directly to see current counts.
+
+**Why does the proposal only show up next session, not immediately?**
+Detection happens continuously (every assistant turn), but proposals are only injected at session start, by design - this keeps mid-task context free of interruptions.
+
+**Can I recover a proposal I ignored?**
+Yes. Ignored proposals are moved to `snoozed`, not deleted. Run `/skill-fog` inside Claude Code to see and act on snoozed patterns anytime - the `skill-fog review` CLI command only walks pending files awaiting first proposal, so once a pattern is snoozed it no longer shows up there.
 
 ---
 
 ## How it fits in the ecosystem
 
-There are already great tools in this space — use whichever fits your workflow.
+There are already great tools in this space - use whichever fits your workflow.
 
-**[ECC (Everything Claude Code)](https://github.com/affaan-m/ECC)** — 210K+ stars, a full suite of Claude Code extensions including `continuous-learning-v2`, which also collects session patterns via a Stop hook and can promote them into skills with `/evolve`. If you want a comprehensive toolkit, ECC is excellent.
+**[ECC (Everything Claude Code)](https://github.com/affaan-m/ECC)** - a full suite of Claude Code extensions including `continuous-learning-v2`, which also collects session patterns via a Stop hook and can promote them into skills with `/evolve`. If you want a comprehensive toolkit, ECC is excellent.
 
-**[Hermes](https://github.com/NousResearch/hermes-agent)** — an agent framework that wraps Claude Code as a sub-agent. Great if you want a higher-level orchestration layer.
+**[Hermes](https://github.com/NousResearch/hermes-agent)** - an agent framework that wraps Claude Code as a sub-agent. Great if you want a higher-level orchestration layer.
 
-**[OpenClaw](https://github.com/claw-orchestrator/openclaw)** — life automation (WhatsApp, calendar, smart home). Different category entirely, but worth knowing about.
+**[OpenClaw](https://github.com/claw-orchestrator/openclaw)** - life automation (WhatsApp, calendar, smart home). Different category entirely, but worth knowing about.
 
----
-
-skill-fog does one thing: **watches which requests you repeat, and when a pattern crosses the threshold, proposes a tool for it automatically** — no commands to remember, no manual triggers. If that specific behavior is what you want, skill-fog is for you. If you want a broader suite, go with ECC.
-
----
-
-## Privacy
-
-All pattern data lives in `~/.skill-fog/` on your machine. Nothing is sent anywhere.
-
-- API keys, tokens, emails, and secrets are masked automatically before storage
-- Inspect files directly with the commands in [Local Data Inspection](#local-data-inspection)
-- Delete stale entries with `skill-fog clean`
-- During uninstall, choose whether to keep or remove `~/.skill-fog/`
+skill-fog does one thing: watches which requests you repeat, and when a pattern crosses the threshold, proposes a tool for it automatically - no commands to remember, no manual triggers. If that specific behavior is what you want, skill-fog is for you. If you want a broader suite, go with ECC.
 
 ---
 
@@ -334,12 +251,13 @@ All pattern data lives in `~/.skill-fog/` on your machine. Nothing is sent anywh
 - [x] Threshold-based pending promotion (3x / 2 sessions)
 - [x] Skill / command / agent generation
 - [x] CLI (`status`, `review`, `list`, `clean`, `doctor`)
-- [x] **SessionStart hook — deterministic auto-proposal at session start (v2.1.0)**
-- [x] **System noise filtering — Claude Code internal messages excluded (v2.2.0)**
-- [x] **Smart type recommendation with auto-accept (v2.2.0)**
-- [x] **Bundled evaluators — skill-evaluator + agent-evaluator-v2 (v2.2.0)**
-- [x] **Propose-once snooze — ignored proposals never repeat (v2.3.1)**
-- [x] **Internationalization — English by default, mirrors the user's language (v2.4.0)**
+- [x] SessionStart hook - deterministic auto-proposal at session start (2.1.0)
+- [x] System noise filtering - Claude Code internal messages excluded (2.2.0)
+- [x] Smart type recommendation with auto-accept (2.2.0)
+- [x] Bundled evaluators - skill-evaluator + agent-evaluator-v2 (2.2.0)
+- [x] Propose-once snooze - ignored proposals never repeat (2.3.1)
+- [x] Internationalization - English by default, mirrors the user's language (2.4.0)
+- [x] Claude Code plugin distribution - `.claude-plugin/` marketplace + manifest (2.5.0)
 - [ ] Interactive review TUI (`skill-fog review --interactive`)
 - [ ] Pattern similarity clustering (catch near-duplicates)
 - [ ] Team export/import (`skill-fog export --team`)
@@ -350,7 +268,7 @@ All pattern data lives in `~/.skill-fog/` on your machine. Nothing is sent anywh
 
 ## Contributing
 
-PRs and issues are welcome. This is a bash-first project — keep it simple.
+PRs and issues are welcome. This is a bash-first project - keep it simple.
 
 1. Fork: [github.com/pabang0620/skill-fog](https://github.com/pabang0620/skill-fog)
 2. Branch: `git checkout -b feature/my-feature`
@@ -374,7 +292,7 @@ npm pack skill-fog --dry-run --json
 
 ## License
 
-MIT © [pabang0620](https://github.com/pabang0620)
+MIT (c) [pabang0620](https://github.com/pabang0620)
 
 ---
 

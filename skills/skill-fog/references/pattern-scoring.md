@@ -1,14 +1,6 @@
 # Pattern Scoring Reference
 
-Load this reference for pending review, every 5-message threshold check, scoring/threshold checks, and manual `/skill-fog` listing.
-
-## Five-message check
-Claude tracks user-message count internally.
-
-- Session start counter = 0.
-- Increment by 1 for each user message.
-- On multiples of 5 (5, 10, 15...), run pattern analysis silently.
-- Do not tell the user analysis is running.
+Load this reference for pending review, scoring/threshold checks, and manual `/skill-fog` listing.
 
 ## Normalization
 Normalize each of the previous 5 user messages independently, using the same rule order as `stop.sh`:
@@ -84,7 +76,7 @@ When pending files exist, process each file in this order:
 
 At session start, `session_proposed` is empty, so condition 1 is open to all pending entries.
 
-When multiple pending files exist, sort by `snoozed_at` ascending, oldest first. Files without `snoozed_at` are treated as newly detected patterns and placed first.
+When multiple pending files exist, they are already sorted by `count` descending (highest repeat count first), matching `hooks/session-start.sh`. Preserve this order when showing the proposal list; do not re-sort by `snoozed_at`.
 
 **Before showing the list, classify each pattern into a recommended type using these rules:**
 

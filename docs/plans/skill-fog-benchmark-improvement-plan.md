@@ -19,7 +19,7 @@ The current local repository state, refreshed on 2026-06-13, is:
 | `bin/skill-fog` size | 984 lines, 34,578 bytes | CLI behavior needs command-level self-tests before new features are added. | `wc -l -c bin/skill-fog` |
 | package contents | 9 files, 114,801 bytes | New runtime dirs such as `references/` or `scripts/` will not ship unless `package.json.files` changes. | `npm pack --dry-run` |
 | Hook simulation | Creates `patterns.json` and `pending/*.json` in isolated `HOME` | The core repeated-pattern path works and must be preserved. | Temp-HOME transcript simulation |
-| Real user install | 5 ok, 3 warnings, 1 failure | Actual `/home/pabang` install is incomplete and must not be treated as healthy. | `HOME=/home/pabang ./bin/skill-fog doctor` |
+| Real user install | 5 ok, 3 warnings, 1 failure | Actual `<user-home>` install is incomplete and must not be treated as healthy. | `HOME=<user-home> ./bin/skill-fog doctor` |
 
 Current real-HOME install failure:
 
@@ -137,7 +137,7 @@ Benchmark basis:
 - GitHub skill lifecycle vocabulary justifies install/list/update-style checks.
 - Obra verification style requires fresh command evidence before any health claim.
 
-Stop condition: Do not run write operations against `/home/pabang` until temp-HOME install and uninstall checks pass.
+Stop condition: Do not run write operations against `<user-home>` until temp-HOME install and uninstall checks pass.
 
 Checklist:
 
@@ -378,7 +378,7 @@ Completion evidence:
 
 - `scripts/score-patterns.py --fixture fixtures/patterns/ranking-basic.json`.
 - `scripts/score-patterns.py --fixture fixtures/patterns/privacy-risk.json`.
-- Existing `/home/pabang/.skill-fog/patterns.json` can be scored read-only with no mutation.
+- Existing `<user-home>/.skill-fog/patterns.json` can be scored read-only with no mutation.
 
 ## Phase 4: Hook Performance Guardrails
 

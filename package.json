@@ -1,9 +1,10 @@
 {
   "name": "skill-fog",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "Auto-detect usage patterns and generate Claude Code skills, commands, and agents",
   "scripts": {
-    "postinstall": "node postinstall.js"
+    "postinstall": "node postinstall.js",
+    "preuninstall": "node preuninstall.js"
   },
   "bin": {
     "skill-fog": "bin/skill-fog"
@@ -31,11 +32,14 @@
     "bin/",
     "hooks/",
     "agents/",
-    "SKILL.md",
-    "references/*.md",
+    "skills/skill-fog/SKILL.md",
+    "skills/skill-fog/references/*.md",
+    ".claude-plugin/plugin.json",
+    ".claude-plugin/marketplace.json",
     "install.sh",
     "uninstall.sh",
     "postinstall.js",
+    "preuninstall.js",
     "README.md",
     "CHANGELOG.md",
     "docs/troubleshooting.md",

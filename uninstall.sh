@@ -16,6 +16,7 @@ HOOK_CMD="bash $HOME/.skill-fog/hooks/stop.sh"
 SESSION_START_HOOK_CMD="bash $HOME/.skill-fog/hooks/session-start.sh"
 ASSUME_YES=0
 DATA_ACTION="prompt"
+UNINSTALL_BACKUP_DIR="$CLAUDE_DIR/.skill-fog-uninstall-backup.$(date +%Y%m%d_%H%M%S)"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -205,6 +206,8 @@ remove_agents() {
   for agent_file in skill-evaluator.md agent-evaluator-v2.md; do
     local dest="$agents_dir/$agent_file"
     if [ -f "$dest" ]; then
+      mkdir -p "$UNINSTALL_BACKUP_DIR/agents"
+      cp "$dest" "$UNINSTALL_BACKUP_DIR/agents/$agent_file"
       rm "$dest"
       success "Removed $dest"
       removed=$((removed + 1))
@@ -213,6 +216,8 @@ remove_agents() {
 
   if [ "$removed" -eq 0 ]; then
     info "No evaluator agents found, skipping."
+  else
+    info "Backed up removed agents to: $UNINSTALL_BACKUP_DIR/agents"
   fi
 }
 
@@ -223,8 +228,11 @@ remove_skill() {
   info "Removing skill files..."
 
   if [ -d "$SKILLS_DIR" ]; then
+    mkdir -p "$UNINSTALL_BACKUP_DIR/skills"
+    cp -r "$SKILLS_DIR" "$UNINSTALL_BACKUP_DIR/skills/skill-fog"
     rm -rf "$SKILLS_DIR"
     success "Removed $SKILLS_DIR"
+    info "Backed up skill files to: $UNINSTALL_BACKUP_DIR/skills/skill-fog"
   else
     info "Skill directory not found, skipping."
   fi
@@ -332,15 +340,15 @@ remove_claude_md() {
   info "Backed up CLAUDE.md to: $backup_file"
 
   # skill-fog 블록 제거 (구버전 한국어 / 신버전 영어 마커 둘 다)
-  python3 - <<PYEOF
+  SF_CLAUDE_MD="$claude_md" python3 - <<'PYEOF'
 import re, os
 
-claude_md = os.path.expanduser('$claude_md')
+claude_md = os.environ['SF_CLAUDE_MD']
 
 with open(claude_md, 'r', encoding='utf-8') as f:
     content = f.read()
 
-# 빈 줄 + 마커 + 내용 줄(들) 패턴 제거 — 줄 수 변화에 유연하게 대응
+# 빈 줄 + 마커 + 내용 줄(들) 패턴 제거 - 줄 수 변화에 유연하게 대응
 for pat in (
     r'\n# skill-fog: pattern detection.*?(?=\n#|\Z)',
     r'\n# skill-fog: 대화 중 반복 패턴 감지.*?(?=\n#|\Z)',

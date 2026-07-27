@@ -63,7 +63,15 @@ scripts/bench-hook.sh --benchmark-only --runs 5 --warmups 1 --json --fail-p95-ms
 
 Pass criteria: command exits with code `0`; JSON output is valid; every result status is `ok` or `warn`; no result is `performance_budget_exceeded`; each measured p95 is less than or equal to `10000` ms.
 
-### 7. Scoring Fixtures
+### 7. Privacy Redaction Hook Test
+
+```bash
+bash scripts/test-privacy-redaction.sh
+```
+
+Pass criteria: command exits with code `0`.
+
+### 8. Scoring Fixtures
 
 ```bash
 python3 scripts/score-patterns.py --fixture fixtures/patterns/ranking-basic.json
@@ -72,7 +80,7 @@ python3 scripts/score-patterns.py --fixture fixtures/patterns/privacy-risk.json
 
 Pass criteria: both commands exit with code `0`; each JSON payload has `"ok": true` and an empty `"failures"` array; privacy-risk output must not contain the raw forbidden secret values from the fixture.
 
-### 8. Artifact Evals
+### 9. Artifact Evals
 
 ```bash
 scripts/run-evals.sh --all
@@ -80,17 +88,17 @@ scripts/run-evals.sh --all
 
 Pass criteria: command exits with code `0`; JSON output has `"ok": true`; every case has `result` equal to `expected_result`; simulated drafts are written only under the runner temporary directory.
 
-### 9. npm Pack Dry-Run
+### 10. npm Pack Dry-Run
 
 ```bash
 npm pack --dry-run --json
 ```
 
-Pass criteria: command exits with code `0`; output is valid JSON; the file list includes runtime files referenced by `SKILL.md` and README, including `SKILL.md`, `bin/skill-fog`, `hooks/stop.sh`, `install.sh`, `uninstall.sh`, `postinstall.js`, `references/*.md`, `docs/troubleshooting.md`, `docs/release-checklist.md`, `CHANGELOG.md`, `README.md`, `package.json`, and `skill-fog.metadata.json`. The file list must not include `.git`, plans, `scripts/__pycache__`, or unrelated local artifacts.
+Pass criteria: command exits with code `0`; output is valid JSON; the file list includes runtime files referenced by `SKILL.md` and README, including `skills/skill-fog/SKILL.md`, `bin/skill-fog`, `hooks/stop.sh`, `hooks/hooks.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `install.sh`, `uninstall.sh`, `postinstall.js`, `preuninstall.js`, `LICENSE`, `skills/skill-fog/references/*.md`, `docs/troubleshooting.md`, `docs/release-checklist.md`, `CHANGELOG.md`, `README.md`, `package.json`, and `skill-fog.metadata.json`. The file list must not include `.git`, plans, `scripts/__pycache__`, or unrelated local artifacts.
 
 ## Publish Notes
 
-1. Confirm `package.json.version`, `SKILL.md` frontmatter version, and `skill-fog.metadata.json.version` match.
+1. Confirm `package.json.version`, `skills/skill-fog/SKILL.md` frontmatter version, and `skill-fog.metadata.json.version` match.
 2. Confirm the GitHub README matches the npm README in the packed tarball.
 3. Publish with npm only after all required checks pass.
 
@@ -104,7 +112,7 @@ Required fields:
 - `schema_version`: version of this metadata schema.
 - `schema_description`: plain-language statement that the file is self-defined.
 - `name`: npm package name.
-- `version`: package version, matching `package.json` and `SKILL.md`.
+- `version`: package version, matching `package.json` and `skills/skill-fog/SKILL.md`.
 - `license`: package license.
 - `repository`: canonical GitHub repository URL.
 - `install_command`: primary npm install command.

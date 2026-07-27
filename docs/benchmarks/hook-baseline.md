@@ -47,7 +47,7 @@ Environment:
 | Field | Value |
 | --- | --- |
 | Date | `2026-06-13T12:41:57Z` |
-| Machine | `Linux 6.18.33.1-microsoft-standard-WSL2 x86_64` |
+| Machine | `Linux x86_64` |
 | Cores | 12 |
 
 Results:

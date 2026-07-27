@@ -1,7 +1,7 @@
 ---
 name: skill-fog
 description: Detects repeated request patterns and proposes generating a skill, command, or agent. A SessionStart hook injects pending patterns at session start, and it also activates when the user explicitly runs /skill-fog.
-version: 2.4.0
+version: 2.5.0
 triggers:
   - /skill-fog
 ---
@@ -62,7 +62,7 @@ cat ~/.skill-fog/patterns.json 2>/dev/null || echo '{"patterns":{}}'
 The output format, handling of active pattern selection, `session_proposed` updates, and STEP B entry conditions are in [pattern-scoring.md](references/pattern-scoring.md).
 
 ## Safety rules
-- SKILL.md uses `patterns.json` as read-only. Pattern accumulation (count increment, session additions) is handled only by `stop.sh` at session end.
+- SKILL.md uses `patterns.json` as read-only. Pattern accumulation (count increment, session additions) is handled only by `stop.sh` at the end of each assistant turn.
 - Patterns proposed at session start are moved to `snoozed` state. If ignored, they are not re-proposed in the next session.
 - If a pattern's status is `accepted` / `rejected` / `snoozed`, do not create a new pending file.
 - `snoozed` patterns can be reviewed and selected for generation via the `/skill-fog` manual invocation list.

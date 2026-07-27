@@ -1,0 +1,11 @@
+{
+  "name": "skill-fog",
+  "displayName": "Skill Fog",
+  "version": "2.5.0",
+  "description": "Detects repeated request patterns across sessions and proposes generating a skill, command, or agent from them.",
+  "author": { "name": "pabang0620", "url": "https://github.com/pabang0620" },
+  "homepage": "https://github.com/pabang0620/skill-fog",
+  "repository": "https://github.com/pabang0620/skill-fog",
+  "license": "MIT",
+  "keywords": ["automation", "pattern-detection", "skill-generation", "workflow"]
+}

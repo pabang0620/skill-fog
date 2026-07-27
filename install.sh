@@ -104,20 +104,20 @@ install_skill() {
 
   mkdir -p "$SKILLS_DIR"
 
-  if [ -f "$SCRIPT_DIR/SKILL.md" ]; then
-    cp "$SCRIPT_DIR/SKILL.md" "$SKILLS_DIR/SKILL.md"
+  if [ -f "$SCRIPT_DIR/skills/skill-fog/SKILL.md" ]; then
+    cp "$SCRIPT_DIR/skills/skill-fog/SKILL.md" "$SKILLS_DIR/SKILL.md"
     success "SKILL.md installed to $SKILLS_DIR/SKILL.md"
   else
-    error "SKILL.md not found in $SCRIPT_DIR"
+    error "SKILL.md not found in $SCRIPT_DIR/skills/skill-fog"
     exit 1
   fi
 
-  if [ -d "$SCRIPT_DIR/references" ]; then
+  if [ -d "$SCRIPT_DIR/skills/skill-fog/references" ]; then
     rm -rf "$SKILLS_DIR/references"
-    cp -R "$SCRIPT_DIR/references" "$SKILLS_DIR/references"
+    cp -R "$SCRIPT_DIR/skills/skill-fog/references" "$SKILLS_DIR/references"
     success "references/ installed to $SKILLS_DIR/references"
   else
-    error "references/ not found in $SCRIPT_DIR"
+    error "references/ not found in $SCRIPT_DIR/skills/skill-fog"
     exit 1
   fi
 }
@@ -181,7 +181,7 @@ install_runtime_bundle() {
   info "Installing CLI runtime bundle to $SKILL_FOG_DIR..."
 
   local required_file
-  for required_file in install.sh uninstall.sh SKILL.md; do
+  for required_file in install.sh uninstall.sh; do
     if [ -f "$SCRIPT_DIR/$required_file" ]; then
       copy_file_if_needed "$SCRIPT_DIR/$required_file" "$SKILL_FOG_DIR/$required_file"
     else
@@ -190,15 +190,22 @@ install_runtime_bundle() {
     fi
   done
 
+  if [ -f "$SCRIPT_DIR/skills/skill-fog/SKILL.md" ]; then
+    copy_file_if_needed "$SCRIPT_DIR/skills/skill-fog/SKILL.md" "$SKILL_FOG_DIR/SKILL.md"
+  else
+    error "SKILL.md not found in $SCRIPT_DIR/skills/skill-fog"
+    exit 1
+  fi
+
   chmod +x "$SKILL_FOG_DIR/install.sh" "$SKILL_FOG_DIR/uninstall.sh"
 
-  if [ -d "$SCRIPT_DIR/references" ]; then
-    if ! same_path "$SCRIPT_DIR/references" "$SKILL_FOG_DIR/references"; then
+  if [ -d "$SCRIPT_DIR/skills/skill-fog/references" ]; then
+    if ! same_path "$SCRIPT_DIR/skills/skill-fog/references" "$SKILL_FOG_DIR/references"; then
       rm -rf "$SKILL_FOG_DIR/references"
-      cp -R "$SCRIPT_DIR/references" "$SKILL_FOG_DIR/references"
+      cp -R "$SCRIPT_DIR/skills/skill-fog/references" "$SKILL_FOG_DIR/references"
     fi
   else
-    error "references/ not found in $SCRIPT_DIR"
+    error "references/ not found in $SCRIPT_DIR/skills/skill-fog"
     exit 1
   fi
 
@@ -384,43 +391,6 @@ register_hook() {
 }
 
 # ─────────────────────────────────────────────
-# 9. CLAUDE.md에 skill-fog 활성화 등록
-# ─────────────────────────────────────────────
-register_claude_md() {
-  CURRENT_STEP="register_claude_md"
-  local claude_md="$HOME/.claude/CLAUDE.md"
-  local marker="# skill-fog: pattern detection"
-  local old_marker="# skill-fog: 대화 중 반복 패턴 감지"
-
-  if [ -f "$claude_md" ] && grep -q "$marker" "$claude_md"; then
-    info "CLAUDE.md already configured"
-    return
-  fi
-
-  # 구버전(한국어) 블록이 있으면 먼저 제거하여 중복/고아 방지
-  if [ -f "$claude_md" ] && grep -q "$old_marker" "$claude_md"; then
-    SF_CLAUDE_MD="$claude_md" python3 - <<'PYEOF'
-import os, re
-claude_md = os.environ['SF_CLAUDE_MD']
-with open(claude_md, 'r', encoding='utf-8') as f:
-    content = f.read()
-content = re.sub(r'\n# skill-fog: 대화 중 반복 패턴 감지.*?(?=\n#|\Z)', '', content, flags=re.DOTALL)
-with open(claude_md, 'w', encoding='utf-8') as f:
-    f.write(content)
-PYEOF
-    info "Migrated legacy skill-fog entry in CLAUDE.md"
-  fi
-
-  cat >> "$claude_md" << 'CLAUDEMD'
-
-# skill-fog: pattern detection & auto-generation (always loaded)
-Keep the skill-fog skill always active. When a system-reminder contains the text "[skill-fog]", your FIRST response must run STEP A to propose patterns — regardless of what the user's message says. Even if the user sends an unrelated message like "hi", the skill-fog proposal comes first. The same applies when /skill-fog is invoked manually. Always respond in the same language the user is using.
-CLAUDEMD
-
-  success "skill-fog registered in CLAUDE.md"
-}
-
-# ─────────────────────────────────────────────
 # 완료 메시지
 # ─────────────────────────────────────────────
 print_summary() {
@@ -439,10 +409,9 @@ print_summary() {
   echo -e "    ~/.skill-fog/install.sh      (Installed self-test source)"
   echo -e "    ~/.skill-fog/uninstall.sh    (Uninstaller)"
   echo -e "    ~/.local/bin/skill-fog       (CLI)"
-  echo -e "    ~/.claude/CLAUDE.md          (skill-fog always-on entry)"
   echo ""
   echo -e "  ${BLUE}How it works:${NC}"
-  echo -e "    1. Each Claude Code session end → stop.sh analyzes patterns"
+  echo -e "    1. After each assistant turn → stop.sh analyzes patterns"
   echo -e "    2. Pattern detected ≥3 times across ≥2 sessions → pending"
   echo -e "    3. Next session start → skill-fog suggests skill/command/agent"
   echo ""
@@ -452,6 +421,20 @@ print_summary() {
   echo -e "    skill-fog list      List generated skills/commands/agents"
   echo -e "    skill-fog doctor    Diagnose installation"
   echo -e "    skill-fog clean     Remove old/rejected patterns"
+  echo ""
+  echo -e "  ${YELLOW}Optional:${NC} this installer no longer writes to ~/.claude/CLAUDE.md."
+  echo -e "  The SessionStart hook already surfaces pending patterns automatically."
+  echo -e "  If you find those proposals are not showing up reliably, you can add"
+  echo -e "  the following block to ~/.claude/CLAUDE.md yourself:"
+  echo ""
+  echo -e "    # skill-fog: pattern detection & auto-generation (always loaded)"
+  echo -e "    Keep the skill-fog skill always active. When a system-reminder"
+  echo -e "    contains the text \"[skill-fog]\", your FIRST response must run"
+  echo -e "    STEP A to propose patterns - regardless of what the user's"
+  echo -e "    message says. Even if the user sends an unrelated message like"
+  echo -e "    \"hi\", the skill-fog proposal comes first. The same applies"
+  echo -e "    when /skill-fog is invoked manually. Always respond in the"
+  echo -e "    same language the user is using."
   echo ""
   echo -e "  Restart Claude Code to activate the Stop hook."
   echo ""
@@ -475,7 +458,6 @@ main() {
   install_cli
   backup_settings
   register_hook
-  register_claude_md
   print_summary
 }
 

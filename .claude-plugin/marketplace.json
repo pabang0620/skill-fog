@@ -1,0 +1,13 @@
+{
+  "name": "skill-fog",
+  "owner": { "name": "pabang0620", "url": "https://github.com/pabang0620" },
+  "description": "Detects repeated request patterns across sessions and proposes generating a skill, command, or agent from them.",
+  "plugins": [
+    {
+      "name": "skill-fog",
+      "source": "./",
+      "description": "Detects repeated request patterns across sessions and proposes generating a skill, command, or agent from them.",
+      "license": "MIT"
+    }
+  ]
+}

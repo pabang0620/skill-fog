@@ -100,7 +100,7 @@ The benchmark output intentionally contains only fixture paths, sizes, counts, t
 
 ## Validation Evidence
 
-Commands run from `/home/pabang/myapp/skill-fog`:
+Commands run from `<repo-root>`:
 
 ```bash
 bash -n scripts/bench-hook.sh
