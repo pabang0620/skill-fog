@@ -552,6 +552,8 @@ def clean_json(value):
     return value
 
 pattern_id = os.environ['SF_PATTERN_ID']
+min_count = int(os.environ.get('SKILL_FOG_MIN_COUNT', '5'))
+min_sessions = int(os.environ.get('SKILL_FOG_MIN_SESSIONS', '3'))
 patterns_file = os.environ['SF_PATTERNS_FILE']
 pending_dir = os.environ['SF_PENDING_DIR']
 now = _dt.datetime.now(_dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -574,7 +576,7 @@ with open(lock_file, 'w') as lock_f:
         session_count = len(p.get('sessions', []))
         status = p.get('status', 'active')
 
-        if count >= 5 and session_count >= 3 and status not in ('accepted', 'rejected', 'snoozed'):
+        if count >= min_count and session_count >= min_sessions and status not in ('accepted', 'rejected', 'snoozed'):
             pending_file = os.path.join(pending_dir, pattern_id + '.json')
             existing_pending = {}
             if os.path.exists(pending_file):

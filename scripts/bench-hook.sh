@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Fixtures are built around the original 3x / 2-session promotion threshold.
+export SKILL_FOG_MIN_COUNT=3
+export SKILL_FOG_MIN_SESSIONS=2
+
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_dir="$(cd "$script_dir/.." && pwd)"
 hook_path="$repo_dir/hooks/stop.sh"
