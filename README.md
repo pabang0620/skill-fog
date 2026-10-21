@@ -5,30 +5,32 @@
   <img src="https://img.shields.io/badge/Claude%20Code-compatible-orange?style=flat-square&logo=anthropic" alt="claude-code compatible" />
 </p>
 
-<!-- Logo / Title -->
+<!-- Title -->
+<h1 align="center">skill-fog</h1>
+
+<h3 align="center">Claude Code notices what you keep asking for, then offers to build the skill for you.</h3>
+
 <p align="center">
-<pre>
- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
- ░                                                   ░
- ░    ███████╗██╗  ██╗██╗██╗     ██╗                ░
- ░    ██╔════╝██║ ██╔╝██║██║     ██║                ░
- ░    ███████╗█████╔╝ ██║██║     ██║                ░
- ░    ╚════██║██╔═██╗ ██║██║     ██║                ░
- ░    ███████║██║  ██╗██║███████╗███████╗           ░
- ░    ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝           ░
- ░                                                   ░
- ░    ███████╗ ██████╗   ██████╗                    ░
- ░    ██╔════╝██╔═══██╗ ██╔════╝                    ░
- ░    █████╗  ██║   ██║ ██║  ███╗                   ░
- ░    ██╔══╝  ██║   ██║ ██║   ██║                   ░
- ░    ██║     ╚██████╔╝ ╚██████╔╝                   ░
- ░    ╚═╝      ╚═════╝   ╚═════╝                    ░
- ░                                                   ░
- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-</pre>
+  <code>/plugin marketplace add pabang0620/skill-fog</code><br/>
+  <code>/plugin install skill-fog</code>
 </p>
 
-<h2 align="center">Claude Code watches your patterns. Then builds your tools.</h2>
+<p align="center">Local only. No network calls. Secrets are masked before anything touches disk.</p>
+
+### What you see
+
+Ask for the same thing across a few sessions. At the start of your next session, Claude opens with:
+
+```
+[skill-fog] You have 2 repeated pattern(s) pending review.
+
+1. "find every place that calls the old api" - 6x, 4 session(s)
+2. "summarize the overall scope of the project" - 5x, 3 session(s)
+
+Propose a skill / command / agent for each? (recommended: agent, command)
+```
+
+Say yes and skill-fog writes the file under `~/.claude/`, then runs a quality check on it. Say nothing and it will not ask again.
 
 ---
 
@@ -108,12 +110,12 @@ This is not a legacy or deprecated path - it is the only way to get the CLI. Use
             │                                    yes ─┤
             ▼                                          ▼
   Normalize + hash each                    Sort by count (desc),
-  user message -> pattern ID               take top 5, inject into
+  user message -> pattern ID               take top 2, inject into
             │                              context, mark snoozed
        ┌────┴──────┐                                  │
        │           │                                  ▼
-     < 3x       >= 3x                     [skill-fog] You have N
-     2+ sessions                          repeated pattern(s)
+     < 5x       >= 5x                     [skill-fog] You have N
+     3+ sessions                          repeated pattern(s)
        │           │                      pending review.
      keep      write to                              │
     tracking   pending/                               ▼
@@ -130,8 +132,8 @@ This is not a legacy or deprecated path - it is the only way to get the CLI. Use
 ```
 
 1. **Detect** - the Stop hook fires at the end of *every assistant turn* (not at session end). It incrementally parses new lines from the transcript since the last cursor position, masks secrets, normalizes each new user message (strips filenames, UUIDs, URLs, numbers), and hashes it into a pattern ID stored in `~/.skill-fog/patterns.json`.
-2. **Promote** - once a pattern's normalized text has appeared **3 or more times across 2 or more sessions**, it is written to `~/.skill-fog/pending/` as a candidate.
-3. **Propose** - at the start of your *next* session (`startup` or `resume`, not mid-session `/clear` or `/compact`), the SessionStart hook reads `pending/`, sorts by repeat count descending, takes the top 5, and injects them directly into Claude's context before you type anything. The proposed patterns are immediately marked `snoozed` so they are not re-proposed if ignored.
+2. **Promote** - once a pattern's normalized text has appeared **5 or more times across 3 or more sessions**, it is written to `~/.skill-fog/pending/` as a candidate.
+3. **Propose** - at the start of your *next* session (`startup` or `resume`, not mid-session `/clear` or `/compact`), the SessionStart hook reads `pending/`, sorts by repeat count descending, takes the top 2, and injects them directly into Claude's context before you type anything. The proposed patterns are immediately marked `snoozed` so they are not re-proposed if ignored.
 4. **Generate** - Claude runs STEP A through STEP F: propose a recommended type (skill / command / agent) for each pattern, scan for similar existing artifacts, show a preview, and on confirmation write the file under `~/.claude/` and run the matching quality evaluator (`skill-evaluator` for skills, `agent-evaluator-v2` for commands and agents).
 
 You can also trigger the review flow manually at any time with `/skill-fog` inside Claude Code, which lists active and snoozed patterns for you to pick from.
@@ -221,7 +223,7 @@ tail -n 100 ~/.skill-fog/logs/*.log 2>/dev/null || true
 ## FAQ
 
 **Why didn't my pattern get proposed?**
-Check that it has repeated at least 3 times across at least 2 different Claude Code sessions, that the message isn't shorter than 10 characters after secret masking (before normalization), and that it isn't already `snoozed` or `rejected`. Run `skill-fog status` (npm install) or inspect `~/.skill-fog/patterns.json` directly to see current counts.
+Check that it has repeated at least 5 times across at least 3 different Claude Code sessions, that the message isn't shorter than 10 characters after secret masking (before normalization), and that it isn't already `snoozed` or `rejected`. Run `skill-fog status` (npm install) or inspect `~/.skill-fog/patterns.json` directly to see current counts.
 
 **Why does the proposal only show up next session, not immediately?**
 Detection happens continuously (every assistant turn), but proposals are only injected at session start, by design - this keeps mid-task context free of interruptions.
@@ -248,7 +250,7 @@ skill-fog does one thing: watches which requests you repeat, and when a pattern 
 ## Roadmap
 
 - [x] Stop hook pattern collection
-- [x] Threshold-based pending promotion (3x / 2 sessions)
+- [x] Threshold-based pending promotion (5x / 3 sessions)
 - [x] Skill / command / agent generation
 - [x] CLI (`status`, `review`, `list`, `clean`, `doctor`)
 - [x] SessionStart hook - deterministic auto-proposal at session start (2.1.0)

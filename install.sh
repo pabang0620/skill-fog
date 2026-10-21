@@ -412,7 +412,7 @@ print_summary() {
   echo ""
   echo -e "  ${BLUE}How it works:${NC}"
   echo -e "    1. After each assistant turn → stop.sh analyzes patterns"
-  echo -e "    2. Pattern detected ≥3 times across ≥2 sessions → pending"
+  echo -e "    2. Pattern detected ≥5 times across ≥3 sessions → pending"
   echo -e "    3. Next session start → skill-fog suggests skill/command/agent"
   echo ""
   echo -e "  ${BLUE}CLI commands:${NC}"

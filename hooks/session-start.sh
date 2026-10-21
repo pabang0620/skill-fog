@@ -51,7 +51,7 @@ if [ "$has_pending" -eq 0 ]; then
 fi
 
 # pending 패턴 파싱 후 stdout 출력 (Claude context에 주입됨)
-# 최대 5개, count 내림차순
+# 최대 2개, count 내림차순
 # 제안 후 즉시 pending 파일 삭제 + patterns.json snoozed 전환 (재제안 방지)
 SF_PENDING_DIR="$PENDING_DIR" SF_PATTERNS_FILE="$HOME/.skill-fog/patterns.json" python3 - <<'PYEOF'
 import json, os, sys
@@ -79,7 +79,7 @@ if not items:
 
 items.sort(key=lambda x: x[2].get('count', 0), reverse=True)
 total = len(items)
-items = items[:5]
+items = items[:2]
 
 print(f'[skill-fog] You have {total} repeated pattern(s) pending review.')
 print()

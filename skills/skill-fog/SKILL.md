@@ -1,7 +1,7 @@
 ---
 name: skill-fog
 description: Detects repeated request patterns and proposes generating a skill, command, or agent. A SessionStart hook injects pending patterns at session start, and it also activates when the user explicitly runs /skill-fog.
-version: 2.5.0
+version: 2.6.0
 triggers:
   - /skill-fog
 ---

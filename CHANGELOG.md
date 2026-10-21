@@ -4,6 +4,12 @@ All notable changes to this package are documented here.
 
 ## Unreleased
 
+## 2.6.0
+
+### Changed
+- **Fewer proposals**: a pattern is now promoted to pending after 5 repeats across 3 sessions (was 3 across 2), and the SessionStart hook proposes at most 2 patterns per session (was 5). Patterns beyond the cap stay pending for the next session.
+- README opens with a compact title, the two install commands, and a sample of the session-start proposal.
+
 ## 2.5.0
 
 ### Added

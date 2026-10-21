@@ -693,7 +693,7 @@ cmd_review() {
   if [ "${pending_total:-0}" -eq 0 ]; then
     success "No pending patterns to review."
     echo ""
-    dim "  Patterns are promoted to pending when count >= 3 across >= 2 sessions."
+    dim "  Patterns are promoted to pending when count >= 5 across >= 3 sessions."
     echo ""
     return
   fi
@@ -1212,7 +1212,7 @@ cmd_help() {
   echo ""
   echo -e "${BOLD}HOW IT WORKS${NC}"
   echo -e "  1. After each assistant turn → stop.sh analyzes message patterns"
-  echo -e "  2. Pattern seen ≥3 times across ≥2 sessions → moved to pending"
+  echo -e "  2. Pattern seen ≥5 times across ≥3 sessions → moved to pending"
   echo -e "  3. Session start → skill-fog proposes skill/command/agent creation"
   echo -e "  4. You confirm → file generated in ~/.claude/skills|commands|agents"
   echo ""

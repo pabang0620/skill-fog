@@ -237,9 +237,9 @@ scenario_4() {
   pass "$scenario"
 }
 
-# ── Scenario 5: 6+ pending patterns -> only top 5 by count are shown/consumed
+# ── Scenario 5: 6+ pending patterns -> only top 2 by count are shown/consumed
 scenario_5() {
-  local scenario="scenario 5 (6 pending patterns, only top 5 shown and consumed)"
+  local scenario="scenario 5 (6 pending patterns, only top 2 shown and consumed)"
   local home
   home="$(mktemp -d "$tmp_root/home-5.XXXXXX")"
 
@@ -267,8 +267,8 @@ scenario_5() {
 
   local shown_count
   shown_count=$(printf '%s' "$RUN_STDOUT" | grep -cE '^[0-9]+\. "')
-  if [ "$shown_count" -ne 5 ]; then
-    fail "$scenario" "expected exactly 5 numbered items in stdout, found $shown_count"
+  if [ "$shown_count" -ne 2 ]; then
+    fail "$scenario" "expected exactly 2 numbered items in stdout, found $shown_count"
     return
   fi
 
@@ -277,7 +277,7 @@ scenario_5() {
     return
   fi
 
-  for i in 1 2 3 4 5; do
+  for i in 1 2; do
     if ! printf '%s' "$RUN_STDOUT" | grep -qF "canonical-rank-$i"; then
       fail "$scenario" "expected canonical-rank-$i in stdout"
       return
@@ -286,8 +286,8 @@ scenario_5() {
 
   local remaining
   remaining=$(pending_count "$home")
-  if [ "$remaining" -ne 1 ]; then
-    fail "$scenario" "expected exactly 1 pending file left over (rank-6), found $remaining"
+  if [ "$remaining" -ne 4 ]; then
+    fail "$scenario" "expected exactly 4 pending files left over (rank-3..6), found $remaining"
     return
   fi
 
